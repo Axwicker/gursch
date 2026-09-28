@@ -1,0 +1,374 @@
+{
+  "format": "gursch-report",
+  "version": 1,
+  "description": "Jag förmodar att sixtens lägsta kort inte är en 10a, isåfall borde han inte kunna lägga den på en sjua. På sjuan hade han behövt lägga sitt lägsta kort, en sjua eller ett ess",
+  "note": "Rapporterat som fel, men draget är tillåtet (bekräftat 2026-09-28): Greta spelade ut 4,4,7 = tre fyror, och Sixtens 6,7,10 är alla minst 4 (R24). Felet var att sticket visades så att bara 7:an syntes - rättat med etiketter (\"tre 4:or (med 7:a)\") och mindre överlappning.",
+  "expect": [
+    {
+      "event": 28,
+      "accepted": true,
+      "why": "Sixten 6,7,10 på utspelet 4,4,7 (tre fyror)"
+    }
+  ],
+  "reportedBy": "Vän 4",
+  "room": "KWLA",
+  "createdAt": "2026-09-27T23:06:22.912Z",
+  "phaseWhenReported": "TRICK",
+  "log": {
+    "format": "gursch-round",
+    "version": 1,
+    "roundNumber": 1,
+    "seed": 1881646505,
+    "dealerIndex": 0,
+    "startedAt": 1790550224920,
+    "settings": {
+      "multiplierMode": "fixed",
+      "multiplierValue": 10,
+      "flopMultFactor": 1,
+      "maxSlasks": 3,
+      "miniGurschCap": 0,
+      "chatEnabled": true,
+      "animations": true,
+      "sound": true,
+      "slaskCallSeconds": 8,
+      "turnSeconds": 45,
+      "negotiationSeconds": 20
+    },
+    "players": [
+      {
+        "id": "ea9845e0-b2cd-4c08-8aeb-1c6350f54912",
+        "nickname": "Vän 4",
+        "balance": 0,
+        "isBot": false,
+        "botLevel": null
+      },
+      {
+        "id": "bot-1-531605123",
+        "nickname": "Bot Bengt",
+        "balance": 0,
+        "isBot": true,
+        "botLevel": "medium"
+      },
+      {
+        "id": "bot-2-977141995",
+        "nickname": "Bot Greta",
+        "balance": 0,
+        "isBot": true,
+        "botLevel": "medium"
+      },
+      {
+        "id": "bot-3-116353042",
+        "nickname": "Bot Sixten",
+        "balance": 0,
+        "isBot": true,
+        "botLevel": "medium"
+      }
+    ],
+    "events": [
+      {
+        "t": 1790550226463,
+        "playerId": "bot-2-977141995",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S14",
+            "H13",
+            "H8"
+          ]
+        }
+      },
+      {
+        "t": 1790550227299,
+        "playerId": "bot-3-116353042",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H14",
+            "S12",
+            "S11"
+          ]
+        }
+      },
+      {
+        "t": 1790550272300,
+        "tick": true
+      },
+      {
+        "t": 1790550273621,
+        "playerId": "bot-1-531605123",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S13",
+            "D12",
+            "D4"
+          ]
+        }
+      },
+      {
+        "t": 1790550276217,
+        "playerId": "bot-1-531605123",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1790550277647,
+        "playerId": "bot-3-116353042",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1790550280163,
+        "playerId": "bot-2-977141995",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1790550282164,
+        "tick": true
+      },
+      {
+        "t": 1790550283678,
+        "playerId": "bot-1-531605123",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D13",
+            "H10"
+          ]
+        }
+      },
+      {
+        "t": 1790550283720,
+        "playerId": "bot-2-977141995",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "C14",
+            "C5"
+          ]
+        }
+      },
+      {
+        "t": 1790550283787,
+        "playerId": "bot-3-116353042",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D11",
+            "D10"
+          ]
+        }
+      },
+      {
+        "t": 1790550286302,
+        "playerId": "bot-1-531605123",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1790550287764,
+        "playerId": "bot-2-977141995",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1790550288127,
+        "playerId": "ea9845e0-b2cd-4c08-8aeb-1c6350f54912",
+        "action": {
+          "type": "propose",
+          "count": 3
+        }
+      },
+      {
+        "t": 1790550291058,
+        "playerId": "bot-3-116353042",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1790550295070,
+        "playerId": "ea9845e0-b2cd-4c08-8aeb-1c6350f54912",
+        "action": {
+          "type": "propose",
+          "count": 3
+        }
+      },
+      {
+        "t": 1790550298095,
+        "playerId": "ea9845e0-b2cd-4c08-8aeb-1c6350f54912",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1790550300096,
+        "tick": true
+      },
+      {
+        "t": 1790550301154,
+        "playerId": "bot-1-531605123",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "C13",
+            "C9"
+          ]
+        }
+      },
+      {
+        "t": 1790550301813,
+        "playerId": "bot-3-116353042",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H12",
+            "H11"
+          ]
+        }
+      },
+      {
+        "t": 1790550302148,
+        "playerId": "bot-2-977141995",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "C10",
+            "C8"
+          ]
+        }
+      },
+      {
+        "t": 1790550306024,
+        "playerId": "ea9845e0-b2cd-4c08-8aeb-1c6350f54912",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D8",
+            "D5"
+          ]
+        }
+      },
+      {
+        "t": 1790550309834,
+        "playerId": "bot-3-116353042",
+        "action": {
+          "type": "stay"
+        }
+      },
+      {
+        "t": 1790550311363,
+        "playerId": "bot-2-977141995",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1790550312177,
+        "playerId": "bot-3-116353042",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1790550315162,
+        "playerId": "ea9845e0-b2cd-4c08-8aeb-1c6350f54912",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1790550316651,
+        "playerId": "bot-1-531605123",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1790550317958,
+        "playerId": "bot-2-977141995",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "H4",
+            "S4",
+            "C7"
+          ]
+        }
+      },
+      {
+        "t": 1790550319406,
+        "playerId": "bot-3-116353042",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "D6",
+            "H7",
+            "S10"
+          ]
+        }
+      },
+      {
+        "t": 1790550364408,
+        "tick": true
+      },
+      {
+        "t": 1790550365489,
+        "playerId": "bot-1-531605123",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "H5",
+            "D7",
+            "S7"
+          ]
+        }
+      },
+      {
+        "t": 1790550366861,
+        "playerId": "bot-1-531605123",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "H3"
+          ]
+        }
+      },
+      {
+        "t": 1790550368080,
+        "playerId": "bot-2-977141995",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "H6"
+          ]
+        }
+      },
+      {
+        "t": 1790550369759,
+        "playerId": "bot-3-116353042",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "S6"
+          ]
+        }
+      }
+    ],
+    "result": null,
+    "inProgress": true
+  }
+}

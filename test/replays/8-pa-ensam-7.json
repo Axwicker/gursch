@@ -1,0 +1,376 @@
+{
+  "format": "gursch-report",
+  "version": 1,
+  "description": "Jag kunde lägga min 8 när personen före la en 7a. En 7a själv ska tolkas som ett ess, alltså borde jag behövt lägga mitt lägsta kort.",
+  "reportedBy": "Axel",
+  "room": "EXEMPEL",
+  "createdAt": "2026-09-28T12:00:00.000Z",
+  "note": "Återskapat exempel på det första rapporterade felet. Draget accepterades av den gamla motorn.",
+  "expect": [
+    {
+      "event": 33,
+      "rejected": "minst A eller ett av dina lägsta"
+    }
+  ],
+  "log": {
+    "format": "gursch-round",
+    "version": 1,
+    "roundNumber": 1,
+    "seed": 3470250327,
+    "dealerIndex": 0,
+    "startedAt": 1790596800000,
+    "settings": {
+      "multiplierMode": "fixed",
+      "multiplierValue": 10,
+      "flopMultFactor": 1,
+      "maxSlasks": 3,
+      "miniGurschCap": 0,
+      "chatEnabled": true,
+      "animations": true,
+      "sound": true,
+      "slaskCallSeconds": 8,
+      "turnSeconds": 45,
+      "negotiationSeconds": 20
+    },
+    "players": [
+      {
+        "id": "axel",
+        "nickname": "Axel",
+        "balance": 0,
+        "isBot": false,
+        "botLevel": null
+      },
+      {
+        "id": "bengt",
+        "nickname": "Bot Bengt",
+        "balance": 0,
+        "isBot": true,
+        "botLevel": "medium"
+      },
+      {
+        "id": "greta",
+        "nickname": "Bot Greta",
+        "balance": 0,
+        "isBot": true,
+        "botLevel": "medium"
+      },
+      {
+        "id": "sixten",
+        "nickname": "Bot Sixten",
+        "balance": 0,
+        "isBot": true,
+        "botLevel": "medium"
+      }
+    ],
+    "events": [
+      {
+        "t": 1790596800935,
+        "playerId": "bengt",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S13",
+            "S12",
+            "S11",
+            "D8"
+          ]
+        }
+      },
+      {
+        "t": 1790596802202,
+        "playerId": "greta",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D13",
+            "C12",
+            "C11",
+            "D10"
+          ]
+        }
+      },
+      {
+        "t": 1790596803274,
+        "playerId": "sixten",
+        "action": {
+          "type": "stay"
+        }
+      },
+      {
+        "t": 1790596803999,
+        "playerId": "axel",
+        "action": {
+          "type": "stay"
+        }
+      },
+      {
+        "t": 1790596804881,
+        "playerId": "bengt",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1790596806521,
+        "playerId": "greta",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1790596808521,
+        "tick": true
+      },
+      {
+        "t": 1790596809459,
+        "playerId": "greta",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S9",
+            "D4"
+          ]
+        }
+      },
+      {
+        "t": 1790596810450,
+        "playerId": "bengt",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H14",
+            "D12"
+          ]
+        }
+      },
+      {
+        "t": 1790596811217,
+        "playerId": "sixten",
+        "action": {
+          "type": "propose",
+          "count": 1
+        }
+      },
+      {
+        "t": 1790596812430,
+        "playerId": "axel",
+        "action": {
+          "type": "propose",
+          "count": 1
+        }
+      },
+      {
+        "t": 1790596813599,
+        "playerId": "bengt",
+        "action": {
+          "type": "propose",
+          "count": 1
+        }
+      },
+      {
+        "t": 1790596815459,
+        "playerId": "greta",
+        "action": {
+          "type": "propose",
+          "count": 1
+        }
+      },
+      {
+        "t": 1790596817459,
+        "tick": true
+      },
+      {
+        "t": 1790596819316,
+        "playerId": "bengt",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H12"
+          ]
+        }
+      },
+      {
+        "t": 1790596820153,
+        "playerId": "axel",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S14"
+          ]
+        }
+      },
+      {
+        "t": 1790596820831,
+        "playerId": "sixten",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "C9"
+          ]
+        }
+      },
+      {
+        "t": 1790596822664,
+        "playerId": "greta",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "C5"
+          ]
+        }
+      },
+      {
+        "t": 1790596823277,
+        "playerId": "sixten",
+        "action": {
+          "type": "stay"
+        }
+      },
+      {
+        "t": 1790596824238,
+        "playerId": "bengt",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1790596825976,
+        "playerId": "greta",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1790596827204,
+        "playerId": "sixten",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1790596828529,
+        "playerId": "axel",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1790596829466,
+        "playerId": "bengt",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "H7",
+            "H10"
+          ]
+        }
+      },
+      {
+        "t": 1790596830302,
+        "playerId": "greta",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "H3",
+            "C10"
+          ]
+        }
+      },
+      {
+        "t": 1790596831255,
+        "playerId": "sixten",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "S2",
+            "H13"
+          ]
+        }
+      },
+      {
+        "t": 1790596831873,
+        "playerId": "axel",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "C2",
+            "H5"
+          ]
+        }
+      },
+      {
+        "t": 1790596833228,
+        "playerId": "bengt",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "C6"
+          ]
+        }
+      },
+      {
+        "t": 1790596834366,
+        "playerId": "greta",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "D7"
+          ]
+        }
+      },
+      {
+        "t": 1790596835995,
+        "playerId": "sixten",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "S8"
+          ]
+        }
+      },
+      {
+        "t": 1790596836668,
+        "playerId": "axel",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "C8"
+          ]
+        }
+      },
+      {
+        "t": 1790596837291,
+        "playerId": "greta",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "C7"
+          ]
+        }
+      },
+      {
+        "t": 1790596838439,
+        "playerId": "sixten",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "C4"
+          ]
+        }
+      },
+      {
+        "t": 1790596839500,
+        "playerId": "axel",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "H8"
+          ]
+        }
+      }
+    ],
+    "result": null
+  }
+}

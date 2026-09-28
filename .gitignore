@@ -1,0 +1,4 @@
+node_modules/
+.DS_Store
+# Skärmbilder från senaste körningen - referensbilderna i screenshots/baseline/ versionshanteras
+screenshots/current/

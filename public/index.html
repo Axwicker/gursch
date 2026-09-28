@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Gursch</title>
+<link rel="stylesheet" href="/styles.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%A5%92%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+
+<!-- ============================ HOME ============================ -->
+<section id="screen-home" class="screen active">
+  <div class="home-wrap">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 120 120" aria-hidden="true">
+        <defs>
+          <linearGradient id="pickle" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#8fd14f"/><stop offset="60%" stop-color="#4f9c2f"/><stop offset="100%" stop-color="#2f6a1d"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="60" cy="60" rx="30" ry="46" transform="rotate(-28 60 60)" fill="url(#pickle)" stroke="#1f4a14" stroke-width="3"/>
+        <g fill="#dff5c0" opacity=".85">
+          <ellipse cx="50" cy="42" rx="4" ry="6" transform="rotate(-28 50 42)"/>
+          <ellipse cx="64" cy="55" rx="4" ry="6" transform="rotate(-28 64 55)"/>
+          <ellipse cx="52" cy="70" rx="4" ry="6" transform="rotate(-28 52 70)"/>
+          <ellipse cx="70" cy="80" rx="3.5" ry="5" transform="rotate(-28 70 80)"/>
+        </g>
+      </svg>
+      <h1>GURSCH</h1>
+      <p class="tagline">Kortspelet med slask, sjuor och mini-gursch</p>
+    </div>
+
+    <div class="home-cards">
+      <div class="panel">
+        <h2>CREATE GAME</h2>
+        <label>Nickname<input id="create-nick" maxlength="16" placeholder="Axel" autocomplete="off" /></label>
+        <button id="btn-create" class="btn btn-primary btn-lg">CREATE GAME</button>
+        <div class="practice-row">
+          <button id="btn-practice" class="btn btn-lg">SPELA MOT BOTTAR</button>
+          <select id="practice-level" aria-label="Bottarnas nivå">
+            <option value="easy">Lätt</option>
+            <option value="medium" selected>Medel</option>
+            <option value="hard">Svår</option>
+          </select>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>JOIN GAME</h2>
+        <label>Nickname<input id="join-nick" maxlength="16" placeholder="Erik" autocomplete="off" /></label>
+        <label>Room code<input id="join-code" maxlength="6" placeholder="ABCD" class="code-input" autocomplete="off" /></label>
+        <button id="btn-join" class="btn btn-lg">JOIN GAME</button>
+      </div>
+    </div>
+    <p class="home-error" id="home-error"></p>
+    <p class="home-foot">2–5 spelare · en kortlek · alla börjar på 0 kr</p>
+  </div>
+</section>
+
+<!-- ============================ LOBBY ============================ -->
+<section id="screen-lobby" class="screen">
+  <div class="lobby-wrap">
+    <header class="lobby-head">
+      <div>
+        <div class="eyebrow">ROOM CODE</div>
+        <div class="room-code" id="lobby-code">----</div>
+      </div>
+      <div class="invite">
+        <div class="eyebrow">INVITE LINK</div>
+        <div class="invite-row">
+          <input id="lobby-link" readonly />
+          <button class="btn btn-sm" id="btn-copy">KOPIERA</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="lobby-grid">
+      <div class="panel">
+        <h2>SPELARE <span class="muted" id="lobby-count"></span></h2>
+        <ul class="player-list" id="lobby-players"></ul>
+        <p class="hint" id="lobby-hint"></p>
+        <button id="btn-add-bot" class="btn">+ LÄGG TILL BOT</button>
+        <button id="btn-start" class="btn btn-primary btn-lg">START GAME</button>
+        <button id="btn-leave" class="btn btn-ghost">LÄMNA</button>
+      </div>
+
+      <div class="panel">
+        <h2>INSTÄLLNINGAR</h2>
+        <div class="settings" id="settings">
+          <label>Multiplier
+            <select data-setting="multiplierPreset" id="set-mult">
+              <option value="1">×1</option><option value="5">×5</option>
+              <option value="10" selected>×10</option><option value="25">×25</option>
+              <option value="50">×50</option><option value="100">×100</option>
+              <option value="flop:1">flopmult</option><option value="flop:2">flopmult ×2</option>
+              <option value="flop:3">flopmult ×3</option><option value="flop:4">flopmult ×4</option>
+            </select>
+          </label>
+          <label>Mini-gursch cap
+            <select data-setting="miniGurschCap">
+              <option value="0">Ingen begränsning</option>
+              <option value="1">Endast mini-gursch</option>
+              <option value="2">Mini-mini-gursch</option>
+              <option value="3">3 nivåer</option>
+            </select>
+          </label>
+          <label>Turtimer
+            <select data-setting="turnSeconds">
+              <option value="0">Av</option>
+              <option value="20">20 s</option><option value="30">30 s</option>
+              <option value="45" selected>45 s</option><option value="60">60 s</option>
+              <option value="90">90 s</option>
+            </select>
+          </label>
+          <label>Förhandlingstid
+            <select data-setting="negotiationSeconds">
+              <option value="10">10 s</option><option value="15">15 s</option>
+              <option value="20" selected>20 s</option><option value="30">30 s</option>
+              <option value="45">45 s</option><option value="60">60 s</option>
+            </select>
+          </label>
+          <label>Max slasks
+            <select data-setting="maxSlasks">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3" selected>3</option><option value="5">5</option>
+            </select>
+          </label>
+          <label class="toggle"><input type="checkbox" data-setting="chatEnabled" checked /> <span>Chat</span></label>
+          <label class="toggle"><input type="checkbox" data-setting="animations" checked /> <span>Animationer</span></label>
+          <label class="toggle"><input type="checkbox" data-setting="sound" checked /> <span>Ljud</span></label>
+        </div>
+        <p class="hint">Starting balance är alltid 0 kr.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TABLE ============================ -->
+<section id="screen-game" class="screen">
+  <div class="game-layout">
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="chip chip-round" id="chip-round">RUNDA 1</span>
+        <span class="chip chip-mult" id="chip-mult">×10</span>
+        <span class="chip" id="chip-code"></span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-sm btn-report-top" id="btn-report-top" title="Rapportera ett regelfel – även mitt i rundan">RAPPORTERA FEL</button>
+        <button class="btn btn-sm" id="btn-history">HISTORY</button>
+        <button class="btn btn-sm" id="btn-chat-toggle">CHAT</button>
+      </div>
+    </header>
+
+    <main class="table-area">
+      <div class="felt">
+        <div class="table-center">
+          <div class="pause-banner" id="pause-banner" role="status" aria-live="polite" hidden></div>
+          <div class="phase-banner" id="phase-banner">DISCARD PHASE</div>
+          <div class="phase-sub" id="phase-sub"></div>
+          <div class="piles" id="piles" hidden>
+            <div class="pile" id="pile-deck"><div class="card back pile-card"></div><div class="pile-label">LEK <span id="deck-count"></span></div></div>
+            <div class="pile" id="pile-discard"><div class="card back pile-card"></div><div class="pile-label">SLÄNGT</div></div>
+          </div>
+          <div class="trick-area" id="trick-area"></div>
+          <div class="table-foot" id="table-foot"></div>
+        </div>
+        <div class="seats" id="seats"></div>
+        <div class="seat-me" id="seat-me"></div>
+      </div>
+      <div class="fx-layer" id="fx"></div>
+    </main>
+
+    <footer class="handbar">
+      <div class="hand-info">
+        <span id="hand-hint">Dina kort</span>
+        <span class="sel-count" id="sel-count"></span>
+        <span class="turn-clock" id="turn-clock"></span>
+      </div>
+      <div class="hand" id="hand"></div>
+      <div class="actions" id="actions"></div>
+    </footer>
+  </div>
+
+  <aside class="side-panel" id="chat-panel">
+    <div class="side-head"><h3>CHAT</h3><button class="btn btn-icon" data-close="chat-panel">✕</button></div>
+    <div class="chat-log" id="chat-log"></div>
+    <form class="chat-form" id="chat-form">
+      <input id="chat-input" maxlength="300" placeholder="Skriv…" autocomplete="off" />
+      <button class="btn btn-sm btn-primary">SKICKA</button>
+    </form>
+  </aside>
+
+  <aside class="side-panel" id="history-panel">
+    <div class="side-head"><h3>GAME HISTORY</h3><button class="btn btn-icon" data-close="history-panel">✕</button></div>
+    <div class="history" id="history"></div>
+  </aside>
+
+  <div class="slask-overlay" id="slask-overlay">
+    <div class="slask-box">
+      <div class="slask-title">SLASK</div>
+      <div class="slask-text" id="slask-text"></div>
+      <div class="slask-timer"><div class="slask-bar" id="slask-bar"></div></div>
+      <button class="btn btn-primary btn-lg" id="btn-call-slask">CALL SLASK</button>
+    </div>
+  </div>
+
+  <div class="result-overlay" id="result-overlay">
+    <div class="result-box">
+      <h2 id="result-title">ROUND COMPLETE</h2>
+      <div class="result-meta" id="result-meta"></div>
+      <div class="result-rows" id="result-rows"></div>
+      <div class="result-extra" id="result-extra"></div>
+      <div class="result-actions">
+        <button class="btn btn-primary btn-lg" id="btn-play-again">PLAY AGAIN</button>
+        <button class="btn btn-lg" id="btn-to-lobby">RETURN TO LOBBY</button>
+      </div>
+      <p class="hint" id="result-hint"></p>
+      <button class="btn btn-ghost btn-sm btn-report" id="btn-report">RAPPORTERA REGELFEL</button>
+    </div>
+  </div>
+</section>
+
+<div class="result-overlay report-overlay" id="report-overlay" role="dialog" aria-modal="true" aria-labelledby="report-title">
+  <div class="result-box report-box">
+    <h2 id="report-title">RAPPORTERA REGELFEL</h2>
+    <p class="hint">Beskriv vad som blev fel i runda <span id="report-round"></span>. Rapporten sparas
+      direkt i projektet med rundans alla drag – säg sedan till Claude att kolla rapporterna.</p>
+    <label>Vad blev fel?
+      <textarea id="report-text" rows="4" maxlength="2000" placeholder="T.ex. Leo fick lägga en 9:a på en ensam 7:a"></textarea>
+    </label>
+    <div class="result-actions">
+      <button class="btn btn-primary btn-lg" id="btn-report-save">SPARA RAPPORT</button>
+      <button class="btn btn-lg" id="btn-report-cancel">AVBRYT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Flygande kort vid utdelning och slängning (bara dekoration, fångar aldrig klick) -->
+<div class="card-fx" id="card-fx" aria-hidden="true"></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/app.js" type="module"></script>
+</body>
+</html>
