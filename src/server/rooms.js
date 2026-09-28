@@ -2,12 +2,19 @@
 
 import { randomInt } from 'node:crypto';
 import { GurschGame, PHASE } from '../engine/game.js';
+import { seededRandom } from '../engine/cards.js';
 import { chooseBotAction, shouldCallSlask, slaskReactionMs } from '../engine/bot.js';
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 /** Kryptografiskt säker rng i [0,1) för blandning - Math.random är förutsägbar. */
 const secureRng = () => randomInt(2 ** 47) / 2 ** 47;
+
+/**
+ * GURSCH_SEED sätts bara av skärmbildsskriptet (scripts/screenshots.js): varje nytt rum får
+ * då samma frö, så att samma kort delas ut och bilderna före och efter en ändring går att jämföra.
+ */
+const roomRng = () => (process.env.GURSCH_SEED ? seededRandom(Number(process.env.GURSCH_SEED)) : secureRng);
 
 export class RoomManager {
   constructor({ onBroadcast } = {}) {
@@ -27,7 +34,7 @@ export class RoomManager {
     const code = this.createCode();
     const room = {
       code,
-      game: new GurschGame({ id: code, settings, rng: secureRng }),
+      game: new GurschGame({ id: code, settings, rng: roomRng() }),
       sockets: new Map(),   // socketId -> playerId
       tokens: new Map(),    // playerId -> hemlig token för återanslutning
       turnTimer: null,

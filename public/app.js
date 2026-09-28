@@ -1234,7 +1234,8 @@ socket.on('state', ({ code: roomCode, you, state, private: priv, events, serverT
   code = roomCode; me = you;
   const prevPhase = S?.phase;
   S = state; P = priv;
-  window.__gursch = { S, P, me };
+  // Läses (och emit används) av skärmbildsskriptet, som inte ska bero på knapptexter.
+  window.__gursch = { S, P, me, emit };
   store.room = roomCode;
 
   document.body.classList.toggle('no-anim', !S.settings.animations);

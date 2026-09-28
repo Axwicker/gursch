@@ -7,6 +7,7 @@ npm install
 npm start          # http://localhost:3000
 npm test           # 129 tester (regler, invarianter, fuzz, uppspelning, bottar, paus)
 npm run replay -- rapport.json   # visa en rapporterad runda drag för drag
+npm run screenshots              # skärmbilder av en hel runda, jämförda med referensen
 ```
 
 ## Arkitektur
@@ -74,6 +75,20 @@ npm run replay -- rapport.json --until 12 # stanna före händelse 12 och visa a
 Rapporter i `test/replays/` spelas upp i varje testkörning. Med `"expect": [{ "event": 33,
 "rejected": "…" }]` ska just den händelsen avvisas (felet var ett drag som aldrig borde ha
 tillåtits). Utan `expect` ska uppspelningen ge samma resultat som när rundan spelades.
+
+## Skärmbilder
+
+UI:t har inga tester. `npm run screenshots` startar en egen server (port 3217, fast slumpfrö),
+spelar en runda mot bottar med Playwright och den installerade Chrome, och tar bilder i varje
+fas i mobil (375×812) och dator (1280×800): start, lobby, utdelning, slängning, förhandling,
+kortval, sista slaskchansen, slask, stick, resultat, historik och chatt.
+
+* `screenshots/baseline/` är referensen (versionshanteras). Ny referens: `npm run screenshots -- --baseline`.
+* `screenshots/current/index.html` visar referens och senaste körning sida vid sida.
+* Samma kort delas ut varje gång, men bottarnas val är slumpade, så senare faser kan skilja sig.
+* Skriptet agerar via `window.__gursch.emit` och kortens `data-id`, inte via knapptexter.
+  Behåll id:na `create-nick`, `practice-level`, `btn-practice`, `btn-start`, `btn-history`,
+  `btn-chat-toggle` och `data-close` när UI:t görs om, annars behöver skriptet ändras.
 
 ## Övrigt
 
