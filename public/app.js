@@ -46,13 +46,45 @@ const timerNow = () => (S?.paused ? S.paused.since : serverNow());
 function showScreen(id) {
   for (const s of document.querySelectorAll('.screen')) s.classList.toggle('active', s.id === id);
 }
+/** Systemmeddelanden (anslutning, fel, kopierat). Spelhändelser visas på bordet, se noteTable/noteSeat. */
 function toast(msg, isError = false) {
   const t = $('toast');
   t.textContent = msg;
   t.classList.toggle('error', isError);
   t.classList.add('show');
   clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 2600);
+  // Lång text får längre tid - ungefär läshastighet, minst 2,6 s.
+  t._t = setTimeout(() => t.classList.remove('show'), Math.max(2600, msg.length * 70));
+}
+
+/** Läses upp av skärmläsare (visas inte). */
+function announce(text) {
+  const n = $('sr-status');
+  n.textContent = '';
+  requestAnimationFrame(() => { n.textContent = text; });
+}
+
+/** Senaste spelhändelsen, på bordet under fasens text. Ligger kvar tills den byts ut eller tiden gått. */
+let tableNoteTimer = null;
+function noteTable(text, ms = 7000) {
+  const n = $('table-note');
+  n.textContent = text;
+  n.classList.add('show');
+  clearTimeout(tableNoteTimer);
+  tableNoteTimer = setTimeout(() => n.classList.remove('show'), ms);
+}
+
+/** En kort notis vid en spelares plats ("Stay", "Tiden tog slut"). Visas i statusraden. */
+const seatNotes = new Map();   // spelar-id -> { text, until }
+function noteSeat(playerId, text, ms = 4000) {
+  seatNotes.set(playerId, { text, until: Date.now() + ms });
+  setTimeout(() => { if (S && S.phase !== 'LOBBY') renderSeats(); }, ms + 50);
+}
+function seatNote(playerId) {
+  const n = seatNotes.get(playerId);
+  if (n && n.until > Date.now()) return n.text;
+  seatNotes.delete(playerId);
+  return null;
 }
 function kr(n) {
   const sign = n > 0 ? '+' : n < 0 ? '−' : '';
@@ -304,14 +336,17 @@ function renderSeats() {
     badge.append(nick);
     badge.append(el('div', `bal ${p.balance > 0 ? 'pos' : p.balance < 0 ? 'neg' : 'zero'}`, kr(p.balance)));
     const status = p.status || (!p.connected ? 'Återansluter…' : (p.decided ? 'Klar' : ''));
+    const note = seatNote(p.id);
     const neg = S.negotiation;
     if (neg) {
-      // Allas förslag syns i realtid
+      // Allas förslag syns i realtid. Ditt eget i guld, de andras neutrala, grönt när alla är överens.
       const proposal = neg.proposals[p.id];
       const chip = neg.participants.includes(p.id)
-        ? el('div', `proposal-chip${proposal ? '' : ' empty'}${neg.agreedCount ? ' agreed' : ''}`, proposal ? `${proposal} kort` : '…')
+        ? el('div', `proposal-chip${proposal ? '' : ' empty'}${p.id === me ? ' mine' : ''}${neg.agreedCount ? ' agreed' : ''}`, proposal ? `${proposal} kort` : '…')
         : el('div', 'proposal-chip skipped', 'Står över');
       badge.append(chip);
+    } else if (note) {
+      badge.append(el('div', 'status note', note));
     } else if (S.discardSelect?.participants.includes(p.id) && !S.discardSelect.done.includes(p.id)) {
       badge.append(el('div', 'status', 'Väljer kort…'));
     } else {
@@ -383,7 +418,7 @@ function renderCenter() {
     const waiting = ds.participants.filter((id) => !ds.done.includes(id));
     sub = `Alla slänger ${ds.count} kort · väntar på ${waiting.map((id) => (id === me ? 'dig' : nickOf(id))).join(', ')}`;
   } else if (S.phase === 'FINAL_SLASK') {
-    sub = yourTurn ? 'Slask eller pass' : `Väntar på ${nickOf(turn)}`;
+    sub = !turn ? '' : yourTurn ? 'Slask eller pass' : `Väntar på ${nickOf(turn)}`;   // ingen tur under slaskfönstret
   } else if (S.phase === 'TRICK' || S.phase === 'MINI_GURSCH') {
     const t = S.trick;
     if (t) {
@@ -572,17 +607,25 @@ function renderHand() {
 
   const discard = P.actions.find((a) => a.type === 'discard');
   const play = P.actions.find((a) => a.type === 'play');
+  const has = (type) => P.actions.some((a) => a.type === type);
   let hint = 'Dina kort';
   let count = '';
-  if (discard) {
-    hint = discard.free ? 'Välj 1–4 kort att slänga' : `Välj ${discard.count} kort att slänga`;
-    count = `${selected.size} av ${discard.free ? '1–4' : discard.count} valda`;
+  // Ledtexten säger vad du ska göra just nu. Vilka kort som är tillåtna visar korten själva
+  // (gråa = inte tillåtna, enligt serverns legalPlays); regeln förklaras först om du väljer fel.
+  if (discard && S.discardSelect) {
+    hint = `Välj ${discard.count} kort att slänga – alla slänger lika många`;
+  } else if (discard) {
+    hint = discard.free
+      ? 'Du bestämmer antalet: välj 1–4 kort att slänga – eller stay eller slask'
+      : `Släng ${discard.count} kort (${nickOf(S.discard?.proposerId)} valde antalet) – eller stay eller slask`;
   } else if (play) {
     hint = describeSelection(play)
-      || (play.lead ? 'Du leder sticket – välj en kombination' : followRuleHint(play));
-    count = `${selected.size} av ${play.lead ? '1–5' : play.count} valda`;
-  } else if (P.actions.some((a) => a.type === 'propose')) {
-    hint = 'Föreslå hur många kort alla ska slänga – eller stay för att börja spela';
+      || (play.lead ? 'Du leder – välj 1–5 kort som bildar en kombination'
+        : `Följ ${leadDescription()} med ${play.count} kort – gråa kort får inte läggas`);
+  } else if (has('propose')) {
+    hint = 'Hur många kort ska alla slänga? Är alla överens slängs de – stay startar spelet direkt';
+  } else if (has('pass')) {
+    hint = 'Sista chansen att slaska – annars pass';
   } else if (S.negotiation) {
     hint = 'Du står över den här förhandlingen';
   } else if (S.discardSelect) {
@@ -590,49 +633,96 @@ function renderHand() {
   } else if (S.turnPlayerId && S.turnPlayerId !== me) {
     hint = `Väntar på ${nickOf(S.turnPlayerId)}`;
   }
+  if (discard) count = `${selected.size} av ${discard.free ? '1–4' : discard.count} valda`;
+  if (play) count = `${selected.size} av ${play.lead ? '1–5' : play.count} valda`;
   $('hand-hint').textContent = hint;
   $('sel-count').textContent = count;
+
+  // Ditt drag: handraden lyfts fram (färg och kant, ingen layoutändring - flygningarna mäter den).
+  const myMove = P.actions.some((a) => a.type !== 'callSlask');
+  $('handbar').classList.toggle('my-move', myMove);
+  if (myMove && !hadMove) {
+    announce(`Din tur. ${hint}`);
+    beep(620, 0.07, 'sine', 0.03);
+  }
+  hadMove = myMove;
+}
+
+let hadMove = false;
+
+const SINGLE_NAMES = { 11: 'en knekt', 12: 'en dam', 13: 'en kung', 14: 'ett ess', 7: 'en ensam 7:a (= ess)' };
+
+/** Utspelet i klartext: "två 5:or", "en kung", "en ensam 7:a (= ess)". */
+function leadDescription() {
+  const lead = S.trick?.plays[0]?.cards;
+  if (!lead) return 'utspelet';
+  if (lead.length > 1) return describeCombination(lead);
+  return SINGLE_NAMES[lead[0].rank] ?? `en ${lead[0].rank}:a`;
+}
+
+// Knapparna återanvänds mellan uppdateringar (en per typ av drag). Bottarna skickar nytt
+// state hela tiden - att bygga om knapparna skulle ta bort fokus och tangentbordsnavigering.
+const actionNodes = new Map();   // actiontyp -> knapp eller knappgrupp
+const ACTION_CLASS = { discard: 'btn btn-primary', play: 'btn btn-primary', stay: 'btn', slask: 'btn btn-danger', pass: 'btn' };
+
+/** Knappen säger vad den gör: "Spela 2 kort", "Släng 3 kort". */
+function actionLabel(a) {
+  const n = selected.size;
+  if (a.type === 'discard') { const k = a.free ? n : a.count; return k ? `Släng ${k} kort` : 'Släng'; }
+  if (a.type === 'play') { const k = a.lead ? n : a.count; return k ? `Spela ${k} kort` : 'Spela'; }
+  return { stay: 'Stay', slask: 'Slask', pass: 'Pass' }[a.type];
+}
+
+function createActionNode(type) {
+  if (type === 'propose') {
+    const group = el('div', 'propose-group');
+    group.setAttribute('role', 'group');
+    group.setAttribute('aria-label', 'Föreslå antal kort att slänga');
+    for (const count of [1, 2, 3, 4]) {
+      const b = el('button', 'btn propose-btn');
+      b.dataset.count = count;
+      b.append(el('span', 'propose-num', String(count)), el('span', 'propose-votes'));
+      b.onclick = () => emit('action', { type: 'propose', count });
+      group.append(b);
+    }
+    return group;
+  }
+  const b = el('button', ACTION_CLASS[type]);
+  b.onclick = () => {
+    if (!P.actions.some((a) => a.type === type)) return;
+    if (type === 'discard' || type === 'play') {
+      emit('action', { type, cardIds: [...selected] });
+      selected.clear();
+    } else {
+      if (type !== 'pass') selected.clear();
+      emit('action', { type });
+    }
+  };
+  return b;
 }
 
 function renderActions() {
-  const box = $('actions');
-  box.innerHTML = '';
-  for (const a of P.actions) {
-    if (a.type === 'callSlask') continue;  // hanteras i overlayn
+  const acts = P.actions.filter((a) => a.type !== 'callSlask');   // syna slask: i slaskrutan
+  const entries = keyedNodes(actionNodes, acts.map((a) => a.type), createActionNode);
+  entries.forEach(({ node }, i) => {
+    const a = acts[i];
     if (a.type === 'propose') {
-      const group = el('div', 'propose-group');
-      group.setAttribute('role', 'group');
-      group.setAttribute('aria-label', 'Föreslå antal kort att slänga');
-      for (const count of [1, 2, 3, 4]) {
-        const b = el('button', `btn propose-btn${a.current === count ? ' btn-primary' : ''}`, String(count));
-        b.setAttribute('aria-pressed', String(a.current === count));
-        b.onclick = () => emit('action', { type: 'propose', count });
-        group.append(b);
+      // Varje tal visar hur många av de andra som vill samma (en prick per spelare).
+      const proposals = S.negotiation?.proposals ?? {};
+      for (const b of node.children) {
+        const c = Number(b.dataset.count);
+        const votes = Object.entries(proposals).filter(([id, v]) => id !== me && v === c).length;
+        b.classList.toggle('btn-primary', a.current === c);
+        b.setAttribute('aria-pressed', String(a.current === c));
+        b.querySelector('.propose-votes').textContent = '•'.repeat(votes);
+        b.setAttribute('aria-label', `${c} kort${votes ? `, ${votes} ${votes === 1 ? 'annan vill' : 'andra vill'} samma` : ''}`);
       }
-      box.append(group);
-      continue;
+      return;
     }
-    let btn;
-    if (a.type === 'discard') {
-      btn = el('button', 'btn btn-primary', a.free ? 'Släng' : `Släng ${a.count}`);
-      btn.disabled = !selectionValid(a);
-      btn.onclick = () => { emit('action', { type: 'discard', cardIds: [...selected] }); selected.clear(); };
-    } else if (a.type === 'stay') {
-      btn = el('button', 'btn', 'Stay');
-      btn.onclick = () => { selected.clear(); emit('action', { type: 'stay' }); };
-    } else if (a.type === 'slask') {
-      btn = el('button', 'btn btn-danger', 'Slask');
-      btn.onclick = () => { selected.clear(); emit('action', { type: 'slask' }); };
-    } else if (a.type === 'pass') {
-      btn = el('button', 'btn', 'Pass');
-      btn.onclick = () => emit('action', { type: 'pass' });
-    } else if (a.type === 'play') {
-      btn = el('button', 'btn btn-primary', 'Spela');
-      btn.disabled = !selectionValid(a);
-      btn.onclick = () => { emit('action', { type: 'play', cardIds: [...selected] }); selected.clear(); };
-    }
-    if (btn) box.append(btn);
-  }
+    node.textContent = actionLabel(a);
+    if (a.type === 'discard' || a.type === 'play') node.disabled = !selectionValid(a);
+  });
+  syncChildren($('actions'), entries.map((e) => e.node));
 }
 
 // ------------------------------------------------------------------ slask overlay
@@ -646,23 +736,32 @@ function renderSlask() {
     clearInterval(slaskInterval); slaskInterval = null;
     return;
   }
+  const isNew = !overlay.classList.contains('open') || overlay.dataset.key !== String(ps.deadline);
   overlay.classList.add('open');
+  overlay.dataset.key = String(ps.deadline);
   const isMine = ps.playerId === me;
-  $('slask-text').textContent = isMine
-    ? 'Du slaskade – någon kan syna din hand.'
-    : `${nickOf(ps.playerId)} slaskar. Syna för att se handen och ta betalt.`;
+  // Det man behöver för att bestämma sig: vem, vad det kostar (money.js) och hur lång tid som är kvar.
+  $('slask-text').textContent = ps.callerId
+    ? `${nickOf(ps.callerId)} synade ${isMine ? 'dig' : nickOf(ps.playerId)} först.`
+    : isMine
+      ? 'Du slaskade. Synar någon betalar du 10 kr per face card i din gamla hand – har den inga får du 25 kr.'
+      : `${nickOf(ps.playerId)} slaskar. Synar du får du 10 kr per face card i handen – har den inga betalar du 25 kr.`;
   const btn = $('btn-call-slask');
   btn.style.display = isMine || ps.callerId ? 'none' : '';
-  btn.disabled = false;
-  btn.textContent = ps.callerId ? 'Redan synad' : 'Syna slask';
+  if (isNew) btn.disabled = false;   // bara för en ny slask - annars kunde ett andra klick slinka igenom
+  btn.textContent = 'Syna slask';
+  if (isNew && !isMine) announce(`${nickOf(ps.playerId)} slaskar. Syna slask?`);
 
   clearInterval(slaskInterval);
   const total = (S.settings.slaskCallSeconds || 8) * 1000;
-  slaskInterval = setInterval(() => {
+  const tick = () => {
     const left = Math.max(0, ps.deadline - timerNow());
     $('slask-bar').style.width = `${(left / total) * 100}%`;
+    $('slask-count').textContent = ps.callerId ? '' : `${Math.ceil(left / 1000)} s`;
     if (left <= 0) clearInterval(slaskInterval);
-  }, 80);
+  };
+  tick();
+  slaskInterval = setInterval(tick, 80);
 }
 $('btn-call-slask').onclick = (e) => {
   e.currentTarget.disabled = true;   // first click wins - servern avgör
@@ -697,10 +796,12 @@ function countdownFraction() {
 
 function tickTurnTimer() {
   const clock = $('turn-clock');
+  const handBar = $('hand-timer-bar');
   const cd = currentCountdown();
   if (!cd) {
     clock.textContent = '';
     clock.classList.remove('urgent');
+    handBar.style.width = '0';
     return;
   }
   const leftMs = Math.max(0, cd.deadline - timerNow());
@@ -712,6 +813,9 @@ function tickTurnTimer() {
     bar.classList.toggle('urgent', urgent);
   }
   const mine = cd.mine;
+  // Din egen nedräkning löper också längs handradens överkant.
+  handBar.style.width = mine ? `${frac * 100}%` : '0';
+  handBar.classList.toggle('urgent', urgent);
   clock.textContent = `${cd.label} · ${secs} s`;
   clock.classList.toggle('urgent', mine && urgent);
   // Varningspip varje sekund de sista fem sekunderna när det är din tur.
@@ -726,7 +830,11 @@ const TIMEOUT_TEXT = { stay: 'stay', pass: 'pass', play: 'lägsta kortet spelade
 
 // ------------------------------------------------------------------ chat + history
 
-$('btn-chat-toggle').onclick = () => { $('chat-panel').classList.toggle('open'); $('chat-input').focus(); };
+$('btn-chat-toggle').onclick = () => {
+  $('chat-panel').classList.toggle('open');
+  $('chat-unread').hidden = true;
+  $('chat-input').focus();
+};
 $('btn-history').onclick = () => $('history-panel').classList.toggle('open');
 for (const b of document.querySelectorAll('[data-close]')) b.onclick = () => $(b.dataset.close).classList.remove('open');
 $('chat-form').onsubmit = (e) => {
@@ -759,6 +867,7 @@ function renderChat() {
   const lastId = S.chat.at(-1)?.id ?? null;
   if (lastId && seenChatId !== null && lastId !== seenChatId && !$('chat-panel').classList.contains('open')) {
     beep(700, 0.05, 'sine', 0.025);
+    $('chat-unread').hidden = false;
   }
   seenChatId = lastId;
 }
@@ -859,7 +968,25 @@ function renderResult() {
 
 let renderedResultKey = null;
 
+/**
+ * Varför just den spelaren förlorade och vad det kostar. Samma tal som servern räknade med
+ * (money.js calculateRoundPayments): losern betalar slutvärde × multiplier till var och en av de andra.
+ */
+function resultExplanation(r) {
+  const loser = r.players.find((p) => p.id === r.loserId);
+  const name = r.loserId === me ? 'Du' : loser.nickname;
+  const others = r.players.length - 1;
+  const each = Math.round(r.loserValue * r.multiplier);
+  const pays = `betalar ${r.loserValue} × ${r.multiplier} = ${each} kr till var och en av de ${others} andra (${each * others} kr).`;
+  if (r.capReached) {
+    return `Mini-gursch-gränsen nåddes vid lika slutvärde (${r.loserValue}). ${name} fick sitt kort sist i dealerordningen och ${pays}`;
+  }
+  const where = r.miniLevel ? ` i mini-gursch nivå ${r.miniLevel}` : '';
+  return `${name} hade högst slutvärde${where} (${r.loserValue}) och ${pays}`;
+}
+
 function buildResultRows(r) {
+  $('result-why').textContent = resultExplanation(r);
   const rows = $('result-rows');
   rows.innerHTML = '';
   const sorted = [...r.players].sort((a, b) => (b.finalValue ?? -1) - (a.finalValue ?? -1));
@@ -1194,7 +1321,8 @@ function handleEvents(events) {
         if (flightsOn()) for (const d of e.players) if (d.playerId !== me) animateOpponentDraw(d.playerId, d.count);
         break;
       case 'stay':
-        toast(e.endsNegotiation ? `${nickOf(e.playerId)} – stay · spelet börjar` : `${nickOf(e.playerId)} – stay`);
+        noteSeat(e.playerId, 'Stay');
+        if (e.endsNegotiation) noteTable(`${e.playerId === me ? 'Du' : nickOf(e.playerId)} valde stay – spelet börjar`);
         break;
       case 'paused': if (e.playerId !== me) toast(`${nickOf(e.playerId)} pausade spelet för att skriva en felrapport`); break;
       case 'resumed':
@@ -1202,24 +1330,38 @@ function handleEvents(events) {
         if (e.auto) toast('Pausen släppte efter 3 minuter – spelet fortsätter');
         else if (e.playerId !== me) toast('Spelet fortsätter');
         break;
-      case 'negotiation': toast(`Förhandling ${e.number}: kom överens om antal kort`); break;
+      case 'negotiation': if (e.number > 1) noteTable(`Förhandling ${e.number}: kom överens igen om antal kort`); break;
       case 'agreementPending': beep(620, .07, 'triangle', .04); break;
       case 'negotiationAgreed': banner(`ALLA ÖVERENS: ${e.count} KORT`); beep(740, .12, 'sine', .05); break;
       case 'negotiationFailed': banner('INGEN ENIGHET – SPELET BÖRJAR'); break;
       case 'slask': banner('SLASK!'); beep(180, .2, 'sawtooth', .05); break;
-      case 'slaskResolved':
+      case 'slaskResolved': {
         if (flightsOn() && e.playerId !== me) animateOpponentDraw(e.playerId, 5);
-        if (e.callerId) toast(`${nickOf(e.callerId)} synade ${nickOf(e.playerId)}: ${e.hand.join(',')} · ${e.faceCards} face cards · ${e.amount} kr`);
-        else toast(`${nickOf(e.playerId)} slaskade osynad`);
+        const mineSlask = e.playerId === me;
+        const slaskerObj = mineSlask ? 'dig' : nickOf(e.playerId);   // "Greta synade dig"
+        const slaskerSubj = mineSlask ? 'du' : nickOf(e.playerId);   // "– du betalar"
+        const caller = e.callerId === me ? 'Du' : nickOf(e.callerId);
+        // Samma regel som money.js: face cards -> slaskaren betalar 10 kr/st, inga -> synaren betalar 25 kr.
+        const text = !e.callerId ? `${mineSlask ? 'Du' : nickOf(e.playerId)} slaskade osynad`
+          : e.faceCards > 0 ? `${caller} synade ${slaskerObj} (${e.hand.join(',')}): ${e.faceCards} face cards – ${slaskerSubj} betalar ${e.amount} kr`
+            : `${caller} synade ${slaskerObj} (${e.hand.join(',')}): inga face cards – ${e.callerId === me ? 'du' : caller} betalar ${e.amount} kr`;
+        noteTable(text, 9000);
+        noteSeat(e.playerId, e.callerId ? 'Synad' : 'Osynad');
+        announce(text);
         break;
+      }
       case 'play': beep(500, .05, 'square', .025); break;
-      case 'trickWon': toast(`${nickOf(e.playerId)} vann sticket`); beep(660, .09, 'sine', .04); break;
+      case 'trickWon':   // syns i sticket ("· vann"), ingen toast över handen
+        announce(`${e.playerId === me ? 'Du' : nickOf(e.playerId)} vann sticket`);
+        beep(660, .09, 'sine', .04);
+        break;
       case 'quint': banner(e.quintTwo ? 'QUINT TWO!' : 'FIVE OF A KIND!'); beep(880, .25, 'sine', .06); break;
       case 'miniGursch': banner(`MINI-GURSCH ×${e.multiplier}`); break;
       case 'money': flyMoney(e.playerId, e.amount); break;
       case 'roundResult': beep(240, .3, 'sine', .05); break;
       case 'timeout':
-        toast(`${e.playerId === me ? 'Din' : `${nickOf(e.playerId)}s`} tid tog slut – ${TIMEOUT_TEXT[e.action] ?? e.action}`, e.playerId === me);
+        noteSeat(e.playerId, 'Tiden tog slut');
+        noteTable(`${e.playerId === me ? 'Din' : `${nickOf(e.playerId)}s`} tid tog slut – ${TIMEOUT_TEXT[e.action] ?? e.action}`);
         break;
       default: break;
     }

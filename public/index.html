@@ -145,9 +145,10 @@
         <span class="chip" id="chip-code" title="Rumskod"></span>
       </div>
       <div class="topbar-right">
-        <button class="btn btn-sm btn-report-top" id="btn-report-top" title="Rapportera ett regelfel – även mitt i rundan">Rapportera fel</button>
-        <button class="btn btn-sm" id="btn-history">Historik</button>
-        <button class="btn btn-sm" id="btn-chat-toggle">Chatt</button>
+        <!-- Ikoner: Lucide (ISC-licens). Etiketterna döljs på smala skärmar, aria-label finns alltid. -->
+        <button class="btn btn-tool" id="btn-report-top" aria-label="Rapportera fel" title="Rapportera ett regelfel – även mitt i rundan"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg><span class="tool-label">Rapportera fel</span></button>
+        <button class="btn btn-tool" id="btn-history" aria-label="Historik" title="Historik"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg><span class="tool-label">Historik</span></button>
+        <button class="btn btn-tool" id="btn-chat-toggle" aria-label="Chatt" title="Chatt"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span class="tool-label">Chatt</span><span class="unread-dot" id="chat-unread" hidden></span></button>
       </div>
     </header>
 
@@ -157,6 +158,8 @@
           <div class="pause-banner" id="pause-banner" role="status" aria-live="polite" hidden></div>
           <div class="phase-banner" id="phase-banner">Slängning</div>
           <div class="phase-sub" id="phase-sub"></div>
+          <!-- Senaste händelsen (slask synad, tiden tog slut …) - ligger kvar tills nästa, täcker aldrig handen -->
+          <div class="table-note" id="table-note" role="status" aria-live="polite"></div>
           <div class="piles" id="piles" hidden>
             <div class="pile" id="pile-deck"><div class="card back pile-card"></div><div class="pile-label">Lek <span id="deck-count"></span></div></div>
             <div class="pile" id="pile-discard"><div class="card back pile-card"></div><div class="pile-label">Slängt</div></div>
@@ -170,7 +173,8 @@
       <div class="fx-layer" id="fx"></div>
     </main>
 
-    <footer class="handbar">
+    <footer class="handbar" id="handbar">
+      <div class="hand-timer" aria-hidden="true"><div class="hand-timer-bar" id="hand-timer-bar"></div></div>
       <div class="hand-info">
         <span id="hand-hint">Dina kort</span>
         <span class="sel-count" id="sel-count"></span>
@@ -195,10 +199,11 @@
     <div class="history" id="history"></div>
   </aside>
 
-  <div class="slask-overlay" id="slask-overlay">
+  <div class="slask-overlay" id="slask-overlay" role="dialog" aria-labelledby="slask-title">
     <div class="slask-box">
-      <div class="slask-title">SLASK</div>
+      <div class="slask-title" id="slask-title">SLASK</div>
       <div class="slask-text" id="slask-text"></div>
+      <div class="slask-count" id="slask-count" aria-hidden="true"></div>
       <div class="slask-timer"><div class="slask-bar" id="slask-bar"></div></div>
       <button class="btn btn-primary btn-lg" id="btn-call-slask">Syna slask</button>
     </div>
@@ -208,6 +213,7 @@
     <div class="result-box">
       <h2 id="result-title">Rundan är slut</h2>
       <div class="result-meta" id="result-meta"></div>
+      <p class="result-why" id="result-why"></p>
       <div class="result-rows" id="result-rows"></div>
       <div class="result-extra" id="result-extra"></div>
       <div class="result-actions">
@@ -238,7 +244,9 @@
 <!-- Flygande kort vid utdelning och slängning (bara dekoration, fångar aldrig klick) -->
 <div class="card-fx" id="card-fx" aria-hidden="true"></div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<!-- Uppläses av skärmläsare: "Din tur", vem som vann sticket … -->
+<div class="sr-only" id="sr-status" aria-live="polite"></div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/app.js" type="module"></script>
