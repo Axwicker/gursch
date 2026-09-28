@@ -33,11 +33,11 @@
 
     <div class="home-cards">
       <div class="panel">
-        <h2>CREATE GAME</h2>
-        <label>Nickname<input id="create-nick" maxlength="16" placeholder="Axel" autocomplete="off" /></label>
-        <button id="btn-create" class="btn btn-primary btn-lg">CREATE GAME</button>
+        <h2>Skapa spel</h2>
+        <label>Namn<input id="create-nick" maxlength="16" placeholder="Axel" autocomplete="off" /></label>
+        <button id="btn-create" class="btn btn-primary btn-lg">Skapa rum</button>
         <div class="practice-row">
-          <button id="btn-practice" class="btn btn-lg">SPELA MOT BOTTAR</button>
+          <button id="btn-practice" class="btn btn-lg">Spela mot bottar</button>
           <select id="practice-level" aria-label="Bottarnas nivå">
             <option value="easy">Lätt</option>
             <option value="medium" selected>Medel</option>
@@ -46,10 +46,10 @@
         </div>
       </div>
       <div class="panel">
-        <h2>JOIN GAME</h2>
-        <label>Nickname<input id="join-nick" maxlength="16" placeholder="Erik" autocomplete="off" /></label>
-        <label>Room code<input id="join-code" maxlength="6" placeholder="ABCD" class="code-input" autocomplete="off" /></label>
-        <button id="btn-join" class="btn btn-lg">JOIN GAME</button>
+        <h2>Gå med i ett rum</h2>
+        <label>Namn<input id="join-nick" maxlength="16" placeholder="Erik" autocomplete="off" /></label>
+        <label>Rumskod<input id="join-code" maxlength="6" placeholder="ABCD" class="code-input" autocomplete="off" /></label>
+        <button id="btn-join" class="btn btn-lg">Gå med</button>
       </div>
     </div>
     <p class="home-error" id="home-error"></p>
@@ -62,30 +62,30 @@
   <div class="lobby-wrap">
     <header class="lobby-head">
       <div>
-        <div class="eyebrow">ROOM CODE</div>
+        <div class="eyebrow">Rumskod</div>
         <div class="room-code" id="lobby-code">----</div>
       </div>
       <div class="invite">
-        <div class="eyebrow">INVITE LINK</div>
+        <div class="eyebrow">Inbjudningslänk</div>
         <div class="invite-row">
-          <input id="lobby-link" readonly />
-          <button class="btn btn-sm" id="btn-copy">KOPIERA</button>
+          <input id="lobby-link" readonly aria-label="Inbjudningslänk" />
+          <button class="btn btn-sm" id="btn-copy">Kopiera</button>
         </div>
       </div>
     </header>
 
     <div class="lobby-grid">
       <div class="panel">
-        <h2>SPELARE <span class="muted" id="lobby-count"></span></h2>
+        <h2>Spelare <span class="muted" id="lobby-count"></span></h2>
         <ul class="player-list" id="lobby-players"></ul>
         <p class="hint" id="lobby-hint"></p>
-        <button id="btn-add-bot" class="btn">+ LÄGG TILL BOT</button>
-        <button id="btn-start" class="btn btn-primary btn-lg">START GAME</button>
-        <button id="btn-leave" class="btn btn-ghost">LÄMNA</button>
+        <button id="btn-add-bot" class="btn">+ Lägg till bot</button>
+        <button id="btn-start" class="btn btn-primary btn-lg">Starta spelet</button>
+        <button id="btn-leave" class="btn btn-ghost">Lämna rummet</button>
       </div>
 
       <div class="panel">
-        <h2>INSTÄLLNINGAR</h2>
+        <h2>Inställningar</h2>
         <div class="settings" id="settings">
           <label>Multiplier
             <select data-setting="multiplierPreset" id="set-mult">
@@ -96,7 +96,7 @@
               <option value="flop:3">flopmult ×3</option><option value="flop:4">flopmult ×4</option>
             </select>
           </label>
-          <label>Mini-gursch cap
+          <label>Mini-gursch-gräns
             <select data-setting="miniGurschCap">
               <option value="0">Ingen begränsning</option>
               <option value="1">Endast mini-gursch</option>
@@ -119,17 +119,17 @@
               <option value="45">45 s</option><option value="60">60 s</option>
             </select>
           </label>
-          <label>Max slasks
+          <label>Max antal slask
             <select data-setting="maxSlasks">
               <option value="1">1</option><option value="2">2</option>
               <option value="3" selected>3</option><option value="5">5</option>
             </select>
           </label>
-          <label class="toggle"><input type="checkbox" data-setting="chatEnabled" checked /> <span>Chat</span></label>
+          <label class="toggle"><input type="checkbox" data-setting="chatEnabled" checked /> <span>Chatt</span></label>
           <label class="toggle"><input type="checkbox" data-setting="animations" checked /> <span>Animationer</span></label>
           <label class="toggle"><input type="checkbox" data-setting="sound" checked /> <span>Ljud</span></label>
         </div>
-        <p class="hint">Starting balance är alltid 0 kr.</p>
+        <p class="hint">Alla börjar på 0 kr.</p>
       </div>
     </div>
   </div>
@@ -140,14 +140,14 @@
   <div class="game-layout">
     <header class="topbar">
       <div class="topbar-left">
-        <span class="chip chip-round" id="chip-round">RUNDA 1</span>
+        <span class="chip chip-round" id="chip-round">Runda 1</span>
         <span class="chip chip-mult" id="chip-mult">×10</span>
-        <span class="chip" id="chip-code"></span>
+        <span class="chip" id="chip-code" title="Rumskod"></span>
       </div>
       <div class="topbar-right">
-        <button class="btn btn-sm btn-report-top" id="btn-report-top" title="Rapportera ett regelfel – även mitt i rundan">RAPPORTERA FEL</button>
-        <button class="btn btn-sm" id="btn-history">HISTORY</button>
-        <button class="btn btn-sm" id="btn-chat-toggle">CHAT</button>
+        <button class="btn btn-sm btn-report-top" id="btn-report-top" title="Rapportera ett regelfel – även mitt i rundan">Rapportera fel</button>
+        <button class="btn btn-sm" id="btn-history">Historik</button>
+        <button class="btn btn-sm" id="btn-chat-toggle">Chatt</button>
       </div>
     </header>
 
@@ -155,11 +155,11 @@
       <div class="felt">
         <div class="table-center">
           <div class="pause-banner" id="pause-banner" role="status" aria-live="polite" hidden></div>
-          <div class="phase-banner" id="phase-banner">DISCARD PHASE</div>
+          <div class="phase-banner" id="phase-banner">Slängning</div>
           <div class="phase-sub" id="phase-sub"></div>
           <div class="piles" id="piles" hidden>
-            <div class="pile" id="pile-deck"><div class="card back pile-card"></div><div class="pile-label">LEK <span id="deck-count"></span></div></div>
-            <div class="pile" id="pile-discard"><div class="card back pile-card"></div><div class="pile-label">SLÄNGT</div></div>
+            <div class="pile" id="pile-deck"><div class="card back pile-card"></div><div class="pile-label">Lek <span id="deck-count"></span></div></div>
+            <div class="pile" id="pile-discard"><div class="card back pile-card"></div><div class="pile-label">Slängt</div></div>
           </div>
           <div class="trick-area" id="trick-area"></div>
           <div class="table-foot" id="table-foot"></div>
@@ -182,16 +182,16 @@
   </div>
 
   <aside class="side-panel" id="chat-panel">
-    <div class="side-head"><h3>CHAT</h3><button class="btn btn-icon" data-close="chat-panel">✕</button></div>
+    <div class="side-head"><h3>Chatt</h3><button class="btn btn-icon" data-close="chat-panel" aria-label="Stäng chatten">✕</button></div>
     <div class="chat-log" id="chat-log"></div>
     <form class="chat-form" id="chat-form">
-      <input id="chat-input" maxlength="300" placeholder="Skriv…" autocomplete="off" />
-      <button class="btn btn-sm btn-primary">SKICKA</button>
+      <input id="chat-input" maxlength="300" placeholder="Skriv…" autocomplete="off" aria-label="Meddelande" />
+      <button class="btn btn-sm btn-primary">Skicka</button>
     </form>
   </aside>
 
   <aside class="side-panel" id="history-panel">
-    <div class="side-head"><h3>GAME HISTORY</h3><button class="btn btn-icon" data-close="history-panel">✕</button></div>
+    <div class="side-head"><h3>Historik</h3><button class="btn btn-icon" data-close="history-panel" aria-label="Stäng historiken">✕</button></div>
     <div class="history" id="history"></div>
   </aside>
 
@@ -200,37 +200,37 @@
       <div class="slask-title">SLASK</div>
       <div class="slask-text" id="slask-text"></div>
       <div class="slask-timer"><div class="slask-bar" id="slask-bar"></div></div>
-      <button class="btn btn-primary btn-lg" id="btn-call-slask">CALL SLASK</button>
+      <button class="btn btn-primary btn-lg" id="btn-call-slask">Syna slask</button>
     </div>
   </div>
 
   <div class="result-overlay" id="result-overlay">
     <div class="result-box">
-      <h2 id="result-title">ROUND COMPLETE</h2>
+      <h2 id="result-title">Rundan är slut</h2>
       <div class="result-meta" id="result-meta"></div>
       <div class="result-rows" id="result-rows"></div>
       <div class="result-extra" id="result-extra"></div>
       <div class="result-actions">
-        <button class="btn btn-primary btn-lg" id="btn-play-again">PLAY AGAIN</button>
-        <button class="btn btn-lg" id="btn-to-lobby">RETURN TO LOBBY</button>
+        <button class="btn btn-primary btn-lg" id="btn-play-again">Ny runda</button>
+        <button class="btn btn-lg" id="btn-to-lobby">Till lobbyn</button>
       </div>
       <p class="hint" id="result-hint"></p>
-      <button class="btn btn-ghost btn-sm btn-report" id="btn-report">RAPPORTERA REGELFEL</button>
+      <button class="btn btn-ghost btn-sm btn-report" id="btn-report">Rapportera regelfel</button>
     </div>
   </div>
 </section>
 
 <div class="result-overlay report-overlay" id="report-overlay" role="dialog" aria-modal="true" aria-labelledby="report-title">
   <div class="result-box report-box">
-    <h2 id="report-title">RAPPORTERA REGELFEL</h2>
+    <h2 id="report-title">Rapportera regelfel</h2>
     <p class="hint">Beskriv vad som blev fel i runda <span id="report-round"></span>. Rapporten sparas
       direkt i projektet med rundans alla drag – säg sedan till Claude att kolla rapporterna.</p>
     <label>Vad blev fel?
       <textarea id="report-text" rows="4" maxlength="2000" placeholder="T.ex. Leo fick lägga en 9:a på en ensam 7:a"></textarea>
     </label>
     <div class="result-actions">
-      <button class="btn btn-primary btn-lg" id="btn-report-save">SPARA RAPPORT</button>
-      <button class="btn btn-lg" id="btn-report-cancel">AVBRYT</button>
+      <button class="btn btn-primary btn-lg" id="btn-report-save">Spara rapport</button>
+      <button class="btn btn-lg" id="btn-report-cancel">Avbryt</button>
     </div>
   </div>
 </div>

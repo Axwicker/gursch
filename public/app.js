@@ -86,11 +86,11 @@ function beep(freq = 440, dur = 0.08, type = 'sine', gain = 0.05) {
 $('btn-create').onclick = () => createRoom(0);
 $('btn-practice').onclick = () => createRoom(3, $('practice-level').value);   // eget rum med tre bottar
 
-const LEVEL_TEXT = { easy: 'LÄTT', medium: 'MEDEL', hard: 'SVÅR' };
+const LEVEL_TEXT = { easy: 'Lätt', medium: 'Medel', hard: 'Svår' };
 
 function createRoom(bots, botLevel = 'medium') {
   const nickname = $('create-nick').value.trim();
-  if (!nickname) return ($('home-error').textContent = 'Skriv ett nickname');
+  if (!nickname) return ($('home-error').textContent = 'Skriv ditt namn');
   store.nickname = nickname;
   socket.emit('createRoom', { nickname, settings: {}, bots, botLevel }, (res) => {
     if (res.error) return ($('home-error').textContent = res.error);
@@ -104,7 +104,7 @@ $('btn-join').onclick = () => joinRoom($('join-code').value.trim().toUpperCase()
 
 function joinRoom(roomCode, nickname) {
   if (!roomCode) return ($('home-error').textContent = 'Skriv en rumskod');
-  if (!nickname) return ($('home-error').textContent = 'Skriv ett nickname');
+  if (!nickname) return ($('home-error').textContent = 'Skriv ditt namn');
   store.nickname = nickname;
   socket.emit('joinRoom', { code: roomCode, nickname, playerId: store.playerId || undefined, token: store.token || undefined }, (res) => {
     if (res.error) return ($('home-error').textContent = res.error);
@@ -167,10 +167,10 @@ function renderLobby() {
     // Innehållet byggs om (taggar, saldo), men raden ligger kvar - ingen ny in-animation.
     li.replaceChildren();
     li.append(el('span', 'nick', p.nickname));
-    if (p.isHost) li.append(el('span', 'tag', 'HOST'));
-    if (p.isBot && S.hostId !== me) li.append(el('span', 'tag tag-bot', `BOT · ${LEVEL_TEXT[p.botLevel] ?? ''}`));
+    if (p.isHost) li.append(el('span', 'tag', 'Host'));
+    if (p.isBot && S.hostId !== me) li.append(el('span', 'tag tag-bot', `Bot · ${LEVEL_TEXT[p.botLevel] ?? ''}`));
     if (p.isBot && S.hostId === me) {
-      li.append(el('span', 'tag tag-bot', 'BOT'));
+      li.append(el('span', 'tag tag-bot', 'Bot'));
       const sel = el('select', 'bot-level');
       sel.setAttribute('aria-label', `Nivå för ${p.nickname}`);
       for (const [value, text] of [['easy', 'Lätt'], ['medium', 'Medel'], ['hard', 'Svår']]) {
@@ -180,8 +180,8 @@ function renderLobby() {
       sel.onchange = () => emit('setBotLevel', { botId: p.id, level: sel.value });
       li.append(sel);
     }
-    if (p.id === me) li.append(el('span', 'tag tag-you', 'DU'));
-    if (!p.connected) li.append(el('span', 'tag', 'OFFLINE'));
+    if (p.id === me) li.append(el('span', 'tag tag-you', 'Du'));
+    if (!p.connected) li.append(el('span', 'tag', 'Offline'));
     const bal = el('span', `bal ${p.balance > 0 ? 'pos' : p.balance < 0 ? 'neg' : 'zero'}`, kr(p.balance));
     bal.style.marginLeft = 'auto';
     li.append(bal);
@@ -303,17 +303,17 @@ function renderSeats() {
     if (p.isBot) nick.title = `Bot · ${LEVEL_TEXT[p.botLevel] ?? ''}`;
     badge.append(nick);
     badge.append(el('div', `bal ${p.balance > 0 ? 'pos' : p.balance < 0 ? 'neg' : 'zero'}`, kr(p.balance)));
-    const status = p.status || (!p.connected ? 'RECONNECTING…' : (p.decided ? 'READY' : ''));
+    const status = p.status || (!p.connected ? 'Återansluter…' : (p.decided ? 'Klar' : ''));
     const neg = S.negotiation;
     if (neg) {
       // Allas förslag syns i realtid
       const proposal = neg.proposals[p.id];
       const chip = neg.participants.includes(p.id)
-        ? el('div', `proposal-chip${proposal ? '' : ' empty'}${neg.agreedCount ? ' agreed' : ''}`, proposal ? `${proposal} KORT` : '…')
-        : el('div', 'proposal-chip skipped', 'STÅR ÖVER');
+        ? el('div', `proposal-chip${proposal ? '' : ' empty'}${neg.agreedCount ? ' agreed' : ''}`, proposal ? `${proposal} kort` : '…')
+        : el('div', 'proposal-chip skipped', 'Står över');
       badge.append(chip);
     } else if (S.discardSelect?.participants.includes(p.id) && !S.discardSelect.done.includes(p.id)) {
-      badge.append(el('div', 'status', 'VÄLJER KORT…'));
+      badge.append(el('div', 'status', 'Väljer kort…'));
     } else {
       badge.append(el('div', 'status', status));
     }
@@ -329,9 +329,9 @@ function renderSeats() {
 
     const marks = el('div', 'seat-marks');
     if (p.isDealer) marks.append(el('span', 'mark dealer', 'D'));
-    if (S.flopWinnerId === p.id) marks.append(el('span', 'mark flop', 'FLOP'));
-    if (p.inMini) marks.append(el('span', 'mark mini', 'MINI'));
-    if (p.slasks > 0) marks.append(el('span', 'mark', `SLASK ${p.slasks}/${p.maxSlasks}`));
+    if (S.flopWinnerId === p.id) marks.append(el('span', 'mark flop', 'Flop'));
+    if (p.inMini) marks.append(el('span', 'mark mini', 'Mini'));
+    if (p.slasks > 0) marks.append(el('span', 'mark', `Slask ${p.slasks}/${p.maxSlasks}`));
     if (marks.children.length) seat.append(marks);
 
     if (p.id !== me && p.handCount > 0) {
@@ -347,16 +347,16 @@ function renderSeats() {
 }
 
 const PHASE_TEXT = {
-  DEALING: 'DEALING',
-  FLOP: 'FLOP',
-  INITIAL_DISCARD: 'DISCARD PHASE',
-  NEGOTIATION: 'FÖRHANDLING',
-  DISCARD_SELECT: 'SLÄNG KORT',
-  FINAL_SLASK: 'SISTA SLASKCHANSEN',
-  TRICK: 'STICKSPEL',
-  MINI_GURSCH: 'MINI-GURSCH',
-  ROUND_RESULT: 'ROUND COMPLETE',
-  LOBBY: 'LOBBY',
+  DEALING: 'Utdelning',
+  FLOP: 'Flop',
+  INITIAL_DISCARD: 'Slängning',
+  NEGOTIATION: 'Förhandling',
+  DISCARD_SELECT: 'Släng kort',
+  FINAL_SLASK: 'Sista slaskchansen',
+  TRICK: 'Stickspel',
+  MINI_GURSCH: 'Mini-gursch',
+  ROUND_RESULT: 'Rundan är slut',
+  LOBBY: 'Lobby',
 };
 
 function renderCenter() {
@@ -370,25 +370,25 @@ function renderCenter() {
     if (d.requiredCount === null) {
       sub = `${nickOf(d.proposerId ?? turn)} bestämmer antalet kort`;
     } else {
-      sub = `${nickOf(d.proposerId)} chooses: ${d.requiredCount} ${d.requiredCount === 1 ? 'kort' : 'kort'}`;
+      sub = `${nickOf(d.proposerId)} valde ${d.requiredCount} kort`;
     }
-    if (turn) sub += ` · ${yourTurn ? 'DIN TUR' : `väntar på ${nickOf(turn)}`}`;
+    if (turn) sub += ` · ${yourTurn ? 'din tur' : `väntar på ${nickOf(turn)}`}`;
   } else if (S.negotiation) {
     const n = S.negotiation;
     sub = n.agreedCount
       ? `Alla överens: ${n.agreedCount} kort – ändra dig nu om du inte vill`
-      : 'Kom överens om antal kort (1–4) · STAY = spelet börjar';
+      : 'Kom överens om antal kort (1–4) · stay = spelet börjar';
   } else if (S.discardSelect) {
     const ds = S.discardSelect;
     const waiting = ds.participants.filter((id) => !ds.done.includes(id));
     sub = `Alla slänger ${ds.count} kort · väntar på ${waiting.map((id) => (id === me ? 'dig' : nickOf(id))).join(', ')}`;
   } else if (S.phase === 'FINAL_SLASK') {
-    sub = yourTurn ? 'SLASK eller PASS' : `Väntar på ${nickOf(turn)}`;
+    sub = yourTurn ? 'Slask eller pass' : `Väntar på ${nickOf(turn)}`;
   } else if (S.phase === 'TRICK' || S.phase === 'MINI_GURSCH') {
     const t = S.trick;
     if (t) {
       const lead = t.count === null ? 'leder sticket' : `spelar ${t.count} kort`;
-      sub = turn ? `${yourTurn ? 'DU' : nickOf(turn)} ${lead}` : '';
+      sub = turn ? `${yourTurn ? 'Du' : nickOf(turn)} ${lead}` : '';
       if (t.lastWinnerId && t.plays.length === 0) sub += ` · ${nickOf(t.lastWinnerId)} vann förra sticket`;
     }
   } else if (S.phase === 'ROUND_RESULT') {
@@ -403,7 +403,7 @@ function renderCenter() {
   if (S.trick) foot.push(`Stick ${S.trick.trickNumber}`);
   $('table-foot').textContent = foot.join('  ·  ');
 
-  $('chip-round').textContent = `RUNDA ${S.roundNumber}`;
+  $('chip-round').textContent = `Runda ${S.roundNumber}`;
   $('chip-mult').textContent = S.multiplier ? `×${S.multiplier}` : '×?';
   $('chip-code').textContent = code;
 
@@ -412,7 +412,7 @@ function renderCenter() {
 }
 
 const trickNodes = new Map();   // "runda:mini:stick:spelare" -> element
-const trickCaption = el('div', 'trick-caption', 'FÖRRA STICKET');
+const trickCaption = el('div', 'trick-caption', 'Förra sticket');
 const centerTimer = el('div', 'turn-timer center-timer');
 centerTimer.append(el('div', 'turn-timer-bar'));
 
@@ -445,7 +445,7 @@ function renderTrickArea() {
     if (isNew) enter(node, { opacity: 0, transform: 'translateY(26px) scale(.85)' }, { duration: 300 });
     const leads = play.playerId === leaderId;
     node.classList.toggle('winner', leads);
-    node.querySelector('.who').textContent = nickOf(play.playerId) + (leads ? (showingLast ? ' · VANN' : ' · LEDER') : '');
+    node.querySelector('.who').textContent = nickOf(play.playerId) + (leads ? (showingLast ? ' · vann' : ' · leder') : '');
     return node;
   });
   if (showingLast) nodes.push(trickCaption);
@@ -576,13 +576,13 @@ function renderHand() {
   let count = '';
   if (discard) {
     hint = discard.free ? 'Välj 1–4 kort att slänga' : `Välj ${discard.count} kort att slänga`;
-    count = `${selected.size} / ${discard.free ? '1–4' : discard.count} SELECTED`;
+    count = `${selected.size} av ${discard.free ? '1–4' : discard.count} valda`;
   } else if (play) {
     hint = describeSelection(play)
       || (play.lead ? 'Du leder sticket – välj en kombination' : followRuleHint(play));
-    count = `${selected.size} / ${play.lead ? '1–5' : play.count} SELECTED`;
+    count = `${selected.size} av ${play.lead ? '1–5' : play.count} valda`;
   } else if (P.actions.some((a) => a.type === 'propose')) {
-    hint = 'Föreslå hur många kort alla ska slänga – eller STAY för att börja spela';
+    hint = 'Föreslå hur många kort alla ska slänga – eller stay för att börja spela';
   } else if (S.negotiation) {
     hint = 'Du står över den här förhandlingen';
   } else if (S.discardSelect) {
@@ -614,20 +614,20 @@ function renderActions() {
     }
     let btn;
     if (a.type === 'discard') {
-      btn = el('button', 'btn btn-primary', a.free ? 'DISCARD' : `DISCARD ${a.count}`);
+      btn = el('button', 'btn btn-primary', a.free ? 'Släng' : `Släng ${a.count}`);
       btn.disabled = !selectionValid(a);
       btn.onclick = () => { emit('action', { type: 'discard', cardIds: [...selected] }); selected.clear(); };
     } else if (a.type === 'stay') {
-      btn = el('button', 'btn', 'STAY');
+      btn = el('button', 'btn', 'Stay');
       btn.onclick = () => { selected.clear(); emit('action', { type: 'stay' }); };
     } else if (a.type === 'slask') {
-      btn = el('button', 'btn btn-danger', 'SLASK');
+      btn = el('button', 'btn btn-danger', 'Slask');
       btn.onclick = () => { selected.clear(); emit('action', { type: 'slask' }); };
     } else if (a.type === 'pass') {
-      btn = el('button', 'btn', 'PASS');
+      btn = el('button', 'btn', 'Pass');
       btn.onclick = () => emit('action', { type: 'pass' });
     } else if (a.type === 'play') {
-      btn = el('button', 'btn btn-primary', 'PLAY');
+      btn = el('button', 'btn btn-primary', 'Spela');
       btn.disabled = !selectionValid(a);
       btn.onclick = () => { emit('action', { type: 'play', cardIds: [...selected] }); selected.clear(); };
     }
@@ -654,7 +654,7 @@ function renderSlask() {
   const btn = $('btn-call-slask');
   btn.style.display = isMine || ps.callerId ? 'none' : '';
   btn.disabled = false;
-  btn.textContent = ps.callerId ? 'SLASK ALREADY CALLED' : 'CALL SLASK';
+  btn.textContent = ps.callerId ? 'Redan synad' : 'Syna slask';
 
   clearInterval(slaskInterval);
   const total = (S.settings.slaskCallSeconds || 8) * 1000;
@@ -678,16 +678,16 @@ function currentCountdown() {
   const n = S.negotiation;
   if (n) {
     return n.confirmAt
-      ? { deadline: n.confirmAt, totalMs: 2000, mine: false, label: `SLÄNGER ${n.agreedCount} KORT OM` }
-      : { deadline: n.deadline, totalMs: n.seconds * 1000, mine: n.participants.includes(me), label: 'FÖRHANDLING' };
+      ? { deadline: n.confirmAt, totalMs: 2000, mine: false, label: `Slänger ${n.agreedCount} kort om` }
+      : { deadline: n.deadline, totalMs: n.seconds * 1000, mine: n.participants.includes(me), label: 'Förhandling' };
   }
   const ds = S.discardSelect;
   if (ds?.deadline) {
-    return { deadline: ds.deadline, totalMs: S.turnSeconds * 1000, mine: ds.participants.includes(me) && !ds.done.includes(me), label: 'VÄLJ KORT' };
+    return { deadline: ds.deadline, totalMs: S.turnSeconds * 1000, mine: ds.participants.includes(me) && !ds.done.includes(me), label: 'Välj kort' };
   }
   if (!S.turnDeadline) return null;
   const mine = S.turnPlayerId === me;
-  return { deadline: S.turnDeadline, totalMs: S.turnSeconds * 1000, mine, label: mine ? 'DIN TUR' : nickOf(S.turnPlayerId) };
+  return { deadline: S.turnDeadline, totalMs: S.turnSeconds * 1000, mine, label: mine ? 'Din tur' : nickOf(S.turnPlayerId) };
 }
 
 function countdownFraction() {
@@ -722,7 +722,7 @@ function tickTurnTimer() {
 }
 setInterval(tickTurnTimer, 200);
 
-const TIMEOUT_TEXT = { stay: 'STAY', pass: 'PASS', play: 'lägsta kortet spelades', discard: 'högsta korten slängdes' };
+const TIMEOUT_TEXT = { stay: 'stay', pass: 'pass', play: 'lägsta kortet spelades', discard: 'högsta korten slängdes' };
 
 // ------------------------------------------------------------------ chat + history
 
@@ -771,7 +771,7 @@ function renderHistory() {
   for (const h of [...S.history].reverse()) {
     if (h.round !== currentRound) {
       currentRound = h.round;
-      box.append(el('div', 'hist-round', `RUNDA ${h.round}`));
+      box.append(el('div', 'hist-round', `Runda ${h.round}`));
     }
     const row = el('div', 'hist-row');
     row.append(el('div', '', `${h.nickname} · ${h.event}`));
@@ -844,8 +844,8 @@ function renderResult() {
   if (S.phase !== 'ROUND_RESULT' || !S.result) { overlay.classList.remove('open'); return; }
   const r = S.result;
   overlay.classList.add('open');
-  $('result-title').textContent = 'ROUND COMPLETE';
-  $('result-meta').textContent = `RUNDA ${r.round} · MULTIPLIER ×${r.multiplier}${r.miniLevel ? ` · MINI-GURSCH NIVÅ ${r.miniLevel}` : ''}`;
+  $('result-title').textContent = 'Rundan är slut';
+  $('result-meta').textContent = `Runda ${r.round} · multiplier ×${r.multiplier}${r.miniLevel ? ` · mini-gursch nivå ${r.miniLevel}` : ''}`;
 
   // Resultatet ändras inte under rundan - bygg raderna en gång, inte vid varje uppdatering.
   const resultKey = `${code}:${r.round}`;
@@ -871,15 +871,15 @@ function buildResultRows(r) {
     const chg = el('div', 'chg', kr(p.change));
     chg.style.color = p.change >= 0 ? 'var(--green)' : 'var(--red)';
     row.append(chg);
-    row.append(el('div', 'bal', `Balance: ${kr(p.balance)}${p.finalCards.length ? ` · gick ut på ${p.finalCards.map((c) => RANK_LABELS[c.rank]).join(',')}` : ''}`));
+    row.append(el('div', 'bal', `Saldo: ${kr(p.balance)}${p.finalCards.length ? ` · gick ut på ${p.finalCards.map((c) => RANK_LABELS[c.rank]).join(',')}` : ''}`));
     rows.append(row);
   });
 
   const extra = $('result-extra');
   extra.innerHTML = '';
-  if (r.quintExitPlayerId) extra.append(el('div', '', `QUINT/FIVE-OF-A-KIND: ${nickOf(r.quintExitPlayerId)} gick ut direkt och kunde inte bli loser.`));
+  if (r.quintExitPlayerId) extra.append(el('div', '', `Quint/five of a kind: ${nickOf(r.quintExitPlayerId)} gick ut direkt och kunde inte bli loser.`));
   for (const s of r.slaskLog) {
-    extra.append(el('div', '', `SLASK: ${nickOf(s.slaskerId)} (${s.hand.join(',')}) synad av ${nickOf(s.callerId)} · ${s.faceCards} face cards · ${s.amount} kr`));
+    extra.append(el('div', '', `Slask: ${nickOf(s.slaskerId)} (${s.hand.join(',')}) synad av ${nickOf(s.callerId)} · ${s.faceCards} face cards · ${s.amount} kr`));
   }
   for (const m of r.miniHistory) {
     extra.append(el('div', '', `Mini-gursch nivå ${m.level}: ${m.participants.map((id) => `${nickOf(id)} ${m.values[id]}`).join(', ')} · ×${m.multiplier}`));
@@ -1194,7 +1194,7 @@ function handleEvents(events) {
         if (flightsOn()) for (const d of e.players) if (d.playerId !== me) animateOpponentDraw(d.playerId, d.count);
         break;
       case 'stay':
-        toast(e.endsNegotiation ? `${nickOf(e.playerId)} – STAY · spelet börjar` : `${nickOf(e.playerId)} – STAY`);
+        toast(e.endsNegotiation ? `${nickOf(e.playerId)} – stay · spelet börjar` : `${nickOf(e.playerId)} – stay`);
         break;
       case 'paused': if (e.playerId !== me) toast(`${nickOf(e.playerId)} pausade spelet för att skriva en felrapport`); break;
       case 'resumed':
