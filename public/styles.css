@@ -463,6 +463,31 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
   animation: bannerPop 1.9s cubic-bezier(.2,.8,.3,1) forwards;
 }
 @keyframes bannerPop { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.6); } 15% { opacity: 1; transform: translate(-50%,-50%) scale(1.06); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,-62%) scale(1); } }
+/* Synad slask: den gamla handen mitt på bordet, face cards markerade */
+.fx-reveal {
+  position: absolute; left: 50%; top: 46%; transform: translate(-50%,-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 16px 20px; border-radius: 18px; max-width: 92%;
+  background: rgba(8,16,12,.92); border: 1px solid rgba(255,255,255,.18); box-shadow: var(--shadow);
+}
+.reveal-title { font-size: var(--text-subhead); font-weight: 600; text-align: center; }
+.reveal-cards { display: flex; gap: 6px; }
+.reveal-card { width: 44px; height: 62px; }
+.reveal-card .rank { font-size: 20px; }
+.reveal-card.face { box-shadow: 0 0 0 3px var(--gold), 0 4px 12px rgba(0,0,0,.4); }
+.reveal-verdict { font-size: var(--text-subhead); font-weight: 700; color: var(--gold); text-align: center; text-wrap: balance; }
+/* Multipliern steg (mini-gursch): chipen lyser i guld medan talet räknas upp */
+.chip-round { transition: color .4s ease, border-color .4s ease, background-color .4s ease; }
+.chip-round.bump { color: var(--gold); border-color: var(--gold-dim); background: rgba(232,200,119,.12); }
+/* Rundans slut: losern markeras på bordet innan resultatrutan kommer */
+.seat.loser .seat-badge { border-color: var(--red); box-shadow: 0 0 0 2px rgba(226,86,74,.3), var(--shadow); }
+/* En bot funderar: tre prickar som fylls på (ingen rörelse, bara fler prickar) */
+.seat .status.thinking { color: var(--on-felt); }
+.seat .status.thinking::after {
+  content: "..."; display: inline-block; width: 0; overflow: hidden; vertical-align: bottom;
+  animation: thinkDots 1.2s steps(4, jump-none) infinite;
+}
+@keyframes thinkDots { to { width: 1.1em; } }
 body.no-anim * { animation: none !important; transition: none !important; }
 
 /* Överst (som iOS-notiser) - täcker aldrig handen eller knapparna. */
@@ -638,6 +663,7 @@ textarea { resize: vertical; line-height: 1.4; }
   .fx-money { transform: translate(-50%, -24px); animation-name: fadeInOut; }
   .fx-banner { animation-name: fadeInOut; }
   .turn-clock.urgent { animation: none; }
+  .seat .status.thinking::after { animation: none; width: auto; }
   .toast, .toast.show { transform: translate(-50%, 0); }
   .slask-overlay .slask-box { animation: fadeIn .2s ease-out; }
   .side-panel { transform: none; opacity: 0; transition: opacity .2s ease, visibility 0s linear .2s; }

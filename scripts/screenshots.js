@@ -116,8 +116,10 @@ async function playRound(page, shot) {
 
     if (st.pendingSlask) {
       await once('10-slask', 400);
+      // Avslöjandet när slasken synas (om någon synar)
+      await page.waitForSelector('.fx-reveal', { timeout: 9000 }).then(() => once('10b-slask-avslojad', 700), () => {});
     } else if (st.phase === 'ROUND_RESULT') {
-      await once('13-resultat', 900);
+      await once('13-resultat', 1900);   // 0,9 s paus på bordet + rutan och uppräkningen
       await page.locator('#btn-leave-game').click();
       await once('16-lamna', 300);
       await page.locator('#confirm-cancel').click();

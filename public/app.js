@@ -182,6 +182,11 @@ function beep(freq = 440, dur = 0.08, type = 'sine', gain = 0.05) {
   } catch { /* ljud är valfritt */ }
 }
 
+/** Några toner efter varandra (stora ögonblick). Mjuka vågformer - inga fyrkant- eller sågtandspip. */
+function chime(freqs, { step = 0.09, dur = 0.16, gain = 0.035 } = {}) {
+  freqs.forEach((f, i) => setTimeout(() => beep(f, dur, 'triangle', gain), i * step * 1000));
+}
+
 // ------------------------------------------------------------------ home
 
 const selectedLevel = () => document.querySelector('input[name="practice-level"]:checked')?.value ?? 'medium';
@@ -475,6 +480,7 @@ function renderSeats() {
       seat.style.top = `${top}%`;
     }
     if (S.turnPlayerId === p.id) seat.classList.add('turn');
+    if (S.phase === 'ROUND_RESULT' && S.result?.loserId === p.id) seat.classList.add('loser');
     if (!p.connected) seat.classList.add('disconnected');
 
     const badge = el('div', 'seat-badge');
@@ -501,6 +507,8 @@ function renderSeats() {
       badge.append(chip);
     } else if (note) {
       badge.append(el('div', 'status note', note));
+    } else if (p.isBot && S.turnPlayerId === p.id && !S.pendingSlask) {
+      badge.append(el('div', 'status thinking', 'Tänker'));   // prickarna i CSS
     } else if (S.discardSelect?.participants.includes(p.id) && !S.discardSelect.done.includes(p.id)) {
       badge.append(el('div', 'status', 'Väljer kort…'));
     } else {
@@ -594,11 +602,42 @@ function renderCenter() {
   if (S.trick) foot.push(`Stick ${S.trick.trickNumber}`);
   $('table-foot').textContent = foot.join('  ·  ');
 
-  $('chip-round').textContent = `Runda ${S.roundNumber} · ×${S.multiplier || '?'}`;
+  renderMultiplier();
   $('chip-code').textContent = code;
 
   renderPiles();
   renderTrickArea();
+}
+
+let shownMult = null;      // { round, value } som toppraden visar just nu
+let multFrame = null;
+
+/**
+ * Runda och multiplier i toppraden. Stiger multipliern inom samma runda (mini-gursch) räknas
+ * talet upp på 0,6 s och chipen lyser i guld en stund - utan studs, bara talet och färgen.
+ */
+function renderMultiplier() {
+  const chip = $('chip-round');
+  const value = S.mini?.multiplier ?? S.multiplier;
+  const text = (v) => `Runda ${S.roundNumber} · ×${v || '?'}`;
+  const from = shownMult?.round === S.roundNumber ? shownMult.value : null;
+  if (shownMult?.round === S.roundNumber && shownMult.value === value) return;
+  shownMult = { round: S.roundNumber, value };
+  cancelAnimationFrame(multFrame);
+  if (!from || !value || value <= from || !animationsOn() || reducedMotion.matches || document.hidden) {
+    chip.textContent = text(value);
+    return;
+  }
+  chip.classList.add('bump');
+  setTimeout(() => chip.classList.remove('bump'), 1600);
+  const start = performance.now();
+  const step = (now) => {
+    const t = Math.min(1, (now - start) / 600);
+    const eased = 1 - (1 - t) ** 3;
+    chip.textContent = text(Math.round(from + (value - from) * eased));
+    if (t < 1) multFrame = requestAnimationFrame(step);
+  };
+  multFrame = requestAnimationFrame(step);
 }
 
 const trickNodes = new Map();   // "runda:mini:stick:spelare" -> element
@@ -1013,7 +1052,7 @@ function tickTurnTimer() {
   // Varningspip varje sekund de sista fem sekunderna när det är din tur.
   if (mine && secs <= 5 && secs > 0 && secs !== lastWarnSecond) {
     lastWarnSecond = secs;
-    beep(880, 0.06, 'square', 0.03);
+    beep(880, 0.06, 'sine', 0.025);
   }
 }
 setInterval(tickTurnTimer, 200);
@@ -1140,13 +1179,38 @@ function renderPause() {
 }
 $('btn-to-lobby').onclick = () => emit('returnToLobby');
 
+let resultRevealAt = 0;
+let resultTimer = null;
+let statesSeen = 0;   // första state efter (åter)anslutning visar resultatet direkt
+
 function renderResult() {
   const overlay = $('result-overlay');
-  if (S.phase !== 'ROUND_RESULT' || !S.result) { overlay.classList.remove('open'); return; }
+  if (S.phase !== 'ROUND_RESULT' || !S.result) {
+    overlay.classList.remove('open');
+    clearTimeout(resultTimer);
+    resultRevealAt = 0;
+    return;
+  }
   const r = S.result;
+  // Rundans slut: bordet får 0,9 s - sista sticket, losern markerad och pengarna som flyttas -
+  // innan resultatrutan kommer. Ingenting väntar på animationen; det är bara rutan som dröjer.
+  if (!overlay.classList.contains('open')) {
+    if (!resultRevealAt) {
+      const pause = statesSeen > 0 && animationsOn() && !reducedMotion.matches && !document.hidden;
+      resultRevealAt = Date.now() + (pause ? 900 : 0);
+    }
+    const wait = resultRevealAt - Date.now();
+    if (wait > 0) {
+      clearTimeout(resultTimer);
+      resultTimer = setTimeout(() => { if (S) renderResult(); }, wait);
+      return;
+    }
+  }
   const opening = !overlay.classList.contains('open');
   overlay.classList.add('open');
-  $('result-title').textContent = 'Rundan är slut';
+  const mine = r.players.find((p) => p.id === me);
+  $('result-title').textContent = r.loserId === me ? 'Du förlorade rundan'
+    : mine ? `Du vann ${kr(mine.change)}` : 'Rundan är slut';
   $('result-meta').textContent = `Runda ${r.round} · multiplier ×${r.multiplier}${r.miniLevel ? ` · mini-gursch nivå ${r.miniLevel}` : ''}`;
 
   // Resultatet ändras inte under rundan - bygg raderna en gång, inte vid varje uppdatering.
@@ -1162,6 +1226,21 @@ function renderResult() {
 }
 
 let renderedResultKey = null;
+
+/** Beloppet räknas upp från 0 kr (0,5 s, efter raden tonats in). Utan animationer: direkt. */
+function countUp(node, amount, delay) {
+  if (!animationsOn() || reducedMotion.matches || document.hidden || !amount) return;
+  node.textContent = kr(0);
+  setTimeout(() => {
+    const start = performance.now();
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / 500);
+      node.textContent = kr(Math.round(amount * (1 - (1 - t) ** 3)));
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, delay);
+}
 
 /**
  * Varför just den spelaren förlorade och vad det kostar. Samma tal som servern räknade med
@@ -1192,6 +1271,7 @@ function buildResultRows(r) {
     row.append(el('div', 'val', p.finalValue === null ? '' : `slutvärde ${p.finalValue}`));
     const chg = el('div', 'chg', kr(p.change));
     chg.style.color = p.change >= 0 ? 'var(--green)' : 'var(--red)';
+    countUp(chg, p.change, 120 + i * 70);
     row.append(chg);
     row.append(el('div', 'bal', `Saldo: ${kr(p.balance)}${p.finalCards.length ? ` · gick ut på ${p.finalCards.map((c) => RANK_LABELS[c.rank]).join(',')}` : ''}`));
     rows.append(row);
@@ -1499,6 +1579,34 @@ function flyMoney(playerId, amount) {
   setTimeout(() => n.remove(), 1600);
 }
 
+/**
+ * Synad slask: den gamla handen vänds upp kort för kort mitt på bordet, face cards (J, Q, K, A)
+ * markeras och utfallet står under. Ren dekoration ovanpå spelet (ca 2,6 s) - texten finns
+ * också på bordet och i historiken. Händelsen har bara valörerna, därför inga färger.
+ */
+function revealSlask(e, title) {
+  if (!animationsOn() || document.hidden) return;
+  const calm = reducedMotion.matches;
+  const box = el('div', 'fx-reveal');
+  box.setAttribute('aria-hidden', 'true');
+  const row = el('div', 'reveal-cards');
+  e.hand.forEach((label, i) => {
+    const c = el('div', `card reveal-card${['J', 'Q', 'K', 'A'].includes(label) ? ' face' : ''}`);
+    c.append(el('div', 'rank', label));
+    row.append(c);
+    if (!calm) c.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { delay: 120 + i * 70, duration: FLIP_MS, easing: EASE_OUT, fill: 'backwards' });
+  });
+  const verdict = el('div', 'reveal-verdict', e.faceCards > 0
+    ? `${e.faceCards} face card${e.faceCards > 1 ? 's' : ''} · slaskaren betalar ${e.amount} kr`
+    : `Inga face cards · synaren betalar ${e.amount} kr`);
+  if (!calm) verdict.animate([{ opacity: 0 }, { opacity: 1 }], { delay: 120 + e.hand.length * 70 + FLIP_MS, duration: 200, fill: 'backwards' });
+  box.append(el('div', 'reveal-title', title), row, verdict);
+  $('fx').append(box);
+  chime(e.faceCards > 0 ? [440, 554] : [554, 440]);
+  box.animate([{ opacity: 0 }, { opacity: 1, offset: 0.06 }, { opacity: 1, offset: 0.9 }, { opacity: 0 }], { duration: 2600 })
+    .finished.then(() => box.remove(), () => box.remove());
+}
+
 function banner(text) {
   if (!animationsOn()) { toast(text); return; }
   const n = el('div', 'fx-banner', text);
@@ -1510,7 +1618,8 @@ function handleEvents(events) {
   for (const e of events) {
     switch (e.type) {
       case 'deal': beep(330, .06, 'triangle', .04); animateDeal(); break;
-      case 'flop': banner(`FLOP: ${nickOf(e.playerId)} ${e.label}`); break;
+      // Med flopmult bestämmer floppen multipliern - då hör den hemma i samma ögonblick.
+      case 'flop': banner(`FLOP: ${nickOf(e.playerId)} ${e.label}${S.settings.multiplierMode === 'flop' ? ` · ×${e.multiplier}` : ''}`); break;
       case 'draw':
         beep(420, .05, 'triangle', .035);
         if (flightsOn()) for (const d of e.players) if (d.playerId !== me) animateOpponentDraw(d.playerId, d.count);
@@ -1529,7 +1638,7 @@ function handleEvents(events) {
       case 'agreementPending': beep(620, .07, 'triangle', .04); break;
       case 'negotiationAgreed': banner(`ALLA ÖVERENS: ${e.count} KORT`); beep(740, .12, 'sine', .05); break;
       case 'negotiationFailed': banner('INGEN ENIGHET – SPELET BÖRJAR'); break;
-      case 'slask': banner('SLASK!'); beep(180, .2, 'sawtooth', .05); break;
+      case 'slask': banner('SLASK!'); chime([392, 294], { gain: 0.04 }); break;
       case 'slaskResolved': {
         if (flightsOn() && e.playerId !== me) animateOpponentDraw(e.playerId, 5);
         const mineSlask = e.playerId === me;
@@ -1543,10 +1652,11 @@ function handleEvents(events) {
         noteTable(text, 9000);
         noteSeat(e.playerId, e.callerId ? 'Synad' : 'Osynad');
         announce(text);
+        if (e.callerId) revealSlask(e, `${caller} synade ${slaskerObj}`);
         break;
       }
       case 'play':
-        beep(500, .05, 'square', .025);
+        beep(500, .05, 'triangle', .025);
         if (e.playerId !== me) announce(`${nickOf(e.playerId)} lade ${cardNames(e.cards)}`);
         break;
       case 'trickWon':   // syns i sticket ("· vann"), ingen toast över handen
@@ -1554,9 +1664,9 @@ function handleEvents(events) {
         beep(660, .09, 'sine', .04);
         break;
       case 'quint': banner(e.quintTwo ? 'QUINT TWO!' : 'FIVE OF A KIND!'); beep(880, .25, 'sine', .06); break;
-      case 'miniGursch': banner(`MINI-GURSCH ×${e.multiplier}`); break;
+      case 'miniGursch': banner(`MINI-GURSCH ×${e.multiplier}`); chime([523, 659, 784]); break;
       case 'money': flyMoney(e.playerId, e.amount); break;
-      case 'roundResult': beep(240, .3, 'sine', .05); break;
+      case 'roundResult': e.loserId === me ? chime([392, 330, 262], { step: 0.12 }) : chime([523, 659, 784, 1047]); break;
       case 'timeout':
         noteSeat(e.playerId, 'Tiden tog slut');
         noteTable(`${e.playerId === me ? 'Din' : `${nickOf(e.playerId)}s`} tid tog slut – ${TIMEOUT_TEXT[e.action] ?? e.action}`);
@@ -1611,6 +1721,7 @@ socket.on('state', ({ code: roomCode, you, state, private: priv, events, serverT
   if (events?.length && !firstState) handleEvents(events);
   else if (events?.length) handleEvents(events.filter((e) => e.type === 'money'));
   lastPhase = S.phase;
+  statesSeen += 1;
 });
 
 socket.on('connect', () => {
