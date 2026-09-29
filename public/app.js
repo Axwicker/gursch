@@ -588,6 +588,7 @@ function renderCenter() {
     if (t) {
       const lead = t.count === null ? 'leder sticket' : `spelar ${t.count} kort`;
       sub = turn ? `${yourTurn ? 'Du' : nickOf(turn)} ${lead}` : '';
+      if (turn && t.plays.length && isFinalTrick(t.plays)) sub += ' · sista sticket';
       if (t.lastWinnerId && t.plays.length === 0) sub += ` · ${nickOf(t.lastWinnerId)} vann förra sticket`;
     }
   } else if (S.phase === 'ROUND_RESULT') {
@@ -645,15 +646,30 @@ const trickCaption = el('div', 'trick-caption', 'Förra sticket');
 const centerTimer = el('div', 'turn-timer center-timer');
 centerTimer.append(el('div', 'turn-timer-bar'));
 
+/**
+ * [R26] Sista sticket: den som spelade ut lade alla sina kort, så alla går ut på det här
+ * sticket. Då vinner ingen sticket - korten är slutvärdet, och högst förlorar (R28).
+ */
+function isFinalTrick(plays) {
+  const leadId = plays[0]?.playerId;
+  return Boolean(leadId) && S.players.find((p) => p.id === leadId)?.handCount === 0;
+}
+
+let seenTrickNo = 0;   // numret på det senaste stick vi visade (för rundans slut, då sticket är borta)
+
 function renderTrickArea() {
   const area = $('trick-area');
   const t = S.trick;
   // Visa det pågående sticket, eller det senast avgjorda tills någon leder nästa.
-  const showingLast = t && t.plays.length === 0 && S.lastTrick;
+  // När rundan är slut visas sista sticket kvar under pausen före resultatet.
+  const roundOver = S.phase === 'ROUND_RESULT' && !t && S.lastTrick;
+  const showingLast = (t && t.plays.length === 0 && S.lastTrick) || roundOver;
   const plays = showingLast ? S.lastTrick.plays : (t?.plays ?? []);
   const leaderId = showingLast ? S.lastTrick.winnerId : t?.leadingPlayerId;
+  const final = isFinalTrick(plays);
   // Samma nyckel före och efter att sticket avgjorts, så att sista kortet inte animeras två gånger.
-  const trickNo = t ? (showingLast ? t.trickNumber - 1 : t.trickNumber) : 0;
+  if (t) seenTrickNo = t.trickNumber;
+  const trickNo = t ? (showingLast ? t.trickNumber - 1 : t.trickNumber) : seenTrickNo;
   const keyOf = (play) => `${S.roundNumber}:${S.mini?.level ?? 0}:${trickNo}:${play.playerId}`;
   const byKey = new Map(plays.map((play) => [keyOf(play), play]));
   area.classList.toggle('previous', Boolean(showingLast));
@@ -673,17 +689,29 @@ function renderTrickArea() {
       combo.setAttribute('aria-hidden', 'true');
       wrap.append(combo);
     }
+    wrap.append(el('div', 'combo final-value', `slutvärde ${calculateFinalValue(play.cards)}`));
     return wrap;
   });
+  // I sista sticket: högst slutvärde (hittills) markeras - det är den som förlorar, inte vinner.
+  const values = final ? plays.map((play) => calculateFinalValue(play.cards)) : [];
+  const highest = Math.max(...values);
+  const loserId = S.phase === 'ROUND_RESULT' ? S.result?.loserId : null;
+  area.classList.toggle('final', final);
   const nodes = entries.map(({ node, isNew }, i) => {
     const play = plays[i];
     if (isNew) enter(node, { opacity: 0, transform: 'translateY(26px) scale(.85)' }, { duration: 300 });
-    const leads = play.playerId === leaderId;
+    const leads = !final && play.playerId === leaderId;
+    const high = final && values[i] === highest;
     node.classList.toggle('winner', leads);
-    node.querySelector('.who').textContent = nickOf(play.playerId) + (leads ? (showingLast ? ' · vann' : ' · leder') : '');
+    node.classList.toggle('highest', high);
+    const tag = final
+      ? (loserId === play.playerId ? ' · förlorar' : high && !loserId ? ' · högst' : '')
+      : (leads ? (showingLast ? ' · vann' : ' · leder') : '');
+    node.querySelector('.who').textContent = nickOf(play.playerId) + tag;
     return node;
   });
-  if (showingLast) nodes.push(trickCaption);
+  trickCaption.textContent = final ? 'Sista sticket – högst slutvärde förlorar' : 'Förra sticket';
+  if (showingLast || (final && plays.length)) nodes.push(trickCaption);
   if (S.negotiation || S.discardSelect?.deadline) nodes.push(centerTimer);
   syncChildren(area, nodes);
 }
@@ -739,7 +767,8 @@ function describeSelection(play) {
     return `Inte tillåtet – ${rule[0].toLowerCase()}${rule.slice(1)}`;
   }
   const leading = S.trick?.plays.find((p) => p.playerId === S.trick.leadingPlayerId);
-  if (!play.lead && leading && cards.length === play.count && combo.type !== MIXED) {
+  const lastTrick = !play.lead && play.count === P.hand.length;   // du går ut på det här sticket
+  if (!play.lead && !lastTrick && leading && cards.length === play.count && combo.type !== MIXED) {
     // Vid exakt lika vinner den som lägger sist - alltså du.
     parts.push(compareCombinations(cards, leading.cards) >= 0 ? 'tar ledningen' : 'slår inte');
   }

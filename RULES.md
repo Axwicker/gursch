@@ -26,6 +26,8 @@ dealern: fyra dolda kort var, sedan ett femte uppvänt kort var.
 
 **R5.** Den som har det högsta uppvända kortet vinner *floppen*.
 ⚠️ Vid lika vinner den som fick sitt kort sist i utdelningsordningen.
+Floppkortet syns för alla under floppen och första slängrundan. När första slängrundan är
+slut göms det.
 
 **R6.** Multiplier: antingen fast (×1, ×5, ×10, ×25, ×50, ×100) eller *flopmult*, där
 flopkortets värde gånger 1–4 blir multiplier.
@@ -47,7 +49,9 @@ bestämmer antalet (1–4). De andra slänger lika många eller säger STAY.
 **R10.** Den som säger STAY i första slängrundan står över den första förhandlingen och är
 med igen i nästa.
 
-**R11.** Drar man 1 kort visas det uppvänt. Drar man 2–4 kort är de dolda.
+**R11.** Drar man 1 kort visas det uppvänt för alla när det dras, i ungefär 3 sekunder, och
+sedan göms det. Det syns aldrig i nästa slängning, i sista slaskchansen eller i stickspelet.
+Drar man 2–4 kort är de dolda.
 
 **R12.** När draghögen tar slut blandas hela slänghögen, även kort som just har slängts,
 och blir en ny draghög.

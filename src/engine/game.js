@@ -42,6 +42,7 @@ const MAX_ROUND_LOGS = 20;
 const MAX_PAUSE_MS = 3 * 60 * 1000;  // en paus släpper av sig själv efter 3 minuter           // så många avslutade rundor sparas för felrapporter
 const MAX_NEGOTIATIONS = 20;        // säkerhetsspärr mot ändlösa slängrundor
 const AGREE_CONFIRM_MS = 2000;       // när alla är överens: så länge hinner man ändra sig
+export const REVEAL_MS = 3000;       // [R11] ett ensamt draget kort syns så här länge när det dras
 export const BOT_LEVELS = ['easy', 'medium', 'hard'];
 const BOT_NAMES = ['Bot Bengt', 'Bot Greta', 'Bot Sixten', 'Bot Majken', 'Bot Doris', 'Bot Ivar'];
 
@@ -432,9 +433,12 @@ export class GurschGame {
       this.resume(this.paused.playerId, { auto: true });   // säkerhetsspärr: pausen släpper
       return true;
     }
+    // [R11] Uppvända dragna kort göms efter REVEAL_MS. Bara synlighet: loggas inte som ett
+    // drag och påverkar inget utfall (uppspelningar ger samma resultat med eller utan).
+    const hidden = this.expireReveal();
     if (this.pendingSlask) {
-      if (this.now() < this.pendingSlask.deadline) return false;
-      return this.expireSlask();                // ingen hann syna
+      if (this.now() < this.pendingSlask.deadline) return hidden;
+      return this.expireSlask() || hidden;      // ingen hann syna
     }
     const round = this.round;
     let changed = false;
@@ -449,7 +453,26 @@ export class GurschGame {
       this.moveCount += 1;
       this.refreshTurnTimer();
     }
-    return changed;
+    return changed || hidden;
+  }
+
+  /** [R11] Göm de uppvända dragna korten när deras tid gått ut. */
+  expireReveal() {
+    const r = this.round;
+    if (!r?.revealUntil || this.now() < r.revealUntil) return false;
+    this.hideFaceUp();
+    return true;
+  }
+
+  /**
+   * [R5] [R11] Ingen ser längre något uppvänt kort i rundan: floppkortet när första
+   * slängrundan är slut, ett draget kort när dess tid gått ut eller rundan går vidare.
+   */
+  hideFaceUp() {
+    const r = this.round;
+    if (!r) return;
+    for (const set of r.visible.values()) set.clear();
+    r.revealUntil = null;
   }
 
   /** Nästa tidpunkt (ms) då tick() behöver anropas, eller null. */
@@ -457,9 +480,11 @@ export class GurschGame {
     if (this.paused) return this.paused.until;
     if (this.pendingSlask && !this.pendingSlask.resolved) return this.pendingSlask.deadline;
     if (!this.round) return null;
-    if (this.phase === PHASE.NEGOTIATION) return this.round.negotiation.confirmAt ?? this.round.negotiation.deadline;
-    if (this.phase === PHASE.DISCARD_SELECT) return this.round.discardSelect.deadline;
-    return this.turnDeadline;
+    const reveal = this.round.revealUntil ?? null;
+    const soonest = (t) => (reveal && (!t || reveal < t) ? reveal : t);
+    if (this.phase === PHASE.NEGOTIATION) return soonest(this.round.negotiation.confirmAt ?? this.round.negotiation.deadline);
+    if (this.phase === PHASE.DISCARD_SELECT) return soonest(this.round.discardSelect.deadline);
+    return soonest(this.turnDeadline);
   }
 
   // ---- paus (medan någon skriver en felrapport) --------------------------
@@ -496,6 +521,7 @@ export class GurschGame {
       if (r.negotiation.confirmAt) r.negotiation.confirmAt += shift;
     }
     if (r?.discardSelect?.deadline) r.discardSelect.deadline += shift;
+    if (r?.revealUntil) r.revealUntil += shift;
     const pausedBy = this.paused.playerId;
     this.paused = null;
     this.record(r, { resume: true, playerId: pausedBy, ...(auto ? { auto: true } : {}) });
@@ -670,6 +696,7 @@ export class GurschGame {
     for (const [playerId, decision] of r.decisions) {
       if (decision.type === 'discard') selections.set(playerId, decision.cardIds);
     }
+    this.hideFaceUp();   // [R5] floppkortet syns bara under första slängrundan
     this.applyDiscards(selections);
     r.decisions = new Map();
     // STAY i första fasen => spelaren står över den första förhandlingen, men är med sedan.
@@ -679,6 +706,7 @@ export class GurschGame {
   /** Slänger valda kort och drar nya, i ordning med start hos flopvinnaren. */
   applyDiscards(selections) {
     const r = this.round;
+    this.hideFaceUp();   // [R11] tidigare dragna kort syns aldrig i nästa slängning
     const drawnPerPlayer = [];
     const order = this.rotate(this.players.map((p) => p.id), this.indexOf(r.flopWinnerId));
     for (const playerId of order) {
@@ -695,8 +723,12 @@ export class GurschGame {
       r.piles.discard.push(...discarded);
       const newCards = drawCards(r.piles, discarded.length, r.rng);
       hand.push(...newCards);
-      // Exakt ett draget kort visas face-up. 2-4 kort är face-down.
-      if (newCards.length === 1) r.visible.get(playerId).add(newCards[0].id);
+      // [R11] Exakt ett draget kort visas uppvänt, men bara en kort stund (REVEAL_MS).
+      // 2-4 kort är dolda.
+      if (newCards.length === 1) {
+        r.visible.get(playerId).add(newCards[0].id);
+        r.revealUntil = this.now() + REVEAL_MS;
+      }
       drawnPerPlayer.push({ playerId, count: newCards.length, faceUp: newCards.length === 1 });
     }
     this.pushEvent({ type: 'draw', players: drawnPerPlayer, discardRound: r.discardRound });
@@ -796,6 +828,7 @@ export class GurschGame {
   startDiscardSelect(count, participants) {
     const r = this.round;
     r.negotiation = null;
+    this.hideFaceUp();   // [R11] syns aldrig rundan efter
     const seconds = this.settings.turnSeconds;
     r.discardSelect = {
       count,
@@ -846,6 +879,7 @@ export class GurschGame {
 
   startFinalSlaskWindow() {
     const r = this.round;
+    this.hideFaceUp();   // [R11] inga uppvända kort efter slängningen - inte heller i stickspelet
     for (const p of this.players) p.status = null;
     r.finalSlaskDone = new Set();
     r.turnOrder = this.rotate(this.players.map((p) => p.id), this.indexOf(r.flopWinnerId));

@@ -265,6 +265,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .trick-play .combo { font-size: var(--text-caption1); color: var(--on-felt);
   background: rgba(0,0,0,.35); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
 .trick-play .combo.mixed { color: rgba(255,255,255,.72); }
+/* Sista sticket (R26): slutvärdet visas, och högst markeras i rött - det förlorar */
+.trick-play .final-value { display: none; }
+.trick-area.final .final-value { display: inline-block; }
+.trick-area.previous.final .trick-play { opacity: 1; }   /* sista sticket ligger kvar fullt synligt */
+.trick-area.final .trick-play .combo:not(.final-value) { display: none; }
+.trick-play.highest .cards { filter: drop-shadow(0 0 10px rgba(226,86,74,.75)); }
+.trick-play.highest .who { color: #ffb3aa; font-weight: 700; }
 
 /* seats */
 .seats { position: absolute; inset: 0; z-index: 3; }
