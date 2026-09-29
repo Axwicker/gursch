@@ -118,6 +118,9 @@ async function playRound(page, shot) {
       await once('10-slask', 400);
     } else if (st.phase === 'ROUND_RESULT') {
       await once('13-resultat', 900);
+      await page.locator('#btn-leave-game').click();
+      await once('16-lamna', 300);
+      await page.locator('#confirm-cancel').click();
       return taken;
     } else if (act('propose')) {
       const n = st.negotiation;
@@ -194,12 +197,14 @@ async function runViewport(browser, name) {
     console.log(`  ${name}/${file}`);
   };
 
-  await page.goto(BASE);
+  await page.goto(`${BASE}/join/ABCD`);
   await page.waitForFunction(() => document.fonts.ready);
+  await shot('01b-inbjudan');
+  await page.goto(BASE);
   await shot('01-start');
 
-  await page.fill('#create-nick', 'Axel');
-  await page.selectOption('#practice-level', 'medium');
+  await page.fill('#player-nick', 'Axel');
+  await page.check('input[name="practice-level"][value="medium"]');
   await page.click('#btn-practice');
   await page.waitForFunction(() => window.__gursch?.S?.players.length === 4);
   await page.waitForTimeout(400);

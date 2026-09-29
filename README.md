@@ -87,8 +87,9 @@ kortval, sista slaskchansen, slask, stick, resultat, historik och chatt.
 * `screenshots/current/index.html` visar referens och senaste körning sida vid sida.
 * Samma kort delas ut varje gång, men bottarnas val är slumpade, så senare faser kan skilja sig.
 * Skriptet agerar via `window.__gursch.emit` och kortens `data-id`, inte via knapptexter.
-  Behåll id:na `create-nick`, `practice-level`, `btn-practice`, `btn-start`, `btn-history`,
-  `btn-chat-toggle` och `data-close` när UI:t görs om, annars behöver skriptet ändras.
+  Behåll id:na `player-nick`, radioknapparna `practice-level`, `btn-practice`, `btn-start`,
+  `btn-history`, `btn-chat-toggle`, `btn-leave-game`, `confirm-cancel` och `data-close` när
+  UI:t görs om, annars behöver skriptet ändras.
 
 ## Övrigt
 

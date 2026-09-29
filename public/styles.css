@@ -137,7 +137,33 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 @keyframes bob { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-7px) rotate(2deg); } }
 .brand h1 { font-size: 54px; letter-spacing: .22em; margin-top: 6px; background: linear-gradient(180deg,#fff,#c9b37a); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .tagline { color: var(--muted); font-size: var(--text-subhead); margin-top: 4px; }
-.home-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.home-panel { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.home-panel > label { margin-bottom: 0; }
+.home-invite { margin: 0; padding: 10px 14px; border-radius: var(--radius-control); background: rgba(232,200,119,.1);
+  border: 1px solid rgba(232,200,119,.35); font-size: var(--text-subhead); line-height: 1.4; }
+.home-invite[hidden] { display: none; }
+.home-bots { display: flex; flex-direction: column; gap: 10px; }
+.field-label { font-size: var(--text-footnote); color: var(--muted); }
+/* Segmenterad kontroll: riktiga radioknappar (piltangenter, skärmläsare), utseende som iOS */
+.segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px;
+  background: rgba(0,0,0,.35); border: 1px solid var(--panel-line); border-radius: var(--radius-control); }
+.segmented label { margin: 0; position: relative; }
+.segmented input { position: absolute; inset: 0; opacity: 0; margin: 0; min-height: 0; cursor: pointer; }
+.segmented span { display: flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 8px;
+  font-size: var(--text-subhead); font-weight: 600; color: var(--muted); transition: background-color .15s, color .15s; }
+.segmented input:checked + span { background: rgba(255,255,255,.14); color: var(--text); }
+.segmented input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 1px; }
+.home-divider { display: flex; align-items: center; gap: 12px; margin: 6px 0 0; color: var(--muted); font-size: var(--text-footnote); }
+.home-divider::before, .home-divider::after { content: ""; flex: 1; height: 1px; background: var(--panel-line); }
+.join-row { display: flex; gap: 8px; align-items: flex-end; }
+.join-row label { flex: 1; margin: 0; }
+.join-row .btn { flex: none; min-width: 96px; min-height: 46px; }
+/* Inbjuden via länk: namn, inbjudan och Gå med först - bottarna längre ned */
+.home-panel.invited > label { order: -3; }
+.home-panel.invited .home-invite { order: -2; }
+.home-panel.invited .join-row { order: -1; }
+.home-panel.invited .home-divider { display: none; }
+.home-panel.invited .home-bots { margin-top: 10px; }
 .home-error { color: var(--red); text-align: center; min-height: 20px; margin-top: 14px; font-size: var(--text-footnote); }
 .home-foot { text-align: center; color: var(--muted); font-size: var(--text-footnote); }
 
@@ -327,6 +353,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 /* Luft ovanför korten: ett markerat kort lyfts 16 px och bär då etiketten "Uppvänd" (15 px) med sig. */
 .hand { display: flex; gap: 8px; padding-top: 32px; min-height: var(--card-h); justify-content: center; flex-wrap: wrap; }
 .hand .card { cursor: pointer; }
+.hand .card:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .hand .card.selected { transform: translateY(-16px); box-shadow: 0 0 0 3px var(--gold), 0 14px 26px rgba(0,0,0,.5); }
 @media (hover: hover) {
   .hand .card:hover:not(.locked):not(.selected) { transform: translateY(-6px); box-shadow: 0 12px 22px rgba(0,0,0,.45); }
@@ -451,7 +478,7 @@ body.no-anim * { animation: none !important; transition: none !important; }
 
 /* -------------------------------------------------------- responsive */
 @media (max-width: 860px) {
-  .home-cards, .lobby-grid { grid-template-columns: 1fr; }
+  .lobby-grid { grid-template-columns: 1fr; }
   .brand h1 { font-size: 40px; }
   :root { --card-w: 54px; --card-h: 78px; }
   .table-area { padding: 8px max(8px, var(--safe-right)) 8px max(8px, var(--safe-left)); }
@@ -546,9 +573,6 @@ body.no-anim * { animation: none !important; transition: none !important; }
 @keyframes clockPulse { 50% { opacity: .55; } }
 
 /* ---- bottar ---- */
-.practice-row { display: flex; gap: 8px; margin-top: 8px; }
-.practice-row .btn { flex: 1 1 auto; }
-.practice-row select { width: auto; flex: 0 0 auto; margin-top: 0; }
 .bot-level { width: auto; padding: 6px 8px; margin: 0; }   /* 16 px som andra fält - annars zoomar iOS */
 #btn-add-bot { width: 100%; margin-bottom: 10px; border-style: dashed; }
 .tag-bot { border-color: rgba(255,255,255,.3); color: rgba(255,255,255,.75); }
@@ -570,6 +594,11 @@ body.no-anim * { animation: none !important; transition: none !important; }
 .btn-report { display: flex; width: fit-content; margin: 10px auto 0; opacity: .8; }
 @media (hover: hover) { .btn-report:hover { opacity: 1; } }
 .report-overlay { z-index: 70; }
+.confirm-overlay { z-index: 75; }
+.confirm-box { width: min(440px, 92vw); text-align: center; }
+.confirm-box h2 { font-size: var(--text-title3); }
+.confirm-text { color: rgba(255,255,255,.85); font-size: var(--text-subhead); line-height: 1.45; margin: 10px 0 0; }
+#confirm-ok[hidden] { display: none; }
 textarea { resize: vertical; line-height: 1.4; }
 
 /* ---- paus (felrapport) ---- */

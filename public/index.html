@@ -31,25 +31,28 @@
       <p class="tagline">Kortspelet med slask, sjuor och mini-gursch</p>
     </div>
 
-    <div class="home-cards">
-      <div class="panel">
-        <h2>Skapa spel</h2>
-        <label>Namn<input id="create-nick" maxlength="16" placeholder="Axel" autocomplete="off" /></label>
-        <button id="btn-create" class="btn btn-primary btn-lg">Skapa rum</button>
-        <div class="practice-row">
-          <button id="btn-practice" class="btn btn-lg">Spela mot bottar</button>
-          <select id="practice-level" aria-label="Bottarnas nivå">
-            <option value="easy">Lätt</option>
-            <option value="medium" selected>Medel</option>
-            <option value="hard">Svår</option>
-          </select>
+    <div class="panel home-panel">
+      <label>Ditt namn<input id="player-nick" maxlength="16" placeholder="Axel" autocomplete="nickname" autocapitalize="words" enterkeyhint="done" /></label>
+
+      <!-- Inbjuden via länk (/join/KOD): då är "Gå med" huvudvägen -->
+      <p class="home-invite" id="home-invite" hidden></p>
+
+      <div class="home-bots">
+        <div class="field-label" id="level-label">Bottarnas nivå</div>
+        <div class="segmented" role="radiogroup" aria-labelledby="level-label">
+          <label><input type="radio" name="practice-level" value="easy" /><span>Lätt</span></label>
+          <label><input type="radio" name="practice-level" value="medium" checked /><span>Medel</span></label>
+          <label><input type="radio" name="practice-level" value="hard" /><span>Svår</span></label>
         </div>
+        <button id="btn-practice" class="btn btn-primary btn-lg">Spela mot bottar</button>
       </div>
-      <div class="panel">
-        <h2>Gå med i ett rum</h2>
-        <label>Namn<input id="join-nick" maxlength="16" placeholder="Erik" autocomplete="off" /></label>
-        <label>Rumskod<input id="join-code" maxlength="6" placeholder="ABCD" class="code-input" autocomplete="off" /></label>
-        <button id="btn-join" class="btn btn-lg">Gå med</button>
+
+      <div class="home-divider"><span>eller spela med vänner</span></div>
+
+      <button id="btn-create" class="btn btn-lg">Skapa ett rum</button>
+      <div class="join-row">
+        <label>Rumskod<input id="join-code" maxlength="6" placeholder="ABCD" class="code-input" autocomplete="off" autocapitalize="characters" enterkeyhint="go" /></label>
+        <button id="btn-join" class="btn">Gå med</button>
       </div>
     </div>
     <p class="home-error" id="home-error"></p>
@@ -140,8 +143,8 @@
   <div class="game-layout">
     <header class="topbar">
       <div class="topbar-left">
+        <button class="btn btn-tool" id="btn-leave-game" aria-label="Lämna spelet" title="Lämna spelet"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></button>
         <span class="chip chip-round" id="chip-round">Runda 1</span>
-        <span class="chip chip-mult" id="chip-mult">×10</span>
         <span class="chip" id="chip-code" title="Rumskod"></span>
       </div>
       <div class="topbar-right">
@@ -180,13 +183,13 @@
         <span class="sel-count" id="sel-count"></span>
         <span class="turn-clock" id="turn-clock"></span>
       </div>
-      <div class="hand" id="hand"></div>
+      <div class="hand" id="hand" role="group" aria-label="Din hand"></div>
       <div class="actions" id="actions"></div>
     </footer>
   </div>
 
-  <aside class="side-panel" id="chat-panel">
-    <div class="side-head"><h3>Chatt</h3><button class="btn btn-icon" data-close="chat-panel" aria-label="Stäng chatten">✕</button></div>
+  <aside class="side-panel" id="chat-panel" role="dialog" aria-labelledby="chat-title">
+    <div class="side-head"><h3 id="chat-title">Chatt</h3><button class="btn btn-icon" data-close="chat-panel" aria-label="Stäng chatten">✕</button></div>
     <div class="chat-log" id="chat-log"></div>
     <form class="chat-form" id="chat-form">
       <input id="chat-input" maxlength="300" placeholder="Skriv…" autocomplete="off" aria-label="Meddelande" />
@@ -194,12 +197,12 @@
     </form>
   </aside>
 
-  <aside class="side-panel" id="history-panel">
-    <div class="side-head"><h3>Historik</h3><button class="btn btn-icon" data-close="history-panel" aria-label="Stäng historiken">✕</button></div>
+  <aside class="side-panel" id="history-panel" role="dialog" aria-labelledby="history-title">
+    <div class="side-head"><h3 id="history-title">Historik</h3><button class="btn btn-icon" data-close="history-panel" aria-label="Stäng historiken">✕</button></div>
     <div class="history" id="history"></div>
   </aside>
 
-  <div class="slask-overlay" id="slask-overlay" role="dialog" aria-labelledby="slask-title">
+  <div class="slask-overlay" id="slask-overlay" role="alertdialog" aria-labelledby="slask-title" aria-describedby="slask-text">
     <div class="slask-box">
       <div class="slask-title" id="slask-title">SLASK</div>
       <div class="slask-text" id="slask-text"></div>
@@ -209,9 +212,10 @@
     </div>
   </div>
 
-  <div class="result-overlay" id="result-overlay">
+  <!-- Inte modal: toppraden (historik, chatt, lämna) går att nå medan resultatet visas -->
+  <div class="result-overlay" id="result-overlay" role="dialog" aria-labelledby="result-title" aria-describedby="result-why">
     <div class="result-box">
-      <h2 id="result-title">Rundan är slut</h2>
+      <h2 id="result-title" tabindex="-1">Rundan är slut</h2>
       <div class="result-meta" id="result-meta"></div>
       <p class="result-why" id="result-why"></p>
       <div class="result-rows" id="result-rows"></div>
@@ -237,6 +241,18 @@
     <div class="result-actions">
       <button class="btn btn-primary btn-lg" id="btn-report-save">Spara rapport</button>
       <button class="btn btn-lg" id="btn-report-cancel">Avbryt</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bekräftelse (t.ex. Lämna spelet). Avbryt ligger först och får fokus; det farliga valet är aldrig förvalt. -->
+<div class="result-overlay confirm-overlay" id="confirm-overlay" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+  <div class="result-box confirm-box">
+    <h2 id="confirm-title"></h2>
+    <p class="confirm-text" id="confirm-text"></p>
+    <div class="result-actions">
+      <button class="btn btn-lg" id="confirm-cancel">Avbryt</button>
+      <button class="btn btn-lg btn-danger" id="confirm-ok"></button>
     </div>
   </div>
 </div>
