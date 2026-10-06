@@ -20,6 +20,7 @@ export const PHASE = {
   FINAL_SLASK: 'FINAL_SLASK',
   TRICK: 'TRICK',
   MINI_GURSCH: 'MINI_GURSCH',
+  TIEBREAK_DRAW: 'TIEBREAK_DRAW',     // [R31] mini-gurschens tak nått: högst draget kort vinner
   ROUND_RESULT: 'ROUND_RESULT',
   ENDED: 'ENDED',
 };
@@ -33,15 +34,15 @@ export const DEFAULT_SETTINGS = {
   chatEnabled: true,
   animations: true,
   sound: true,
-  slaskCallSeconds: 8,
+  slaskCallSeconds: 7,       // [R18] tid att syna en slask
   turnSeconds: 45,           // turtimer, 0 = av
   negotiationSeconds: 20,    // tid att komma överens i slängförhandlingen
 };
 
 const MAX_ROUND_LOGS = 20;
 const MAX_PAUSE_MS = 3 * 60 * 1000;  // en paus släpper av sig själv efter 3 minuter           // så många avslutade rundor sparas för felrapporter
-const MAX_NEGOTIATIONS = 20;        // säkerhetsspärr mot ändlösa slängrundor
 const AGREE_CONFIRM_MS = 2000;       // när alla är överens: så länge hinner man ändra sig
+export const TIEBREAK_SETTLE_MS = 2500;  // [R31] så länge syns det sista dragna kortet före resultatet
 export const REVEAL_MS = 3000;       // [R11] ett ensamt draget kort syns så här länge när det dras
 export const BOT_LEVELS = ['easy', 'medium', 'hard'];
 const BOT_NAMES = ['Bot Bengt', 'Bot Greta', 'Bot Sixten', 'Bot Majken', 'Bot Doris', 'Bot Ivar'];
@@ -370,6 +371,7 @@ export class GurschGame {
       case 'slask': return this.actSlask(playerId);
       case 'pass': return this.actPassFinalSlask(playerId);
       case 'play': return this.actPlay(playerId, action.cardIds || []);
+      case 'tiebreakPick': return this.actTiebreakPick(playerId, action.index);
       case 'callSlask': throw new GameError('Ingen slask att syna');
       default: throw new GameError('Okänd action');
     }
@@ -399,6 +401,8 @@ export class GurschGame {
   timeoutAction(playerId) {
     if (this.phase === PHASE.INITIAL_DISCARD) return { type: 'stay' };
     if (this.phase === PHASE.FINAL_SLASK) return { type: 'pass' };
+    // [R31] Korten är dolda, så det första lediga är lika bra som vilket som helst.
+    if (this.phase === PHASE.TIEBREAK_DRAW) return { type: 'tiebreakPick', index: this.tiebreakFreeSlots()[0] };
     if (this.phase === PHASE.TRICK || this.phase === PHASE.MINI_GURSCH) {
       // Det lagliga draget med lägst kortsumma: vid utspel ett ensamt lägsta kort.
       const ctx = this.activeTrickState();
@@ -446,6 +450,7 @@ export class GurschGame {
     try {
       if (this.phase === PHASE.NEGOTIATION) changed = this.tickNegotiation();
       else if (this.phase === PHASE.DISCARD_SELECT) changed = this.tickDiscardSelect();
+      else if (this.phase === PHASE.TIEBREAK_DRAW && this.round.tiebreak.settleAt) changed = this.tickTiebreak();
       else changed = this.expireTurn();
     } finally { this.inTimer = false; }
     if (changed) {
@@ -484,6 +489,7 @@ export class GurschGame {
     const soonest = (t) => (reveal && (!t || reveal < t) ? reveal : t);
     if (this.phase === PHASE.NEGOTIATION) return soonest(this.round.negotiation.confirmAt ?? this.round.negotiation.deadline);
     if (this.phase === PHASE.DISCARD_SELECT) return soonest(this.round.discardSelect.deadline);
+    if (this.phase === PHASE.TIEBREAK_DRAW && this.round.tiebreak.settleAt) return this.round.tiebreak.settleAt;
     return soonest(this.turnDeadline);
   }
 
@@ -522,6 +528,7 @@ export class GurschGame {
     }
     if (r?.discardSelect?.deadline) r.discardSelect.deadline += shift;
     if (r?.revealUntil) r.revealUntil += shift;
+    if (r?.tiebreak?.settleAt) r.tiebreak.settleAt += shift;
     const pausedBy = this.paused.playerId;
     this.paused = null;
     this.record(r, { resume: true, playerId: pausedBy, ...(auto ? { auto: true } : {}) });
@@ -540,6 +547,10 @@ export class GurschGame {
     const r = this.round;
     if (!r) return null;
     if (this.phase === PHASE.NEGOTIATION || this.phase === PHASE.DISCARD_SELECT) return null;   // realtid
+    if (this.phase === PHASE.TIEBREAK_DRAW) {
+      const tb = r.tiebreak;
+      return tb.settleAt ? null : tb.active[tb.turnIndex] ?? null;
+    }
     if (this.phase === PHASE.TRICK || this.phase === PHASE.MINI_GURSCH) {
       const t = this.activeTrickState();
       return t.currentTrick ? t.currentTrick.turnOrder[t.currentTrick.turnIndex] ?? null : null;
@@ -749,7 +760,7 @@ export class GurschGame {
     r.discardSelect = null;
     const order = this.rotate(this.players.map((p) => p.id), this.indexOf(r.flopWinnerId));
     const participants = order.filter((id) => !skip.has(id));
-    if (participants.length === 0 || r.negotiationCount > MAX_NEGOTIATIONS) {
+    if (participants.length === 0) {
       r.negotiation = null;
       this.startFinalSlaskWindow();
       return;
@@ -923,7 +934,7 @@ export class GurschGame {
 
   /** Returnerar aktiv stickkontext: normalrunda eller mini-gursch. */
   activeTrickState() {
-    return this.phase === PHASE.MINI_GURSCH ? this.round.mini : this.round;
+    return this.phase === PHASE.MINI_GURSCH || this.phase === PHASE.TIEBREAK_DRAW ? this.round.mini : this.round;
   }
 
   startTrick(ctx, leaderId) {
@@ -1085,14 +1096,7 @@ export class GurschGame {
     const cap = this.settings.miniGurschCap || 0;
     const multiplier = previousMultiplier * participants.length;
 
-    if (cap > 0 && level > cap) {
-      // Gränsen nådd: den som fick sitt kort sist i dealerordningen blir loser.
-      const inDealOrder = r.dealOrder.filter((id) => participants.includes(id));
-      const loserId = inDealOrder[inDealOrder.length - 1];
-      return this.settleRound({
-        loserId, loserValue: tiedValue, multiplier: previousMultiplier, capReached: true,
-      });
-    }
+    if (cap > 0 && level > cap) return this.startTiebreak(participants, tiedValue, previousMultiplier);
 
     const piles = { draw: shuffleDeck(createDeck(), r.rng), discard: [] };
     const hands = new Map();
@@ -1164,6 +1168,86 @@ export class GurschGame {
     return this.startMiniGursch(tied, maxValue, mini.multiplier, mini.level + 1);
   }
 
+  // ---- [R31] dragning när mini-gurschens tak är nått ------------------------
+
+  /**
+   * Korten som finns kvar i mini-gurschens draghög läggs dolda på bordet. De lika väljer
+   * ett kort var i sittordning efter dealern; högst vinner, lägst betalar. Är flera lika
+   * lägst drar de igen bland korten som är kvar.
+   */
+  startTiebreak(participants, tiedValue, multiplier) {
+    const r = this.round;
+    const order = r.dealOrder.filter((id) => participants.includes(id));
+    r.tiebreak = {
+      participants: order,
+      active: order,
+      drawNumber: 1,
+      turnIndex: 0,
+      slots: r.mini.piles.draw.slice(),   // dolda tills de väljs
+      taken: new Map(),                   // plats -> { playerId, drawNumber }
+      draws: [[]],                        // per dragomgång: [{ playerId, slot, card }]
+      tiedValue,
+      multiplier,
+      level: r.mini.level,
+      loserId: null,
+      settleAt: null,
+    };
+    this.phase = PHASE.TIEBREAK_DRAW;
+    this.pushEvent({ type: 'tiebreak', participants: order, multiplier });
+  }
+
+  tiebreakFreeSlots() {
+    const tb = this.round.tiebreak;
+    return tb.slots.map((_, i) => i).filter((i) => !tb.taken.has(i));
+  }
+
+  actTiebreakPick(playerId, index) {
+    if (this.phase !== PHASE.TIEBREAK_DRAW) throw new GameError('Ingen dragning pågår');
+    this.requireTurn(playerId);
+    const tb = this.round.tiebreak;
+    if (!Number.isInteger(index) || index < 0 || index >= tb.slots.length || tb.taken.has(index)) {
+      throw new GameError('Välj ett av de dolda korten');
+    }
+    const card = tb.slots[index];
+    tb.taken.set(index, { playerId, drawNumber: tb.drawNumber });
+    const draw = tb.draws.at(-1);
+    draw.push({ playerId, slot: index, card });
+    this.pushEvent({ type: 'tiebreakPick', playerId, slot: index, card: { id: card.id, rank: card.rank, suit: card.suit } });
+    tb.turnIndex += 1;
+    if (tb.turnIndex < tb.active.length) return;
+
+    const lowest = Math.min(...draw.map((d) => d.card.rank));   // 7:an räknas som 7
+    const losers = tb.active.filter((id) => draw.find((d) => d.playerId === id).card.rank === lowest);
+    if (losers.length === 1) {
+      tb.loserId = losers[0];
+      tb.settleAt = this.now() + TIEBREAK_SETTLE_MS;   // alla hinner se det sista kortet
+      return;
+    }
+    tb.active = losers;
+    tb.drawNumber += 1;
+    tb.turnIndex = 0;
+    tb.draws.push([]);
+    if (this.tiebreakFreeSlots().length < losers.length) {
+      // Teoretiskt fall: korten räcker inte till. Alla kort blandas och läggs ut igen (jfr R12).
+      tb.slots = shuffleDeck(tb.slots, this.round.rng);
+      tb.taken.clear();
+    }
+    this.pushEvent({ type: 'tiebreakAgain', participants: losers });
+  }
+
+  tickTiebreak() {
+    const tb = this.round.tiebreak;
+    if (this.now() < tb.settleAt) return false;
+    this.settleRound({
+      loserId: tb.loserId,
+      loserValue: tb.tiedValue,    // [R30] förlorarens slutvärde i den senaste mini-gurschen
+      multiplier: tb.multiplier,   // den senaste spelade nivåns multiplier
+      miniLevel: tb.level,
+      capReached: true,
+    });
+    return true;
+  }
+
   settleRound({ loserId, loserValue, multiplier, miniLevel = 0, capReached = false }) {
     const r = this.round;
     const playerIds = this.players.map((p) => p.id);
@@ -1184,6 +1268,9 @@ export class GurschGame {
       loserValue,
       miniLevel,
       capReached,
+      tiebreak: capReached && r.tiebreak ? r.tiebreak.draws.map((draw) => draw.map((d) => ({
+        playerId: d.playerId, card: { id: d.card.id, rank: d.card.rank, suit: d.card.suit },
+      }))) : null,
       quintExitPlayerId: r.quintExitPlayerId,
       miniHistory: r.miniHistory || [],
       slaskLog: r.slaskLog,
@@ -1270,7 +1357,8 @@ export class GurschGame {
     const r = this.round;
     const ctx = r ? this.activeTrickState() : null;
     const turnPlayerId = this.pendingSlask && !this.pendingSlask.resolved ? null : this.currentTurnPlayerId();
-    const inMini = this.phase === PHASE.MINI_GURSCH;
+    const inMini = this.phase === PHASE.MINI_GURSCH || this.phase === PHASE.TIEBREAK_DRAW;
+    const tb = this.phase === PHASE.TIEBREAK_DRAW ? r.tiebreak : null;
 
     return {
       id: this.id,
@@ -1354,6 +1442,24 @@ export class GurschGame {
         multiplier: r.mini.multiplier,
         tiedValue: r.mini.tiedValue,
       } : null,
+      // [R31] Bara de valda korten syns. Resten är dolda platser (A2).
+      tiebreak: tb ? {
+        participants: tb.participants,
+        active: tb.active,
+        drawNumber: tb.drawNumber,
+        slotCount: tb.slots.length,
+        taken: [...tb.taken].map(([slot, t]) => ({
+          slot, playerId: t.playerId, drawNumber: t.drawNumber,
+          card: (() => { const c = tb.slots[slot]; return { id: c.id, rank: c.rank, suit: c.suit }; })(),
+        })),
+        draws: tb.draws.map((draw) => draw.map((d) => ({
+          playerId: d.playerId, slot: d.slot, card: { id: d.card.id, rank: d.card.rank, suit: d.card.suit },
+        }))),
+        loserId: tb.loserId,
+        settleAt: tb.settleAt,
+        tiedValue: tb.tiedValue,
+        multiplier: tb.multiplier,
+      } : null,
       turnDeadline: this.turnDeadline,
       paused: this.paused ? { ...this.paused } : null,
       // Bara antal - för högarna mitt på bordet (vilka kort som ligger där är hemligt).
@@ -1429,6 +1535,8 @@ export class GurschGame {
       actions.push({ type: 'discard', count: r.proposal.count, free: r.proposal.count === null });
       actions.push({ type: 'stay' });
       if (p.slasks < this.settings.maxSlasks) actions.push({ type: 'slask' });
+    } else if (this.phase === PHASE.TIEBREAK_DRAW) {
+      actions.push({ type: 'tiebreakPick', options: this.tiebreakFreeSlots() });
     } else if (this.phase === PHASE.FINAL_SLASK) {
       if (p.slasks < this.settings.maxSlasks) actions.push({ type: 'slask' });
       actions.push({ type: 'pass' });
@@ -1453,6 +1561,7 @@ function cleanAction(action) {
   const out = { type: action.type };
   if (Array.isArray(action.cardIds)) out.cardIds = action.cardIds.slice();
   if (action.count !== undefined) out.count = action.count;
+  if (action.index !== undefined) out.index = action.index;
   return out;
 }
 

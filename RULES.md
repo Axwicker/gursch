@@ -3,8 +3,7 @@
 Varje regel har ett nummer. Testerna i `test/` refererar till reglerna med taggar som
 `[R24]`, och `test/rules-coverage.test.js` fallerar om någon regel här saknar test.
 
-**⚠️ = tolkning** som inte är bekräftad. Allt utan ⚠️ är antingen bekräftat av dig eller
-direkt från specifikationen. Läs igenom ⚠️-punkterna och säg till om något är fel.
+Alla regler här är bekräftade eller kommer direkt från specifikationen.
 
 Hittar du ett fel när du spelar: tryck **RAPPORTERA REGELFEL** när rundan är klar (se
 sist i dokumentet).
@@ -25,7 +24,7 @@ sist i dokumentet).
 dealern: fyra dolda kort var, sedan ett femte uppvänt kort var.
 
 **R5.** Den som har det högsta uppvända kortet vinner *floppen*.
-⚠️ Vid lika vinner den som fick sitt kort sist i utdelningsordningen.
+Vid lika vinner den som fick sitt kort sist i utdelningsordningen.
 Floppkortet syns för alla under floppen och första slängrundan. När första slängrundan är
 slut göms det.
 
@@ -44,7 +43,7 @@ stark som ett ess i sticket, men räknas som 7 i slutvärdet.
 
 **R9.** Flopvinnaren börjar, sedan går turen vidare i sittordning. Den första som slänger
 bestämmer antalet (1–4). De andra slänger lika många eller säger STAY.
-⚠️ Om den första säger STAY bestämmer nästa som slänger antalet.
+Säger den första STAY bestämmer nästa som slänger antalet.
 
 **R10.** Den som säger STAY i första slängrundan står över den första förhandlingen och är
 med igen i nästa.
@@ -63,14 +62,14 @@ kort alla ska slänga (1–4) och kan ändra sig när som helst. Allas förslag 
 och man kan chatta under tiden. Förhandlingen har en timer (20 s, går att ändra i lobbyn).
 
 **R14.** Visar alla samma tal väljer alla samtidigt så många kort och drar nya, och sedan
-börjar en ny förhandling. ⚠️ Enigheten måste hålla i 2 s, så att man hinner ändra sig.
+börjar en ny förhandling. Enigheten måste hålla i 2 s, så att man hinner ändra sig.
 
 **R15.** STAY avslutar förhandlingen direkt. Är man inte överens när tiden tar slut avslutas
 den också. I båda fallen slängs inga kort och spelet börjar.
-⚠️ En enighet som redan pågår när tiden tar slut får gå klart.
+En enighet som redan pågår när tiden tar slut får gå klart.
 
-**R16.** ⚠️ Den som inte hinner välja sina kort får sina högsta kort slängda (turtimern
-gäller). ⚠️ Högst 20 förhandlingar per runda, sedan börjar spelet.
+**R16.** Den som inte hinner välja sina kort får sina högsta kort slängda (turtimern
+gäller). Det finns inget tak för antalet förhandlingar i en runda.
 
 ## Slask
 
@@ -80,12 +79,12 @@ direkt på sin nya hand: slaska igen, eller fortsätta (slänga eller STAY i fö
 PASS i sista slaskchansen). Varje spelare får slaska högst 3 gånger per runda (går att ändra
 i lobbyn).
 
-**R18.** När någon slaskar kan de andra *syna* inom ⚠️ 8 sekunder, och den som synar först
+**R18.** När någon slaskar kan de andra *syna* inom 7 sekunder (går att ändra i lobbyn), och den som synar först
 gäller. Man kan inte syna sin egen slask. Inget annat händer förrän fönstret har stängt.
 
 **R19.** Synad slask: fanns det face cards i den gamla handen betalar slaskaren 10 kr per
 face card till den som synade. Fanns det inga betalar den som synade 25 kr till slaskaren.
-⚠️ En slask som ingen synar kostar ingenting.
+En slask som ingen synar kostar ingenting.
 
 **R20.** Sista slaskchansen: när slängningen är klar får alla i tur, med början hos
 flopvinnaren, välja SLASK eller PASS innan stickspelet börjar. Den som redan har slaskat
@@ -109,7 +108,7 @@ två 10:or, så länge varje kort följer R24. Det är ett sätt att bli av med 
 Utspelet räknas som kombinationens värde: 4,4,7 är tre fyror, så 6,7,10 går att lägga.
 En 7:a räknas som ess bara när den spelas ut ensam.
 
-⚠️ "Lägsta" räknas bland korten man inte redan lägger som 7:a eller högt kort. Med handen
+"Lägsta" räknas bland korten man inte redan lägger som 7:a eller högt kort. Med handen
 7,9,K,A mot Q,Q går alltså 7+9, men inte K+9, eftersom den kvarvarande 7:an är lägre än 9:an.
 
 **R25.** Den som lagt den bästa kombinationen hittills leder sticket. Ett senare spel tar
@@ -140,7 +139,7 @@ annan spelare.
 ## Mini-gursch
 
 **R29.** Har flera samma högsta slutvärde spelar de en *mini-gursch*. Var och en får 3 kort
-(2 dolda och 1 uppvänt) ur en ny lek. Den med det högsta uppvända kortet börjar (⚠️ vid lika
+(2 dolda och 1 uppvänt) ur en ny lek. Den med det högsta uppvända kortet börjar (vid lika
 den som fick sitt kort sist). Multipliern gångras med antalet deltagare. Sedan spelas det
 som ett vanligt stickspel.
 
@@ -149,8 +148,12 @@ höjda multipliern. Rundans lika slutvärde spelar ingen roll längre.
 
 **R31.** Blir det lika igen spelas en ny mini-gursch (*mini-mini-gursch*) med ännu högre
 multiplier. Inställningen *Mini-gursch cap* begränsar antalet nivåer.
-⚠️ När gränsen nås förlorar den av de lika som fick sitt kort sist. Slutvärdet från den
-senast spelade nivån och multipliern från senaste giltiga nivå gäller.
+När gränsen nås och det fortfarande är lika avgörs det med en *dragning*. Korten som finns
+kvar i mini-gurschens draghög läggs dolda på bordet. De lika väljer ett kort var i
+sittordning, med början hos den första av dem efter dealern, och varje kort vänds upp när
+det väljs. Högst kort vinner (2 lägst, A högst, 7:an räknas som 7). Den med lägst kort
+förlorar och betalar sitt slutvärde från den senaste mini-gurschen × den senaste nivåns
+multiplier. Drar flera lika lågt drar de igen bland korten som är kvar.
 
 ---
 

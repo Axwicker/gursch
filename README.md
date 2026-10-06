@@ -5,7 +5,7 @@ Realtids multiplayer-webbapp för kortspelet **Gursch** (2–5 spelare, en 52-ko
 ```bash
 npm install
 npm start          # http://localhost:3000
-npm test           # 129 tester (regler, invarianter, fuzz, uppspelning, bottar, paus)
+npm test           # 152 tester (regler, invarianter, fuzz, uppspelning, bottar, paus)
 npm run replay -- rapport.json   # visa en rapporterad runda drag för drag
 npm run screenshots              # skärmbilder av en hel runda, jämförda med referensen
 ```
@@ -45,7 +45,7 @@ och `privateState(playerId)` individuellt. Alla actions valideras på servern
 
 ```
 LOBBY → (deal + flop) → INITIAL_DISCARD → (NEGOTIATION → DISCARD_SELECT)* → NEGOTIATION
-      → FINAL_SLASK → TRICK → [MINI_GURSCH*] → ROUND_RESULT → nästa runda (dealern flyttas ett steg)
+      → FINAL_SLASK → TRICK → [MINI_GURSCH* → TIEBREAK_DRAW] → ROUND_RESULT → nästa runda (dealern flyttas ett steg)
 ```
 NEGOTIATION och DISCARD_SELECT är **realtidsfaser** utan tur. Allt tidsstyrt (turtimer,
 slaskfönstret, förhandlingens timer och bekräftelse, kortvalets timer och pausens
@@ -56,8 +56,8 @@ Five-of-a-kind/Quint two i ett ledutspel avbryter stickspelet och går direkt ti
 
 ## Regler
 
-Alla spelregler finns numrerade i **[RULES.md](RULES.md)** (R1–R31 plus appens regler A1–A5).
-Tolkningar som inte är bekräftade är markerade ⚠️ där. Testerna refererar till reglerna med
+Alla spelregler finns numrerade i **[RULES.md](RULES.md)** (R1–R31 plus appens regler A1–A6).
+Alla regler är bekräftade. Testerna refererar till reglerna med
 taggar som `[R24]`, och `test/rules-coverage.test.js` fallerar om en regel saknar test.
 
 ## Felrapporter och uppspelning

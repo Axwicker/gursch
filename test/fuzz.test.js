@@ -21,6 +21,13 @@ function assertInvariants(g) {
   const sum = g.players.reduce((s, p) => s + p.balance, 0);
   assert.equal(sum, 0, 'pengar ska vara nollsumma');
   if (!g.round || g.phase === PHASE.ROUND_RESULT) return;
+  if (g.phase === PHASE.TIEBREAK_DRAW) {
+    // [R31] Dragningen tar inga kort ur mini-gurschen - platserna är bara en vy av draghögen.
+    // (sista sticket ligger både i tricks och currentTrick när mini-gurschen är slut)
+    assert.equal(new Set(cardsInPlay(g.round.mini)).size, 52);
+    assert.equal(new Set(g.round.tiebreak.slots.map((c) => c.id)).size, g.round.tiebreak.slots.length);
+    return;
+  }
   const ctx = g.phase === PHASE.MINI_GURSCH ? g.round.mini : g.round;
   const ids = cardsInPlay(ctx);
   assert.equal(ids.length, 52, `52 kort ska finnas, hittade ${ids.length}`);
@@ -76,6 +83,11 @@ function step(g, rng, clock) {
     else g.resolveSlask();
     return;
   }
+  if (g.phase === PHASE.TIEBREAK_DRAW && g.round.tiebreak.settleAt) {
+    clock.t = g.round.tiebreak.settleAt;
+    assert.equal(g.tick(), true, 'dragningen måste avslutas');
+    return;
+  }
   const pid = g.currentTurnPlayerId();
   assert.ok(pid, `ingen spelare har turen i fas ${g.phase}`);
   const { hand, actions } = g.privateState(pid);
@@ -91,6 +103,8 @@ function step(g, rng, clock) {
     const n = discard.free ? 1 + Math.floor(rng() * 4) : discard.count;
     return g.handleAction(pid, { type: 'discard', cardIds: randomSubset(hand, n, rng).map((c) => c.id) });
   }
+  const tbPick = actions.find((a) => a.type === 'tiebreakPick');
+  if (tbPick) return g.handleAction(pid, { type: 'tiebreakPick', index: tbPick.options[Math.floor(rng() * tbPick.options.length)] });
   const play = actions.find((a) => a.type === 'play');
   if (play) {
     assert.ok(play.options.length > 0, 'det måste alltid finnas minst ett lagligt spel');
@@ -100,13 +114,14 @@ function step(g, rng, clock) {
   throw new Error(`Bot hittade ingen action: ${JSON.stringify(actions)}`);
 }
 
-for (const players of [2, 3, 4, 5]) {
-  test(`[A3] fuzz: ${players} spelare, 150 rundor med slumpade legala drag`, () => {
+for (const [players, cap] of [[2, 0], [3, 0], [4, 0], [5, 0], [3, 1], [4, 1]]) {
+  test(`[A3] fuzz: ${players} spelare, mini-gursch-tak ${cap}, 150 rundor med slumpade legala drag`, () => {
     const rng = seededRng(1000 + players);
     const clock = { t: 0 };
     const g = new GurschGame({
-      id: 'FUZZ', rng: seededRng(7 * players), now: () => clock.t, settings: { miniGurschCap: 0 },
+      id: 'FUZZ', rng: seededRng(7 * players), now: () => clock.t, settings: { miniGurschCap: cap },
     });
+    let tiebreaks = 0;
     for (let i = 0; i < players; i++) g.addPlayer({ id: `p${i}`, nickname: `P${i}` });
     g.startGame('p0');
     let rounds = 0;
@@ -120,9 +135,11 @@ for (const players of [2, 3, 4, 5]) {
         const r = g.result;
         assert.ok(g.players.some((p) => p.id === r.loserId), 'loser måste finnas');
         assert.notEqual(r.loserId, r.quintExitPlayerId, 'quint-spelaren kan inte bli loser');
+        if (r.tiebreak) tiebreaks += 1;
         rounds += 1;
         g.nextRound('p0');
       }
     }
+    if (cap) assert.ok(tiebreaks > 0, 'fuzzen ska nå dragningen minst en gång');
   });
 }

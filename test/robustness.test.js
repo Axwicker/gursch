@@ -11,7 +11,7 @@ test('[A5] inställningar från klienten valideras', () => {
 
   const g = makeGame(['Axel', 'Erik']);
   assert.throws(() => g.updateSettings('axel', { slaskCallSeconds: 99999 }), /Ogiltig/);
-  assert.equal(g.settings.slaskCallSeconds, 8);
+  assert.equal(g.settings.slaskCallSeconds, 7);
   const g2 = new GurschGame({ id: 'X', settings: { multiplierValue: 3.7, maxSlasks: 3 } });
   assert.equal(g2.settings.multiplierValue, 10, 'ogiltigt värde i konstruktorn ignoreras');
 });

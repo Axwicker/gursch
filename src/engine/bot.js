@@ -99,6 +99,9 @@ function chooseNegotiation(pub, hand, botId, rng, level) {
   const n = pub.negotiation;
   const mine = n.proposals[botId];
   const propose = (count) => (count === mine ? null : { type: 'propose', count });
+  // [R16] Förhandlingarna har inget tak, så bottarna tröttnar själva efter några varv.
+  // Annars kan ett rum med bara bottar förhandla för evigt.
+  if (n.number > 3 && rng() < Math.min(1, (n.number - 3) * 0.2)) return { type: 'stay' };
   if (level === 'easy' && rng() < 0.3) return propose(1 + Math.floor(rng() * 4));
 
   const leads = pub.flopWinnerId === botId;
@@ -331,6 +334,11 @@ export function chooseBotAction({ pub, priv, botId, rng = Math.random, level = '
   // Realtidsfaserna i slängningen
   if (pub.phase === 'NEGOTIATION') {
     return actions.some((a) => a.type === 'propose') ? chooseNegotiation(pub, hand, botId, rng, level) : null;
+  }
+  if (pub.phase === 'TIEBREAK_DRAW') {
+    // [R31] Korten är dolda - ett slumpat val är så bra som det går.
+    const pick = actions.find((a) => a.type === 'tiebreakPick');
+    return pick ? { type: 'tiebreakPick', index: pick.options[Math.floor(rng() * pick.options.length)] } : null;
   }
   if (pub.phase === 'DISCARD_SELECT') {
     const select = actions.find((a) => a.type === 'discard');

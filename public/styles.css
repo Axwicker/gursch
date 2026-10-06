@@ -274,7 +274,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .trick-play.highest .who { color: #ffb3aa; font-weight: 700; }
 
 /* seats */
-.seats { position: absolute; inset: 0; z-index: 3; }
+.seats { position: absolute; inset: 0; z-index: 3; pointer-events: none; }   /* klick går igenom till bordet (t.ex. dragningen) */
+.seats > * { pointer-events: auto; }
 .seat-me:empty { display: none; }
 .seat {
   position: absolute; transform: translate(-50%,-50%);
@@ -661,6 +662,33 @@ textarea { resize: vertical; line-height: 1.4; }
 .seats .seat-cards { transition: opacity .2s ease; }
 .seats.dealing .seat-cards { opacity: 0; }
 
+/* [R31] dragning: dolda kort på bordet, valda kort vänds upp med namnet under */
+.trick-area.tiebreak { flex-direction: column; align-items: center; gap: 10px; }
+.tb-picks { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.tb-pick { padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,.08); font-weight: 700;
+  font-size: var(--text-footnote); font-variant-numeric: tabular-nums; }
+.tb-pick.lowest { background: rgba(226,86,74,.25); color: #ffb3aa; }
+.tb-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 0; max-width: min(760px, 100%); padding: 0 8px 14px 22px; }
+.tb-slot { position: relative; margin-left: -22px; padding: 0; border: 0; background: none; min-height: 0; border-radius: 6px;
+  transition: transform .16s cubic-bezier(.2,.8,.3,1); perspective: 400px; }
+.tb-slot:disabled { cursor: default; opacity: 1; }
+.tb-slot.pickable { cursor: pointer; }
+.tb-slot.pickable:hover, .tb-slot.pickable:focus-visible { transform: translateY(-8px); z-index: 2; }
+.tb-slot.taken { z-index: 3; transform: translateY(-6px); margin-right: 20px; }
+.tb-slot.taken.old { opacity: .45; }
+.tb-name { position: absolute; left: 50%; bottom: -14px; transform: translateX(-50%); white-space: nowrap;
+  font-size: var(--text-caption2); font-weight: 700; color: var(--gold); }
+.tb-intro {
+  position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%);
+  width: min(440px, 88%); padding: 18px 22px; border-radius: 18px; text-align: center;
+  background: rgba(8,16,12,.94); border: 1px solid rgba(232,200,119,.45); box-shadow: var(--shadow);
+  animation: tbIntro 5.2s cubic-bezier(.2,.8,.3,1) forwards;
+}
+.tb-intro p { margin: 8px 0 0; font-size: var(--text-subhead); line-height: 1.4; }
+.tb-intro-title { font-size: clamp(22px, 4vw, 34px); font-weight: 900; letter-spacing: .14em; color: var(--gold); }
+@keyframes tbIntro { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.7); } 6% { opacity: 1; transform: translate(-50%,-50%) scale(1.05); }
+  10% { transform: translate(-50%,-50%) scale(1); } 88% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 0; transform: translate(-50%,-56%) scale(.98); } }
+
 /* -------------------------------------------------- reducerad rörelse */
 /* Ingen förflyttning, skalning eller gungning - korta toningar i stället. Kortflygningarna
    stängs redan av i app.js (flightsOn) när prefers-reduced-motion är satt. */
@@ -669,6 +697,8 @@ textarea { resize: vertical; line-height: 1.4; }
   .slask-box, .result-box { animation: fadeIn .2s ease-out; }
   .fx-money { transform: translate(-50%, -24px); animation-name: fadeInOut; }
   .fx-banner { animation-name: fadeInOut; }
+  .tb-intro { animation-name: fadeInOut; }
+  .tb-slot.pickable:hover, .tb-slot.pickable:focus-visible, .tb-slot.taken { transform: none; }
   .turn-clock.urgent { animation: none; }
   .seat .status.thinking::after { animation: none; width: auto; }
   .toast, .toast.show { transform: translate(-50%, 0); }

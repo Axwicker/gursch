@@ -108,8 +108,11 @@ test('[R31] fortsatt lika startar mini-mini-gursch med ny multiplier', () => {
   assert.equal(g.round.miniHistory.length, 1);
 });
 
-test('[R31] mini-gursch-cap stoppar kedjan', () => {
+/** Mini-gurschen slutar lika (K mot K) med cap 1, så dragningen börjar. */
+function setupTiebreak() {
   const g = setupTie({ miniGurschCap: 1 });
+  const clock = { t: 1_000_000 };
+  g.now = () => clock.t;
   const mini = g.round.mini;
   const [a, b] = mini.participants;
   mini.hands.set(a, hand('K'));
@@ -119,9 +122,128 @@ test('[R31] mini-gursch-cap stoppar kedjan', () => {
   g.startTrick(mini, a);
   play(g, a, mini.hands.get(a).slice());
   play(g, b, mini.hands.get(b).slice());
+  return { g, clock, a, b };
+}
+
+/** Lägger de givna valörerna överst bland de dolda platserna (plats 0, 1, …). */
+function rigSlots(g, ranks) {
+  const tb = g.round.tiebreak;
+  hand(...ranks).forEach((c, i) => { tb.slots[i] = c; });
+}
+
+const pick = (g, pid, index) => g.handleAction(pid, { type: 'tiebreakPick', index });
+
+test('[R31] när taket nås börjar en dragning bland de lika', () => {
+  const { g } = setupTiebreak();
+  assert.equal(g.phase, PHASE.TIEBREAK_DRAW);
+  const tb = g.round.tiebreak;
+  assert.deepEqual(tb.participants, g.round.dealOrder.filter((id) => tb.participants.includes(id)),
+    'sittordning efter dealern');
+  assert.equal(g.currentTurnPlayerId(), tb.participants[0]);
+  assert.equal(tb.slots.length, 52 - 3 * 2, 'korten som finns kvar i mini-gurschens draghög');
+});
+
+test('[R31] högst kort vinner, lägst betalar sitt slutvärde × senaste multiplier', () => {
+  const { g, clock } = setupTiebreak();
+  const [first, second] = g.round.tiebreak.participants;
+  rigSlots(g, ['9', '4']);
+  pick(g, first, 0);
+  pick(g, second, 1);
+  assert.equal(g.phase, PHASE.TIEBREAK_DRAW, 'det sista kortet hinner synas');
+  assert.equal(g.currentTurnPlayerId(), null);
+  clock.t = g.nextWakeup();
+  assert.ok(g.tick());
   assert.equal(g.phase, PHASE.ROUND_RESULT);
+  assert.equal(g.result.loserId, second, '4 är lägre än 9');
   assert.equal(g.result.capReached, true);
-  assert.equal(g.result.multiplier, 20, 'senast giltiga multiplier');
+  assert.equal(g.result.multiplier, 20, 'senaste nivåns multiplier');
+  assert.equal(g.result.loserValue, 13, 'slutvärdet i den senaste mini-gurschen (K)');
+  assert.equal(g.result.tiebreak.length, 1);
+});
+
+test('[R31] 7:an räknas som 7 i dragningen', () => {
+  const { g, clock } = setupTiebreak();
+  const [first, second] = g.round.tiebreak.participants;
+  rigSlots(g, ['7', '8']);
+  pick(g, first, 0);
+  pick(g, second, 1);
+  clock.t = g.nextWakeup();
+  g.tick();
+  assert.equal(g.result.loserId, first);
+});
+
+test('[R31] lika lågt ger en ny dragomgång bland de lika', () => {
+  const { g, clock } = setupTiebreak();
+  const [first, second] = g.round.tiebreak.participants;
+  rigSlots(g, ['J', 'J', 'A', '2']);
+  pick(g, first, 0);
+  pick(g, second, 1);
+  assert.equal(g.round.tiebreak.drawNumber, 2);
+  assert.equal(g.currentTurnPlayerId(), first);
+  assert.throws(() => pick(g, first, 0), /dolda/, 'ett redan valt kort kan inte väljas igen');
+  pick(g, first, 2);
+  pick(g, second, 3);
+  clock.t = g.nextWakeup();
+  g.tick();
+  assert.equal(g.result.loserId, second);
+  assert.equal(g.result.tiebreak.length, 2);
+});
+
+test('[R31] [A2] de dolda korten syns inte i det publika läget', () => {
+  const { g } = setupTiebreak();
+  const [first] = g.round.tiebreak.participants;
+  pick(g, first, 5);
+  const pub = g.publicState();
+  assert.equal(pub.tiebreak.slotCount, 46);
+  assert.equal(pub.tiebreak.taken.length, 1);
+  assert.equal(pub.tiebreak.taken[0].slot, 5);
+  const hiddenIds = g.round.tiebreak.slots.filter((_, i) => i !== 5).map((c) => c.id);
+  const json = JSON.stringify(pub);
+  for (const id of hiddenIds) assert.ok(!json.includes(`"${id}"`), `dolt kort ${id} läcker`);
+});
+
+test('[R31] [A3] fel spelare och ogiltigt index avvisas', () => {
+  const { g } = setupTiebreak();
+  const [first, second] = g.round.tiebreak.participants;
+  assert.throws(() => pick(g, second, 0), /tur/);
+  assert.throws(() => pick(g, first, 999), /dolda/);
+  assert.throws(() => pick(g, 'leo', 0), /tur/);
+});
+
+test('[R31] [A1] turtimern väljer ett kort åt den som inte hinner', () => {
+  const g = setupTie({ miniGurschCap: 1, turnSeconds: 30 });
+  const clock = { t: 1_000_000 };
+  g.now = () => clock.t;
+  const mini = g.round.mini;
+  const [a, b] = mini.participants;
+  mini.hands.set(a, hand('K'));
+  mini.hands.set(b, hand('K'));
+  g.startTrick(mini, a);
+  play(g, a, mini.hands.get(a).slice());
+  play(g, b, mini.hands.get(b).slice());
+  const first = g.currentTurnPlayerId();
+  clock.t = g.nextWakeup();
+  assert.ok(g.tick());
+  assert.equal(g.round.tiebreak.draws[0][0].playerId, first);
+});
+
+test('[R31] [A6] pausen fryser väntan på resultatet', () => {
+  const { g, clock } = setupTiebreak();
+  const [first, second] = g.round.tiebreak.participants;
+  rigSlots(g, ['9', '4']);
+  pick(g, first, 0);
+  pick(g, second, 1);
+  const settleAt = g.round.tiebreak.settleAt;
+  const pausedAt = clock.t;
+  g.pause('axel');
+  clock.t = settleAt + 10_000;
+  assert.equal(g.tick(), false);
+  assert.equal(g.phase, PHASE.TIEBREAK_DRAW);
+  g.resume('axel');
+  assert.equal(g.round.tiebreak.settleAt, settleAt + (clock.t - pausedAt), 'flyttas fram med pausens längd');
+  clock.t = g.nextWakeup();
+  g.tick();
+  assert.equal(g.phase, PHASE.ROUND_RESULT);
 });
 
 test('[R4] mini-gursch påverkar inte dealerordningen', () => {

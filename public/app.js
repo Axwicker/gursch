@@ -554,6 +554,7 @@ const PHASE_TEXT = {
   FINAL_SLASK: 'Sista slaskchansen',
   TRICK: 'Stickspel',
   MINI_GURSCH: 'Mini-gursch',
+  TIEBREAK_DRAW: 'Dragning',
   ROUND_RESULT: 'Rundan är slut',
   LOBBY: 'Lobby',
 };
@@ -591,6 +592,11 @@ function renderCenter() {
       if (turn && t.plays.length && isFinalTrick(t.plays)) sub += ' · sista sticket';
       if (t.lastWinnerId && t.plays.length === 0) sub += ` · ${nickOf(t.lastWinnerId)} vann förra sticket`;
     }
+  } else if (S.tiebreak) {
+    const tb = S.tiebreak;
+    sub = tb.loserId ? `${tb.loserId === me ? 'Du' : nickOf(tb.loserId)} drog lägst och förlorar`
+      : turn ? `Högst kort vinner · ${yourTurn ? 'välj ett kort' : `${nickOf(turn)} väljer`}` : '';
+    if (!tb.loserId && tb.drawNumber > 1) sub += ` · omdragning ${tb.drawNumber - 1}`;
   } else if (S.phase === 'ROUND_RESULT') {
     sub = `${nickOf(S.result.loserId)} förlorade rundan`;
   }
@@ -659,6 +665,8 @@ let seenTrickNo = 0;   // numret på det senaste stick vi visade (för rundans s
 
 function renderTrickArea() {
   const area = $('trick-area');
+  area.classList.toggle('tiebreak', Boolean(S.tiebreak));
+  if (S.tiebreak) { renderTiebreak(area); return; }
   const t = S.trick;
   // Visa det pågående sticket, eller det senast avgjorda tills någon leder nästa.
   // När rundan är slut visas sista sticket kvar under pausen före resultatet.
@@ -714,6 +722,80 @@ function renderTrickArea() {
   if (showingLast || (final && plays.length)) nodes.push(trickCaption);
   if (S.negotiation || S.discardSelect?.deadline) nodes.push(centerTimer);
   syncChildren(area, nodes);
+}
+
+// ------------------------------------------------------------------ [R31] dragning
+
+const tbSlotNodes = new Map();   // "runda:plats" -> element
+const tbPicksRow = el('div', 'tb-picks');
+const tbGrid = el('div', 'tb-grid');
+tbGrid.setAttribute('role', 'group');
+
+/** Dolda kort på bordet. Den som har tur trycker på ett, och det vänds upp med namnet på. */
+function renderTiebreak(area) {
+  const tb = S.tiebreak;
+  const pickAction = P.actions.find((a) => a.type === 'tiebreakPick');
+  const canPick = new Set(pickAction?.options ?? []);
+  const taken = new Map(tb.taken.map((t) => [t.slot, t]));
+  tbGrid.setAttribute('aria-label', pickAction ? 'Välj ett dolt kort' : 'Dolda kort i dragningen');
+
+  const keys = Array.from({ length: tb.slotCount }, (_, i) => `${S.roundNumber}:${i}`);
+  const entries = keyedNodes(tbSlotNodes, keys, (key) => {
+    const slot = Number(key.split(':')[1]);
+    const b = el('button', 'tb-slot');
+    b.dataset.slot = slot;
+    b.append(backNode('mini-card'));
+    b.onclick = () => {
+      if (!P.actions.some((a) => a.type === 'tiebreakPick' && a.options.includes(slot))) return;
+      emit('action', { type: 'tiebreakPick', index: slot });
+    };
+    return b;
+  });
+  entries.forEach(({ node, isNew }, i) => {
+    if (isNew) enter(node, { opacity: 0, transform: 'translateY(-14px) rotate(-8deg) scale(.8)' }, { delay: Math.min(i * 12, 520), duration: 260 });
+    const t = taken.get(i);
+    node.disabled = !canPick.has(i);
+    node.classList.toggle('pickable', canPick.has(i));
+    if (t && !node.classList.contains('taken')) {
+      node.classList.add('taken');
+      const face = cardNode(t.card, 'mini-card');
+      node.replaceChildren(face, el('span', 'tb-name', t.playerId === me ? 'Du' : nickOf(t.playerId)));
+      if (animationsOn() && !document.hidden) {
+        face.animate(reducedMotion.matches ? [{ opacity: 0 }, { opacity: 1 }]
+          : [{ transform: 'rotateY(90deg) scale(1.25)' }, { transform: 'rotateY(0) scale(1.1)', offset: .6 }, { transform: 'none' }],
+        { duration: 420, easing: 'cubic-bezier(.2,.8,.3,1)' });
+      }
+    }
+    node.classList.toggle('old', Boolean(t) && t.drawNumber < tb.drawNumber);
+    node.setAttribute('aria-label', t ? `${nickOf(t.playerId)} drog ${cardNames([t.card])}` : `Dolt kort ${i + 1}`);
+  });
+  syncChildren(tbGrid, entries.map((e) => e.node));
+
+  // Den aktuella dragomgången i klartext: vem som drog vad, lägst markerat när alla dragit.
+  const draw = tb.draws.at(-1) ?? [];
+  const done = draw.length === tb.active.length;
+  const lowest = Math.min(...draw.map((d) => d.card.rank));
+  tbPicksRow.replaceChildren(...tb.active.map((id) => {
+    const d = draw.find((x) => x.playerId === id);
+    const chip = el('span', `tb-pick${d && done && d.card.rank === lowest ? ' lowest' : ''}`,
+      `${id === me ? 'Du' : nickOf(id)}: ${d ? RANK_LABELS[d.card.rank] : '…'}`);
+    return chip;
+  }));
+  syncChildren(area, [tbPicksRow, tbGrid]);
+}
+
+/** Förklaringen som poppar upp när dragningen börjar. Försvinner av sig själv. */
+function showTiebreakIntro(e) {
+  const names = e.participants.map((id) => (id === me ? 'du' : nickOf(id))).join(' och ');
+  const box = el('div', 'tb-intro');
+  box.setAttribute('role', 'status');
+  box.append(
+    el('div', 'tb-intro-title', 'DRAGNING'),
+    el('p', '', `Mini-gursch-gränsen är nådd och det är fortfarande lika mellan ${names}.`),
+    el('p', '', 'Var och en väljer ett av de dolda korten, i tur och ordning. Högst kort vinner (2 lägst, A högst, 7:an är 7). Den som drar lägst betalar.'),
+  );
+  $('fx').append(box);
+  setTimeout(() => box.remove(), 5200);
 }
 
 // ------------------------------------------------------------------ hand + actions
@@ -921,14 +1003,14 @@ function leadDescription() {
 // Knapparna återanvänds mellan uppdateringar (en per typ av drag). Bottarna skickar nytt
 // state hela tiden - att bygga om knapparna skulle ta bort fokus och tangentbordsnavigering.
 const actionNodes = new Map();   // actiontyp -> knapp eller knappgrupp
-const ACTION_CLASS = { discard: 'btn btn-primary', play: 'btn btn-primary', stay: 'btn', slask: 'btn btn-danger', pass: 'btn' };
+const ACTION_CLASS = { tiebreakPick: 'btn btn-primary', discard: 'btn btn-primary', play: 'btn btn-primary', stay: 'btn', slask: 'btn btn-danger', pass: 'btn' };
 
 /** Knappen säger vad den gör: "Spela 2 kort", "Släng 3 kort". */
 function actionLabel(a) {
   const n = selected.size;
   if (a.type === 'discard') { const k = a.free ? n : a.count; return k ? `Släng ${k} kort` : 'Släng'; }
   if (a.type === 'play') { const k = a.lead ? n : a.count; return k ? `Spela ${k} kort` : 'Spela'; }
-  return { stay: 'Stay', slask: 'Slask', pass: 'Pass' }[a.type];
+  return { stay: 'Stay', slask: 'Slask', pass: 'Pass', tiebreakPick: 'Dra ett slumpat kort' }[a.type];
 }
 
 function createActionNode(type) {
@@ -948,7 +1030,10 @@ function createActionNode(type) {
   const b = el('button', ACTION_CLASS[type]);
   b.onclick = () => {
     if (!P.actions.some((a) => a.type === type)) return;
-    if (type === 'discard' || type === 'play') {
+    if (type === 'tiebreakPick') {
+      const options = P.actions.find((a) => a.type === type).options;
+      emit('action', { type, index: options[Math.floor(Math.random() * options.length)] });
+    } else if (type === 'discard' || type === 'play') {
       emit('action', { type, cardIds: [...selected] });
       selected.clear();
     } else {
@@ -1013,7 +1098,7 @@ function renderSlask() {
   if (isNew && !isMine && !ps.callerId && mayMoveFocus()) btn.focus({ preventScroll: true });
 
   clearInterval(slaskInterval);
-  const total = (S.settings.slaskCallSeconds || 8) * 1000;
+  const total = (S.settings.slaskCallSeconds || 7) * 1000;
   const tick = () => {
     const left = Math.max(0, ps.deadline - timerNow());
     $('slask-bar').style.width = `${(left / total) * 100}%`;
@@ -1282,7 +1367,10 @@ function resultExplanation(r) {
   const each = Math.round(r.loserValue * r.multiplier);
   const pays = `betalar ${r.loserValue} × ${r.multiplier} = ${each} kr till var och en av de ${others} andra (${each * others} kr).`;
   if (r.capReached) {
-    return `Mini-gursch-gränsen nåddes vid lika slutvärde (${r.loserValue}). ${name} fick sitt kort sist i dealerordningen och ${pays}`;
+    const lastDraw = r.tiebreak?.at(-1) ?? [];
+    const card = lastDraw.find((d) => d.playerId === r.loserId)?.card;
+    const drew = card ? ` drog lägst i dragningen (${RANK_LABELS[card.rank]})` : ' förlorade dragningen';
+    return `Mini-gursch-gränsen nåddes vid lika slutvärde (${r.loserValue}). ${name}${drew} och ${pays}`;
   }
   const where = r.miniLevel ? ` i mini-gursch nivå ${r.miniLevel}` : '';
   return `${name} hade högst slutvärde${where} (${r.loserValue}) och ${pays}`;
@@ -1315,7 +1403,10 @@ function buildResultRows(r) {
   for (const m of r.miniHistory) {
     extra.append(el('div', '', `Mini-gursch nivå ${m.level}: ${m.participants.map((id) => `${nickOf(id)} ${m.values[id]}`).join(', ')} · ×${m.multiplier}`));
   }
-  if (r.capReached) extra.append(el('div', '', 'Mini-gursch-gränsen nåddes - losern avgjordes av dealerordningen.'));
+  (r.tiebreak ?? []).forEach((draw, i) => {
+    const label = i === 0 ? 'Dragning' : `Omdragning ${i}`;
+    extra.append(el('div', '', `${label}: ${draw.map((d) => `${nickOf(d.playerId)} ${RANK_LABELS[d.card.rank]}`).join(', ')}`));
+  });
 }
 
 // ------------------------------------------------------------------ kortflygningar
@@ -1694,6 +1785,9 @@ function handleEvents(events) {
         break;
       case 'quint': banner(e.quintTwo ? 'QUINT TWO!' : 'FIVE OF A KIND!'); beep(880, .25, 'sine', .06); break;
       case 'miniGursch': banner(`MINI-GURSCH ×${e.multiplier}`); chime([523, 659, 784]); break;
+      case 'tiebreak': showTiebreakIntro(e); chime([392, 523, 659]); break;
+      case 'tiebreakPick': beep(520 + e.card.rank * 20, .09, 'triangle', .05); announce(`${nickOf(e.playerId)} drog ${cardNames([e.card])}`); break;
+      case 'tiebreakAgain': banner('LIKA – DRA IGEN'); break;
       case 'money': flyMoney(e.playerId, e.amount); break;
       case 'roundResult': e.loserId === me ? chime([392, 330, 262], { step: 0.12 }) : chime([523, 659, 784, 1047]); break;
       case 'timeout':

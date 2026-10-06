@@ -198,11 +198,11 @@ test('[A3] fel fas och okända drag avvisas', () => {
   assert.throws(() => g.handleAction(g.currentTurnPlayerId(), { type: 'propose', count: 2 }), GameError);
 });
 
-test('[R16] säkerhetsspärr: efter 20 förhandlingar börjar spelet', () => {
+test('[R16] inget tak: 25 förhandlingar i rad där alla är överens fortsätter', () => {
   const { g, clock } = setup(['Axel', 'Erik']);
   firstDiscardRound(g);
-  let guard = 0;
-  while (g.phase === PHASE.NEGOTIATION && guard++ < 50) {
+  for (let i = 0; i < 25; i++) {
+    assert.equal(g.phase, PHASE.NEGOTIATION);
     proposeAll(g, 1);
     clock.t = g.round.negotiation.confirmAt;
     g.tick();
@@ -210,6 +210,11 @@ test('[R16] säkerhetsspärr: efter 20 förhandlingar börjar spelet', () => {
       g.handleAction(id, { type: 'discard', cardIds: [g.round.hands.get(id)[0].id] });
     }
   }
-  assert.ok([PHASE.FINAL_SLASK, PHASE.TRICK].includes(g.phase));
-  assert.equal(guard, 20);
+  assert.equal(g.phase, PHASE.NEGOTIATION);
+  assert.equal(g.round.negotiation.number, 26);
+});
+
+test('[R18] synatiden är 7 s som standard', () => {
+  const { g } = setup(['Axel', 'Erik']);
+  assert.equal(g.settings.slaskCallSeconds, 7);
 });
