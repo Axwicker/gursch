@@ -1,0 +1,21 @@
+# Betaservern på Render. Kopplas en gång via Render → New → Blueprint → det här repot.
+# Varje push till main deployar automatiskt. Rummen ligger i minnet och försvinner vid en
+# deploy eller när gratisservern somnar (efter 15 min utan trafik); rapporterna ligger i Supabase.
+services:
+  - type: web
+    name: gursch
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Fylls i för hand i Render-panelen (Environment) - aldrig i git.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false

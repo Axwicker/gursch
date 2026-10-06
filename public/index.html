@@ -57,6 +57,7 @@
     </div>
     <p class="home-error" id="home-error"></p>
     <p class="home-foot">2–5 spelare · en kortlek · alla börjar på 0 kr</p>
+    <p class="home-foot beta-note" id="beta-note">Betaversion – hittar du ett fel, tryck på flaggan i spelet och beskriv det.</p>
   </div>
 </section>
 
@@ -152,10 +153,11 @@
         <button class="btn btn-tool" id="btn-leave-game" aria-label="Lämna spelet" title="Lämna spelet"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></button>
         <span class="chip chip-round" id="chip-round">Runda 1</span>
         <span class="chip" id="chip-code" title="Rumskod"></span>
+        <span class="chip chip-beta" id="chip-beta" title="Testversion – rapportera allt som blir fel">BETA</span>
       </div>
       <div class="topbar-right">
         <!-- Ikoner: Lucide (ISC-licens). Etiketterna döljs på smala skärmar, aria-label finns alltid. -->
-        <button class="btn btn-tool" id="btn-report-top" aria-label="Rapportera fel" title="Rapportera ett regelfel – även mitt i rundan"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg><span class="tool-label">Rapportera fel</span></button>
+        <button class="btn btn-tool" id="btn-report-top" aria-label="Rapportera fel" title="Rapportera ett fel – även mitt i rundan"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg><span class="tool-label">Rapportera fel</span></button>
         <button class="btn btn-tool" id="btn-history" aria-label="Historik" title="Historik"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg><span class="tool-label">Historik</span></button>
         <button class="btn btn-tool" id="btn-chat-toggle" aria-label="Chatt" title="Chatt"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span class="tool-label">Chatt</span><span class="unread-dot" id="chat-unread" hidden></span></button>
       </div>
@@ -231,16 +233,24 @@
         <button class="btn btn-lg" id="btn-to-lobby">Till lobbyn</button>
       </div>
       <p class="hint" id="result-hint"></p>
-      <button class="btn btn-ghost btn-sm btn-report" id="btn-report">Rapportera regelfel</button>
+      <button class="btn btn-ghost btn-sm btn-report" id="btn-report">Rapportera fel</button>
     </div>
   </div>
 </section>
 
 <div class="result-overlay report-overlay" id="report-overlay" role="dialog" aria-modal="true" aria-labelledby="report-title">
   <div class="result-box report-box">
-    <h2 id="report-title">Rapportera regelfel</h2>
+    <h2 id="report-title">Rapportera fel</h2>
     <p class="hint">Beskriv vad som blev fel i runda <span id="report-round"></span>. Rapporten sparas
-      direkt i projektet med rundans alla drag – säg sedan till Claude att kolla rapporterna.</p>
+      med rundans alla drag, så att felet kan spelas upp och rättas. Ingen annan spelare ser den.</p>
+    <label>Vad gäller det?
+      <select id="report-category">
+        <option value="regel">Spelreglerna</option>
+        <option value="bugg">Något krånglade eller hängde sig</option>
+        <option value="utseende">Utseende eller text</option>
+        <option value="annat">Annat / förslag</option>
+      </select>
+    </label>
     <label>Vad blev fel?
       <textarea id="report-text" rows="4" maxlength="2000" placeholder="T.ex. Leo fick lägga en 9:a på en ensam 7:a"></textarea>
     </label>

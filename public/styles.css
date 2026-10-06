@@ -166,6 +166,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .home-panel.invited .home-bots { margin-top: 10px; }
 .home-error { color: var(--red); text-align: center; min-height: 20px; margin-top: 14px; font-size: var(--text-footnote); }
 .home-foot { text-align: center; color: var(--muted); font-size: var(--text-footnote); }
+.beta-note { margin-top: 6px; color: var(--gold-dim); }
+.chip-beta { color: var(--gold); border-color: rgba(232,200,119,.35); letter-spacing: .06em; font-weight: 700; }
+@media (max-width: 420px) { .chip-beta { display: none; } }   /* toppraden är full på mobil; versionen står på startsidan */
 
 /* ---------------------------------------------------------- lobby */
 .lobby-wrap {

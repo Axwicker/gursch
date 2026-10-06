@@ -1,15 +1,19 @@
 {
   "name": "gursch",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "Gursch - realtids multiplayer kortspel",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node src/server/index.js",
     "dev": "node --watch src/server/index.js",
     "test": "node --test \"test/*.test.js\"",
     "replay": "node scripts/replay.js",
-    "screenshots": "node scripts/screenshots.js"
+    "screenshots": "node scripts/screenshots.js",
+    "reports:pull": "node --env-file-if-exists=.env scripts/pull-reports.js"
   },
   "dependencies": {
     "express": "^4.19.2",

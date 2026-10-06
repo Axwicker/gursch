@@ -78,6 +78,24 @@ tillåtits). Med `{ "event": 23, "trickWinner": "<spelar-id>" }` ska den spelare
 sticket efter händelsen, och med `{ "result": { … } }` ska rundan sluta så. Utan `expect` ska
 uppspelningen ge samma resultat som när rundan spelades.
 
+## Betan online
+
+Betan körs på Render (`render.yaml`) med gratisplanen och deployas vid varje push till `main`.
+Rummen ligger i serverns minne och försvinner vid en deploy eller när servern somnat (efter
+15 minuter utan trafik, och första besöket tar sedan ca 30 s). Klienten säger då att rummet
+inte finns längre.
+
+På Render är disken inte permanent, så rapporter och oväntade serverfel skrivs till Supabase
+(tabellerna `reports` och `server_errors`, `src/server/store.js`) när `SUPABASE_URL` och
+`SUPABASE_SECRET_KEY` är satta. Utan dem (lokalt) sparas rapporterna som filer i `reports/`.
+
+```bash
+npm run reports:pull     # hämtar nya rapporter till reports/ och nya serverfel (kräver .env)
+```
+
+`.env` (inte i git) innehåller `SUPABASE_URL=…` och `SUPABASE_SECRET_KEY=…`. Höj `version` i
+package.json vid varje deploy. Versionen visas i spelet och sparas i varje rapport.
+
 ## Skärmbilder
 
 UI:t har inga tester. `npm run screenshots` startar en egen server (port 3217, fast slumpfrö),

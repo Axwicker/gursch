@@ -6,8 +6,9 @@ import { Server } from 'socket.io';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { RoomManager } from './rooms.js';
+import { createStore } from './store.js';
 import { GameError, BOT_LEVELS } from '../engine/game.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -16,6 +17,14 @@ const ENGINE_DIR = path.join(__dirname, '../engine');
 const REPORTS_DIR = path.join(__dirname, '../../reports');
 const PORT = process.env.PORT || 3000;
 const HOST_GRACE_MS = 30_000;
+const VERSION = JSON.parse(readFileSync(path.join(__dirname, '../../package.json'), 'utf8')).version;
+const REPORT_CATEGORIES = ['regel', 'bugg', 'utseende', 'annat'];
+const REPORTS_PER_MINUTE = 3;
+
+const store = createStore({ reportsDir: REPORTS_DIR, version: VERSION });
+const logError = (room, error) => store.logError({ room: room?.code ?? null, phase: room?.game.phase ?? null, error });
+process.on('uncaughtException', (err) => logError(null, err));
+process.on('unhandledRejection', (err) => logError(null, err));
 
 const app = express();
 const httpServer = createServer(app);
@@ -25,10 +34,10 @@ app.use(express.static(PUBLIC_DIR));
 // Klienten importerar kombinationsreglerna härifrån för förhandsvisning av valda kort.
 // Servern är fortfarande ensam om att avgöra - samma kod, en sanning.
 app.use('/engine', express.static(ENGINE_DIR));
-app.get('/health', (_req, res) => res.json({ ok: true, rooms: manager.rooms.size }));
+app.get('/health', (_req, res) => res.json({ ok: true, version: VERSION, rooms: manager.rooms.size }));
 app.get('/join/:code', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
 
-const manager = new RoomManager({ onBroadcast: (room) => broadcast(room) });
+const manager = new RoomManager({ onBroadcast: (room) => broadcast(room), onError: logError });
 setInterval(() => manager.sweep(), 60_000).unref?.();
 
 /** Skickar publikt state till alla och privat state till rätt spelare. */
@@ -64,7 +73,7 @@ function withRoom(socket, cb, fn) {
     ack(cb, { ok: true });
   } catch (err) {
     if (err instanceof GameError) ack(cb, { error: err.message });
-    else { console.error(err); ack(cb, { error: 'Serverfel' }); }
+    else { logError(room, err); ack(cb, { error: 'Serverfel' }); }
     // State förstörs aldrig av en ogiltig action - skicka ändå ut aktuellt state.
     broadcast(room);
   }
@@ -213,37 +222,42 @@ io.on('connection', (socket) => {
     withRoom(socket, cb, (room, playerId) => room.game.addChat(playerId, text));
   });
 
-  // Felrapport som sparas direkt i projektets reports/-mapp. Loggen lämnar aldrig servern,
-  // så den kan tas även mitt i en runda utan att avslöja någons kort för spelarna.
-  socket.on('submitReport', ({ description } = {}, cb) => {
+  // Felrapport. Sparas som fil lokalt och i Supabase på betaservern (store.js). Loggen lämnar
+  // aldrig servern, så den kan tas även mitt i en runda utan att avslöja någons kort.
+  socket.on('submitReport', async ({ description, category } = {}, cb) => {
     const room = manager.getRoom(socket.data.code);
     const playerId = socket.data.playerId;
     if (!room || !playerId) return ack(cb, { error: 'Du är inte med i rummet' });
     const text = String(description ?? '').trim().slice(0, 2000);
     if (!text) return ack(cb, { error: 'Beskriv vad som blev fel' });
+    const now = Date.now();
+    socket.data.reportTimes = (socket.data.reportTimes ?? []).filter((t) => now - t < 60_000);
+    if (socket.data.reportTimes.length >= REPORTS_PER_MINUTE) {
+      return ack(cb, { error: 'Vänta en minut innan du skickar fler rapporter' });
+    }
     const log = room.game.reportLog();
     if (!log) return ack(cb, { error: 'Det finns ingen runda att rapportera' });
     const report = {
       format: 'gursch-report',
       version: 1,
+      appVersion: VERSION,
+      category: REPORT_CATEGORIES.includes(category) ? category : 'annat',
       description: text,
       reportedBy: room.game.players.find((p) => p.id === playerId)?.nickname ?? '?',
       room: room.code,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(now).toISOString(),
       phaseWhenReported: room.game.phase,
       log,
     };
-    const stamp = report.createdAt.replace(/[:.]/g, '-');
-    const file = path.join(REPORTS_DIR, `${stamp}-runda-${log.roundNumber}.json`);
     try {
-      mkdirSync(REPORTS_DIR, { recursive: true });
-      writeFileSync(file, `${JSON.stringify(report, null, 2)}\n`);
+      const { where } = await store.saveReport(report);
+      socket.data.reportTimes.push(now);
+      console.log(`Felrapport sparad: ${where}`);
+      ack(cb, { ok: true });
     } catch (err) {
-      console.error('Kunde inte spara rapport:', err);
-      return ack(cb, { error: 'Kunde inte spara rapporten' });
+      logError(room, err);
+      ack(cb, { error: 'Kunde inte spara rapporten – försök igen' });
     }
-    console.log(`Felrapport sparad: ${path.relative(process.cwd(), file)}`);
-    ack(cb, { ok: true, file: path.basename(file) });
   });
 
   socket.on('leaveRoom', (_p, cb) => {
@@ -264,5 +278,5 @@ io.on('connection', (socket) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`Gursch kör på http://localhost:${PORT}`);
+  console.log(`Gursch ${VERSION} kör på http://localhost:${PORT} (rapporter: ${store.mode === 'supabase' ? 'Supabase' : 'reports/'})`);
 });

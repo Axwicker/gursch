@@ -1273,12 +1273,12 @@ $('btn-report-save').onclick = () => {
   if (!description) { toast('Beskriv vad som blev fel', true); return; }
   const btn = $('btn-report-save');
   btn.disabled = true;
-  socket.emit('submitReport', { description }, (res) => {
+  socket.emit('submitReport', { description, category: $('report-category').value }, (res) => {
     btn.disabled = false;
     if (res?.error) { toast(res.error, true); return; }
     $('report-text').value = '';
     closeReport();
-    toast('Rapporten sparades – säg till Claude att kolla rapporterna');
+    toast('Tack! Rapporten är sparad.');
   });
 };
 
@@ -1857,6 +1857,11 @@ socket.on('connect', () => {
         const wasInRoom = store.room === roomCode;
         store.room = null;
         showScreen('screen-home');
+        // Rummen ligger i serverns minne: efter en omstart (ny version, eller när betaservern
+        // somnat) finns rummet inte längre. Säg det rakt ut i stället för att bara hamna på start.
+        if (wasInRoom && res.error === 'Fel rumskod') {
+          toast('Servern har startats om och rummet finns inte längre – skapa ett nytt rum', true);
+        }
         if (urlCode) { showInvite(urlCode); if (wasInRoom) $('home-error').textContent = res.error; }
       } else if (res.reconnected) {
         toast('Återansluten');
@@ -1879,3 +1884,10 @@ $('player-nick').value = store.nickname;
 for (const radio of document.querySelectorAll('input[name="practice-level"]')) radio.checked = radio.value === store.level;
 const urlCode = location.pathname.startsWith('/join/') ? location.pathname.split('/')[2]?.toUpperCase() : null;
 if (urlCode) showInvite(urlCode);
+
+// Betaversionen visas i toppraden, så att det syns vilken version en rapport gäller.
+fetch('/health').then((r) => r.json()).then(({ version }) => {
+  if (!version) return;
+  $('chip-beta').textContent = `BETA ${version}`;
+  $('beta-note').textContent = `Beta ${version} – hittar du ett fel, tryck på flaggan i spelet och beskriv det.`;
+}).catch(() => {});

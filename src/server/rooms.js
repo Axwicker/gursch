@@ -17,9 +17,10 @@ const secureRng = () => randomInt(2 ** 47) / 2 ** 47;
 const roomRng = () => (process.env.GURSCH_SEED ? seededRandom(Number(process.env.GURSCH_SEED)) : secureRng);
 
 export class RoomManager {
-  constructor({ onBroadcast } = {}) {
+  constructor({ onBroadcast, onError } = {}) {
     this.rooms = new Map();          // code -> room
     this.onBroadcast = onBroadcast;  // (room) => void
+    this.onError = onError ?? ((_room, err) => console.error(err));   // (room, err) => void
   }
 
   createCode() {
@@ -74,7 +75,7 @@ export class RoomManager {
       room.turnTimerDeadline = null;
       try {
         room.game.tick();
-      } catch (err) { console.error('Speltimer:', err); }
+      } catch (err) { this.onError(room, err); }
       this.onBroadcast?.(room);   // broadcast synkar timern för nästa deadline
     }, Math.max(0, deadline - Date.now()));
   }
@@ -130,7 +131,7 @@ export class RoomManager {
         if (action) g.handleAction(pid, action);
       } catch (err) {
         // Botten får aldrig låsa spelet: gör det passiva draget istället.
-        console.error(`Botdrag misslyckades (${pid}):`, err.message);
+        this.onError(room, err);
         g.handleAction(pid, g.timeoutAction(pid));
       }
     }), delay);
@@ -179,7 +180,7 @@ export class RoomManager {
 
   runBot(room, fn) {
     if (this.rooms.get(room.code) !== room || room.game.paused) return;
-    try { fn(); } catch (err) { console.error('Bot:', err); }
+    try { fn(); } catch (err) { this.onError(room, err); }
     this.onBroadcast?.(room);
   }
 
