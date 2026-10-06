@@ -31,3 +31,6 @@ create index if not exists server_errors_unpulled on public.server_errors (creat
 alter table public.reports enable row level security;
 alter table public.server_errors enable row level security;
 revoke all on public.reports, public.server_errors from anon, authenticated;
+
+-- Nya Supabase-projekt har public.rls_auto_enable(); stäng den för anon/authenticated:
+-- revoke execute on function public.rls_auto_enable() from public, anon, authenticated;
