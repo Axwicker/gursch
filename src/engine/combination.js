@@ -43,21 +43,25 @@ export function isClean(cards) { return evaluateCombination(cards).type === CLEA
 export function isSemiMixed(cards) { return evaluateCombination(cards).type === SEMI; }
 export function isMixed(cards) { return evaluateCombination(cards).type === MIXED; }
 
-/** Sorteringsnyckel för stick: [trickValue, clean>semi]. Mixed vinner aldrig. */
-function trickKey(combo) {
-  if (combo.type === MIXED) return [-1, -1];
-  return [combo.trickValue, combo.type === CLEAN ? 1 : 0];
-}
-
 /**
- * compareCombinations(a, b) -> >0 om a är starkare, <0 om svagare, 0 om exakt lika.
- * Vid 0 gäller att den som spelade SIST vinner (hanteras i stickupplösningen).
+ * compareCombinations(a, b) - tar a (lagd senare) över ledningen från b?
+ *   >0  a tar ledningen: minst lika högt värde OCH minst lika "ren" (clean > semi-mixed),
+ *       och bättre i minst ett av dem
+ *    0  exakt lika värde och typ - den som lade sist tar ledningen
+ *   <0  b behåller ledningen
+ * Ett högre semi-mixed tar alltså inte över ett clean (A,7 tar inte 8,8), och ett clean
+ * med lägre värde tar inte över ett högre semi-mixed (2,2 tar inte A,7). Mixed vinner aldrig.
+ * Jämförelsen är inte symmetrisk: ordningen (vem som lade först) spelar roll.
  */
 export function compareCombinations(aCards, bCards) {
-  const a = trickKey(evaluateCombination(aCards));
-  const b = trickKey(evaluateCombination(bCards));
-  if (a[0] !== b[0]) return a[0] - b[0];
-  return a[1] - b[1];
+  const a = evaluateCombination(aCards);
+  const b = evaluateCombination(bCards);
+  if (a.type === MIXED) return -1;
+  if (b.type === MIXED) return 1;
+  const aClean = a.type === CLEAN ? 1 : 0;
+  const bClean = b.type === CLEAN ? 1 : 0;
+  if (a.trickValue === b.trickValue && aClean === bClean) return 0;
+  return a.trickValue >= b.trickValue && aClean >= bClean ? 1 : -1;
 }
 
 /** Får kombinationen leda ett stick? (måste vara clean eller semi-mixed) */

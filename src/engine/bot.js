@@ -264,7 +264,7 @@ function payoff(g, pub, botId, order) {
   const values = candidates.map((id) => r.finalValues.get(id));
   const max = Math.max(...values);
   const tied = candidates.filter((id) => r.finalValues.get(id) === max);
-  const V = pub.mini ? pub.mini.tiedValue : max;
+  const V = max;   // även i mini-gursch: det man går ut på är det man betalar för
   const n = pub.players.length;
   if (!tied.includes(botId)) return V;
   // Vid lika avgör mini-gursch - räkna det som ett lotteri mellan de lika.

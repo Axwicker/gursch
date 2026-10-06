@@ -1,0 +1,273 @@
+{
+  "format": "gursch-report",
+  "version": 1,
+  "description": "a 7 ska inte vinna över 8 8\ntvå rena kort vinner alltid mot semi blandat",
+  "reportedBy": "axel",
+  "room": "6EH5",
+  "createdAt": "2026-10-01T11:42:32.410Z",
+  "phaseWhenReported": "TRICK",
+  "log": {
+    "format": "gursch-round",
+    "version": 1,
+    "roundNumber": 14,
+    "seed": 1052530265,
+    "dealerIndex": 1,
+    "startedAt": 1790854866195,
+    "settings": {
+      "multiplierMode": "fixed",
+      "multiplierValue": 5,
+      "flopMultFactor": 1,
+      "maxSlasks": 3,
+      "miniGurschCap": 0,
+      "chatEnabled": true,
+      "animations": true,
+      "sound": true,
+      "slaskCallSeconds": 8,
+      "turnSeconds": 45,
+      "negotiationSeconds": 20
+    },
+    "players": [
+      {
+        "id": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "nickname": "axel",
+        "balance": 235,
+        "isBot": false,
+        "botLevel": null
+      },
+      {
+        "id": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "nickname": "Vän 1",
+        "balance": -235,
+        "isBot": false,
+        "botLevel": null
+      }
+    ],
+    "events": [
+      {
+        "t": 1790854872241,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S10",
+            "C10",
+            "H5",
+            "C3"
+          ]
+        }
+      },
+      {
+        "t": 1790854876430,
+        "playerId": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H3",
+            "C4",
+            "D13",
+            "H13"
+          ]
+        }
+      },
+      {
+        "t": 1790854878811,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "propose",
+          "count": 4
+        }
+      },
+      {
+        "t": 1790854879861,
+        "playerId": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "action": {
+          "type": "propose",
+          "count": 4
+        }
+      },
+      {
+        "t": 1790854881862,
+        "tick": true
+      },
+      {
+        "t": 1790854884819,
+        "playerId": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S9",
+            "C11",
+            "C13",
+            "S13"
+          ]
+        }
+      },
+      {
+        "t": 1790854886412,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D9",
+            "C9",
+            "D6",
+            "D4"
+          ]
+        }
+      },
+      {
+        "t": 1790854889419,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "propose",
+          "count": 3
+        }
+      },
+      {
+        "t": 1790854889537,
+        "playerId": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "action": {
+          "type": "propose",
+          "count": 1
+        }
+      },
+      {
+        "t": 1790854893899,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "propose",
+          "count": 1
+        }
+      },
+      {
+        "t": 1790854895899,
+        "tick": true
+      },
+      {
+        "t": 1790854896943,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "C12"
+          ]
+        }
+      },
+      {
+        "t": 1790854897568,
+        "playerId": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D11"
+          ]
+        }
+      },
+      {
+        "t": 1790854899594,
+        "playerId": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "action": {
+          "type": "propose",
+          "count": 1
+        }
+      },
+      {
+        "t": 1790854900752,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "propose",
+          "count": 1
+        }
+      },
+      {
+        "t": 1790854902753,
+        "tick": true
+      },
+      {
+        "t": 1790854904235,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "C14"
+          ]
+        }
+      },
+      {
+        "t": 1790854904284,
+        "playerId": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H12"
+          ]
+        }
+      },
+      {
+        "t": 1790854906406,
+        "playerId": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "action": {
+          "type": "propose",
+          "count": 1
+        }
+      },
+      {
+        "t": 1790854907725,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "stay"
+        }
+      },
+      {
+        "t": 1790854908935,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1790854910506,
+        "playerId": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1790854911575,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "H8",
+            "C8"
+          ]
+        }
+      },
+      {
+        "t": 1790854919544,
+        "playerId": "5a8b7ca2-0f53-43c9-91a1-958daebd3638",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "H14",
+            "C7"
+          ]
+        }
+      },
+      {
+        "t": 1790854937907,
+        "pause": true,
+        "playerId": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a"
+      }
+    ],
+    "result": null,
+    "inProgress": true
+  },
+  "expect": [
+    {
+      "event": 23,
+      "trickWinner": "d248c27f-8e66-4c17-b5e3-e80fea9cb23a"
+    }
+  ],
+  "note": "R25: clean 8,8 slår semi-mixed A,7."
+}

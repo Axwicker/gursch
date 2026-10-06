@@ -89,7 +89,7 @@ test('[R23] sticket definieras av utspelet - alla måste spela lika många kort'
   // Q,Q är varken 7:or, minst A (som leder) eller Leos lägsta kort (4,Q) - ogiltigt
   assert.throws(() => play(g, 'leo', r.hands.get('leo').slice(0, 2)), /lägsta/);
   play(g, 'leo', [r.hands.get('leo')[0], r.hands.get('leo')[2]]);   // Q,4 = hans två lägsta
-  assert.equal(r.tricks[0].winnerId, 'erik', 'A,7 (14) slår K,K (13)');
+  assert.equal(r.tricks[0].winnerId, 'axel', 'clean K,K slår semi-mixed A,7');
 });
 
 test('[R22] mixed utspel är inte ett giltigt ledutspel', () => {
@@ -104,5 +104,16 @@ test('[R24] spelare måste inte slå - 7:a plus lägsta kort går', () => {
   const r = rigRound(g, { axel: hand('A', 'A', '5'), erik: hand('2', '2', '7') }, 'axel');
   play(g, 'axel', r.hands.get('axel').slice(0, 2));
   play(g, 'erik', [r.hands.get('erik')[0], r.hands.get('erik')[2]]); // 2,7 trots att inget slår
+  assert.equal(r.tricks[0].winnerId, 'axel');
+});
+
+test('[R25] ledningen avgörs i spelordning: 8,8 → A,7 → 2,2 vinns av 8,8', () => {
+  const g = makeGame(['Axel', 'Erik', 'Leo']);
+  const r = rigRound(g, {
+    axel: hand('8', '8', '4'), erik: hand('A', '7', '3'), leo: hand('2', '2', 'K'),
+  }, 'axel');
+  play(g, 'axel', r.hands.get('axel').slice(0, 2));
+  play(g, 'erik', r.hands.get('erik').slice(0, 2));   // semi-mixed tar inte över clean
+  play(g, 'leo', r.hands.get('leo').slice(0, 2));     // lägre clean tar inte över
   assert.equal(r.tricks[0].winnerId, 'axel');
 });

@@ -123,6 +123,14 @@ for (const file of files) {
       assert.doesNotThrow(() => log.events.slice(0, ok.event + 1).forEach((e) => applyEvent(game, clock, e)),
         `händelse ${ok.event} ska vara tillåten: ${ok.why ?? ''}`);
     }
+    // "trickWinner": efter händelsen ska det senaste sticket ha vunnits av den spelaren.
+    for (const tw of expectations.filter((x) => x.trickWinner)) {
+      const { game, clock } = startReplay(log);
+      log.events.slice(0, tw.event + 1).forEach((e) => applyEvent(game, clock, e));
+      assert.equal(game.round.tricks.at(-1)?.winnerId, tw.trickWinner, `fel vinnare i sticket efter händelse ${tw.event}`);
+    }
+    // Dragen efter ett felaktigt avgjort stick spelades med fel ledare - de går inte att spela upp.
+    if (expectations.some((x) => x.trickWinner) && !expectations.some((x) => x.result)) return;
     const rejected = expectations.find((x) => x.rejected !== undefined);
     if (rejected) {
       // Felet var ett drag som aldrig borde ha tillåtits: allt före ska gå, just det ska avvisas.

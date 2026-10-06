@@ -112,8 +112,15 @@ En 7:a räknas som ess bara när den spelas ut ensam.
 ⚠️ "Lägsta" räknas bland korten man inte redan lägger som 7:a eller högt kort. Med handen
 7,9,K,A mot Q,Q går alltså 7+9, men inte K+9, eftersom den kvarvarande 7:an är lägre än 9:an.
 
-**R25.** Sticket vinns av den bästa kombinationen: högre värde vinner. Vid samma värde slår
-clean semi-mixed. Mixed vinner aldrig. Vid exakt lika vinner den som lade sist.
+**R25.** Den som lagt den bästa kombinationen hittills leder sticket. Ett senare spel tar
+över ledningen bara om det har minst lika högt värde *och* är minst lika rent (clean är
+renare än semi-mixed), och är bättre i minst ett av dem. Exempel:
+- A,7 efter 8,8: tar inte över, ett semi-mixed slår aldrig ett clean.
+- 2,2 efter A,7: tar inte över, lägre värde vinner aldrig, även om det är clean.
+- K,K efter K,7, eller A,7 efter K,7: tar över.
+
+Mixed vinner aldrig. Vid exakt lika (samma värde och typ) vinner den som lade sist.
+Ordningen spelar roll: med tre spelare kan 8,8 → A,7 → 2,2 sluta med att 8,8 vinner.
 
 ## Slutvärde och betalning
 
@@ -137,13 +144,13 @@ annan spelare.
 den som fick sitt kort sist). Multipliern gångras med antalet deltagare. Sedan spelas det
 som ett vanligt stickspel.
 
-**R30.** ⚠️ Förloraren betalar rundans lika slutvärde × den höjda multipliern.
-Mini-gurschen avgör alltså vem som betalar, inte hur mycket per poäng.
+**R30.** Förloraren betalar sitt slutvärde i mini-gurschen (det man gick ut på där) × den
+höjda multipliern. Rundans lika slutvärde spelar ingen roll längre.
 
 **R31.** Blir det lika igen spelas en ny mini-gursch (*mini-mini-gursch*) med ännu högre
 multiplier. Inställningen *Mini-gursch cap* begränsar antalet nivåer.
-⚠️ När gränsen nås förlorar den av de lika som fick sitt kort sist, och multipliern från
-senaste giltiga nivå gäller.
+⚠️ När gränsen nås förlorar den av de lika som fick sitt kort sist. Slutvärdet från den
+senast spelade nivån och multipliern från senaste giltiga nivå gäller.
 
 ---
 

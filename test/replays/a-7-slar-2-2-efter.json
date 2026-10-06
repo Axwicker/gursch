@@ -1,0 +1,199 @@
+{
+  "format": "gursch-report",
+  "version": 1,
+  "description": "jag borde inte vunnit, han la a, 7 och jag la två tvåor, jag borde inte vunnit eftersom han har högre och jag lägger efter, även om jag har clean.",
+  "reportedBy": "Axel",
+  "room": "28DR",
+  "createdAt": "2026-10-06T10:35:29.758Z",
+  "phaseWhenReported": "TRICK",
+  "log": {
+    "format": "gursch-round",
+    "version": 1,
+    "roundNumber": 24,
+    "seed": 738514417,
+    "dealerIndex": 1,
+    "startedAt": 1791282835528,
+    "settings": {
+      "multiplierMode": "flop",
+      "multiplierValue": 10,
+      "flopMultFactor": 1,
+      "maxSlasks": 3,
+      "miniGurschCap": 0,
+      "chatEnabled": true,
+      "animations": true,
+      "sound": true,
+      "slaskCallSeconds": 8,
+      "turnSeconds": 45,
+      "negotiationSeconds": 20
+    },
+    "players": [
+      {
+        "id": "11b767af-c7d5-40ab-8f5a-4c3e2a0a855a",
+        "nickname": "Axel",
+        "balance": -269,
+        "isBot": false,
+        "botLevel": null
+      },
+      {
+        "id": "93ea0ab0-6f7c-4cff-b371-0d6484047fc9",
+        "nickname": "Vän 3",
+        "balance": 269,
+        "isBot": false,
+        "botLevel": null
+      }
+    ],
+    "events": [
+      {
+        "t": 1791282842275,
+        "playerId": "93ea0ab0-6f7c-4cff-b371-0d6484047fc9",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S11",
+            "S9",
+            "H4",
+            "C5"
+          ]
+        }
+      },
+      {
+        "t": 1791282845836,
+        "playerId": "11b767af-c7d5-40ab-8f5a-4c3e2a0a855a",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "C11",
+            "D9",
+            "D4",
+            "D13"
+          ]
+        }
+      },
+      {
+        "t": 1791282848060,
+        "playerId": "93ea0ab0-6f7c-4cff-b371-0d6484047fc9",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1791282848144,
+        "playerId": "11b767af-c7d5-40ab-8f5a-4c3e2a0a855a",
+        "action": {
+          "type": "propose",
+          "count": 3
+        }
+      },
+      {
+        "t": 1791282851952,
+        "playerId": "11b767af-c7d5-40ab-8f5a-4c3e2a0a855a",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1791282853953,
+        "tick": true
+      },
+      {
+        "t": 1791282855126,
+        "playerId": "11b767af-c7d5-40ab-8f5a-4c3e2a0a855a",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D10",
+            "H8"
+          ]
+        }
+      },
+      {
+        "t": 1791282857006,
+        "playerId": "93ea0ab0-6f7c-4cff-b371-0d6484047fc9",
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S10",
+            "H11"
+          ]
+        }
+      },
+      {
+        "t": 1791282858952,
+        "playerId": "11b767af-c7d5-40ab-8f5a-4c3e2a0a855a",
+        "action": {
+          "type": "propose",
+          "count": 2
+        }
+      },
+      {
+        "t": 1791282859886,
+        "playerId": "93ea0ab0-6f7c-4cff-b371-0d6484047fc9",
+        "action": {
+          "type": "stay"
+        }
+      },
+      {
+        "t": 1791282861739,
+        "playerId": "93ea0ab0-6f7c-4cff-b371-0d6484047fc9",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1791282862751,
+        "playerId": "11b767af-c7d5-40ab-8f5a-4c3e2a0a855a",
+        "action": {
+          "type": "pass"
+        }
+      },
+      {
+        "t": 1791282869632,
+        "playerId": "93ea0ab0-6f7c-4cff-b371-0d6484047fc9",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "D14",
+            "H7"
+          ]
+        }
+      },
+      {
+        "t": 1791282872048,
+        "playerId": "11b767af-c7d5-40ab-8f5a-4c3e2a0a855a",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "D2",
+            "S2"
+          ]
+        }
+      },
+      {
+        "t": 1791282891656,
+        "playerId": "11b767af-c7d5-40ab-8f5a-4c3e2a0a855a",
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "C13"
+          ]
+        }
+      },
+      {
+        "t": 1791282893034,
+        "pause": true,
+        "playerId": "11b767af-c7d5-40ab-8f5a-4c3e2a0a855a"
+      }
+    ],
+    "result": null,
+    "inProgress": true
+  },
+  "expect": [
+    {
+      "event": 13,
+      "trickWinner": "93ea0ab0-6f7c-4cff-b371-0d6484047fc9"
+    }
+  ],
+  "note": "R25: clean 2,2 efter semi-mixed A,7 tar inte över - lägre värde vinner aldrig."
+}

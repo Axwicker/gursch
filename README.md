@@ -74,7 +74,9 @@ npm run replay -- rapport.json --until 12 # stanna före händelse 12 och visa a
 
 Rapporter i `test/replays/` spelas upp i varje testkörning. Med `"expect": [{ "event": 33,
 "rejected": "…" }]` ska just den händelsen avvisas (felet var ett drag som aldrig borde ha
-tillåtits). Utan `expect` ska uppspelningen ge samma resultat som när rundan spelades.
+tillåtits). Med `{ "event": 23, "trickWinner": "<spelar-id>" }` ska den spelaren ha vunnit
+sticket efter händelsen, och med `{ "result": { … } }` ska rundan sluta så. Utan `expect` ska
+uppspelningen ge samma resultat som när rundan spelades.
 
 ## Skärmbilder
 

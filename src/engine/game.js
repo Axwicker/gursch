@@ -1156,12 +1156,12 @@ export class GurschGame {
     if (tied.length === 1) {
       return this.settleRound({
         loserId: tied[0],
-        loserValue: mini.tiedValue,     // rundans slutvärde avgör beloppet
+        loserValue: maxValue,           // slutvärdet i mini-gurschen avgör beloppet
         multiplier: mini.multiplier,
         miniLevel: mini.level,
       });
     }
-    return this.startMiniGursch(tied, mini.tiedValue, mini.multiplier, mini.level + 1);
+    return this.startMiniGursch(tied, maxValue, mini.multiplier, mini.level + 1);
   }
 
   settleRound({ loserId, loserValue, multiplier, miniLevel = 0, capReached = false }) {
@@ -1187,14 +1187,18 @@ export class GurschGame {
       quintExitPlayerId: r.quintExitPlayerId,
       miniHistory: r.miniHistory || [],
       slaskLog: r.slaskLog,
-      players: this.players.map((p) => ({
-        id: p.id,
-        nickname: p.nickname,
-        finalValue: r.finalValues?.get(p.id) ?? null,
-        finalCards: (r.lastPlays.get(p.id) || []).map((c) => ({ id: c.id, rank: c.rank, suit: c.suit })),
-        change: changeByPlayer.get(p.id) || 0,
-        balance: p.balance,
-      })),
+      players: this.players.map((p) => {
+        // Den som spelade mini-gursch gick senast ut där - det är det värdet som gäller.
+        const ctx = (miniLevel || capReached) && r.mini?.participants.includes(p.id) ? r.mini : r;
+        return {
+          id: p.id,
+          nickname: p.nickname,
+          finalValue: ctx.finalValues?.get(p.id) ?? null,
+          finalCards: (ctx.lastPlays.get(p.id) || []).map((c) => ({ id: c.id, rank: c.rank, suit: c.suit })),
+          change: changeByPlayer.get(p.id) || 0,
+          balance: p.balance,
+        };
+      }),
     };
     this.result = result;
     this.rounds.push(result);

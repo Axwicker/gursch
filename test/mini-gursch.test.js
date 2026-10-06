@@ -47,7 +47,7 @@ test('[R29] mini-gursch multiplicerar multipliern med antalet deltagare', () => 
   assert.equal(g.round.mini.multiplier, 20, '10 x 2 deltagare');
 });
 
-test('[R30] mini-gursch avgör losern och betalningen använder rundans slutvärde', () => {
+test('[R30] mini-gursch avgör losern och betalningen använder slutvärdet i mini-gurschen', () => {
   const g = setupTie();
   const mini = g.round.mini;
   // Rigga mini-händerna: startaren har K, motståndaren A
@@ -63,10 +63,30 @@ test('[R30] mini-gursch avgör losern och betalningen använder rundans slutvär
   assert.equal(g.phase, PHASE.ROUND_RESULT);
   assert.equal(g.result.loserId, b, 'högst slutvärde i mini-gursch (A=14) blir loser');
   assert.equal(g.result.multiplier, 20);
-  assert.equal(g.result.loserValue, 14, 'rundans tie-värde');
+  assert.equal(g.result.loserValue, 14, 'A i mini-gurschen');
   const byId = Object.fromEntries(g.result.players.map((p) => [p.id, p]));
   assert.equal(byId[b].change, -14 * 20 * 2);
   assert.equal(byId.leo.change, 280);
+  assert.equal(byId[b].finalValue, 14, 'resultatet visar vad man gick ut på i mini-gurschen');
+  assert.deepEqual(byId[b].finalCards.map((c) => c.rank), [14]);
+  assert.equal(byId.leo.finalValue, 6, 'den som inte var med i mini-gurschen visar rundans värde');
+});
+
+test('[R30] beloppet följer mini-gurschens slutvärde, inte rundans lika värde', () => {
+  const g = setupTie();   // rundan slutade lika på 14
+  const mini = g.round.mini;
+  const [a, b] = [mini.starterId, mini.participants.find((id) => id !== mini.starterId)];
+  mini.hands.set(a, hand('4'));
+  mini.hands.set(b, hand('5'));
+  mini.visible.set(a, new Set());
+  mini.visible.set(b, new Set());
+  g.startTrick(mini, a);
+  play(g, a, mini.hands.get(a).slice());
+  play(g, b, mini.hands.get(b).slice());
+  assert.equal(g.result.loserId, b);
+  assert.equal(g.result.loserValue, 5);
+  const byId = Object.fromEntries(g.result.players.map((p) => [p.id, p]));
+  assert.equal(byId[b].change, -5 * 20 * 2);
   assert.equal(g.result.miniLevel, 1);
 });
 

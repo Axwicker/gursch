@@ -31,6 +31,20 @@ test('[R25] K,K slår K,7 (clean slår semi-mixed)', () => {
   assert.ok(compareCombinations(hand('K', 'K'), hand('K', '7')) > 0);
 });
 
+test('[R25] semi-mixed tar aldrig över ett clean, även med högre värde (rapport runda 14)', () => {
+  assert.ok(compareCombinations(hand('A', '7'), hand('8', '8')) < 0);
+  assert.ok(compareCombinations(hand('K', 'K', '7'), hand('2', '2', '2')) < 0);
+});
+
+test('[R25] clean med lägre värde tar inte över ett högre semi-mixed (rapport runda 24)', () => {
+  assert.ok(compareCombinations(hand('2', '2'), hand('A', '7')) < 0);
+  assert.ok(compareCombinations(hand('8', '8'), hand('A', '7')) < 0);
+});
+
+test('[R25] clean med högre värde tar över semi-mixed', () => {
+  assert.ok(compareCombinations(hand('A', 'A'), hand('K', '7')) > 0);
+});
+
 test('[R25] högre clean slår lägre clean', () => {
   assert.ok(compareCombinations(hand('A', 'A'), hand('K', 'K')) > 0);
   assert.ok(compareCombinations(hand('3', '3'), hand('2', '2')) > 0);
