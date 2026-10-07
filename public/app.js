@@ -1480,7 +1480,10 @@ function buildResultRows(r) {
   sorted.forEach((p, i) => {
     const row = el('div', `result-row${p.id === r.loserId ? ' loser' : ''}${p.id === me ? ' me' : ''}`);
     enter(row, { opacity: 0, transform: 'translateY(6px)' }, { delay: i * 70, duration: 250 });
-    row.append(el('div', 'name', p.nickname + (p.id === r.quintExitPlayerId ? ' 🥒' : '')));
+    const name = el('div', 'name', p.nickname);
+    // Gick ut med quint/five of a kind: ett litet guldmärke efter namnet (samma stil som DU i lobbyn).
+    if (p.id === r.quintExitPlayerId) name.append(el('span', 'tag tag-quint', 'Quint'));
+    row.append(name);
     row.append(el('div', 'val', p.finalValue === null ? '' : `slutvärde ${p.finalValue}`));
     const chg = el('div', `chg ${p.change >= 0 ? 'pos' : 'neg'}`, kr(p.change));
     countUp(chg, p.change, 120 + i * 70);

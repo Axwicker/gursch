@@ -236,7 +236,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .tag { padding: 3px 7px; border-radius: var(--gk-radie); border: var(--gk-ram) solid var(--gk-grund); color: var(--gk-grund);
   font-family: var(--gk-font-rubrik); font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
 .tag-host { background: var(--gk-grund); color: var(--gk-kram); }
-.tag-you { background: var(--gk-guld); }
+.tag-you, .tag-quint { background: var(--gk-guld); }
+.result-row .tag-quint { margin-left: 8px; vertical-align: 3px; }
 .bot-level { flex: none; }
 .btn-remove-bot { width: var(--tap); min-height: var(--tap); padding: 0; }
 .btn-remove-bot .icon { width: 18px; height: 18px; }
