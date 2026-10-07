@@ -1,9 +1,15 @@
 <!doctype html>
-<html lang="sv">
+<html lang="sv" class="gk-laddar">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Gursch</title>
+<!-- Typsnitt: Alfa Slab One (titlar), Barlow Condensed (knappar, rubriker, etiketter), Barlow (löptext) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" />
+<!-- gk.css: den nya designens variabler och gemensamma komponenter (klasser som börjar på gk-) -->
+<link rel="stylesheet" href="/gk.css" />
 <link rel="stylesheet" href="/styles.css" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%A5%92%3C/text%3E%3C/svg%3E" />
 </head>
@@ -12,52 +18,50 @@
 <!-- ============================ HOME ============================ -->
 <section id="screen-home" class="screen active">
   <div class="home-wrap">
-    <div class="brand">
-      <svg class="logo" viewBox="0 0 120 120" aria-hidden="true">
-        <defs>
-          <linearGradient id="pickle" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#8fd14f"/><stop offset="60%" stop-color="#4f9c2f"/><stop offset="100%" stop-color="#2f6a1d"/>
-          </linearGradient>
-        </defs>
-        <ellipse cx="60" cy="60" rx="30" ry="46" transform="rotate(-28 60 60)" fill="url(#pickle)" stroke="#1f4a14" stroke-width="3"/>
-        <g fill="#dff5c0" opacity=".85">
-          <ellipse cx="50" cy="42" rx="4" ry="6" transform="rotate(-28 50 42)"/>
-          <ellipse cx="64" cy="55" rx="4" ry="6" transform="rotate(-28 64 55)"/>
-          <ellipse cx="52" cy="70" rx="4" ry="6" transform="rotate(-28 52 70)"/>
-          <ellipse cx="70" cy="80" rx="3.5" ry="5" transform="rotate(-28 70 80)"/>
-        </g>
-      </svg>
-      <h1>GURSCH</h1>
-      <p class="tagline">Kortspelet med slask, sjuor och mini-gursch</p>
+    <!-- Vänster: lampan, ljuskäglan, ljusovalen och gurkmannen. Skuggan under skorna ingår i bilden. -->
+    <div class="home-scene">
+      <svg class="home-light" viewBox="0 0 560 800" aria-hidden="true"><polygon points="69,349 200,309 512,716 22,716" fill="#1a3329"/><ellipse cx="270" cy="716" rx="248" ry="50" fill="#28503e"/></svg>
+      <img class="home-lamp" src="/assets/golvlampa.png" alt="" />
+      <img class="home-mascot" src="/assets/gursch-maskot-med-skugga.png" alt="Gurkan: en gurka i fedora, solglasögon och kritstrecksrandig kostym med cigarr" />
     </div>
 
-    <div class="panel home-panel">
-      <label>Ditt namn<input id="player-nick" maxlength="16" placeholder="Axel" autocomplete="nickname" autocapitalize="words" enterkeyhint="done" /></label>
+    <div class="home-main">
+      <h1 class="home-title">GURSCH</h1>
 
-      <!-- Inbjuden via länk (/join/KOD): då är "Gå med" huvudvägen -->
-      <p class="home-invite" id="home-invite" hidden></p>
-
-      <div class="home-bots">
-        <div class="field-label" id="level-label">Bottarnas nivå</div>
-        <div class="segmented" role="radiogroup" aria-labelledby="level-label">
-          <label><input type="radio" name="practice-level" value="easy" /><span>Lätt</span></label>
-          <label><input type="radio" name="practice-level" value="medium" checked /><span>Medel</span></label>
-          <label><input type="radio" name="practice-level" value="hard" /><span>Svår</span></label>
+      <div class="home-panels" id="home-panels">
+        <div class="gk-panel home-create">
+          <h2 class="gk-panel-titel">Skapa spel</h2>
+          <!-- Namnfältet finns i båda panelerna och visar samma värde (synkas i app.js) -->
+          <label class="gk-field">Smeknamn<input id="player-nick" class="gk-input" maxlength="16" placeholder="Ditt smeknamn" autocomplete="nickname" autocapitalize="words" enterkeyhint="done" /></label>
+          <button id="btn-create" class="gk-btn gk-press-dark">Skapa spel</button>
+          <hr class="gk-avdelare home-split" />
+          <div class="gk-field">
+            <div id="level-label">Botnivå</div>
+            <div class="gk-seg gk-seg-light" role="radiogroup" aria-labelledby="level-label">
+              <label><input type="radio" name="practice-level" value="easy" /><span class="gk-seg-val">Lätt</span></label>
+              <label><input type="radio" name="practice-level" value="medium" checked /><span class="gk-seg-val">Medel</span></label>
+              <label><input type="radio" name="practice-level" value="hard" /><span class="gk-seg-val">Svår</span></label>
+            </div>
+          </div>
+          <button id="btn-practice" class="gk-btn gk-ghost-dark">Spela mot bottar</button>
         </div>
-        <button id="btn-practice" class="btn btn-primary btn-lg">Spela mot bottar</button>
+
+        <div class="gk-panel home-join">
+          <h2 class="gk-panel-titel">Gå med i spel</h2>
+          <!-- Inbjuden via länk (/join/KOD): då är "Gå med" huvudvägen -->
+          <p class="home-invite" id="home-invite" hidden></p>
+          <label class="gk-field">Smeknamn<input id="player-nick-join" class="gk-input" maxlength="16" placeholder="Ditt smeknamn" autocomplete="nickname" autocapitalize="words" enterkeyhint="next" /></label>
+          <label class="gk-field">Rumskod<input id="join-code" class="gk-input gk-input-kod" maxlength="6" placeholder="ABCD" autocomplete="off" autocapitalize="characters" enterkeyhint="go" /></label>
+          <button id="btn-join" class="gk-btn gk-solid-dark home-join-btn">Gå med</button>
+        </div>
       </div>
 
-      <div class="home-divider"><span>eller spela med vänner</span></div>
-
-      <button id="btn-create" class="btn btn-lg">Skapa ett rum</button>
-      <div class="join-row">
-        <label>Rumskod<input id="join-code" maxlength="6" placeholder="ABCD" class="code-input" autocomplete="off" autocapitalize="characters" enterkeyhint="go" /></label>
-        <button id="btn-join" class="btn">Gå med</button>
+      <p class="home-error" id="home-error"></p>
+      <div class="home-notes">
+        <p class="home-foot">2–5 spelare · en kortlek · alla börjar på 0 kr</p>
+        <p class="home-foot beta-note" id="beta-note">Betaversion – hittar du ett fel, tryck på flaggan i spelet och beskriv det.</p>
       </div>
     </div>
-    <p class="home-error" id="home-error"></p>
-    <p class="home-foot">2–5 spelare · en kortlek · alla börjar på 0 kr</p>
-    <p class="home-foot beta-note" id="beta-note">Betaversion – hittar du ett fel, tryck på flaggan i spelet och beskriv det.</p>
   </div>
 </section>
 
@@ -65,34 +69,40 @@
 <section id="screen-lobby" class="screen">
   <div class="lobby-wrap">
     <header class="lobby-head">
-      <div>
-        <div class="eyebrow">Rumskod</div>
-        <div class="room-code" id="lobby-code">----</div>
+      <div class="lobby-brand">
+        <img class="lobby-logo" src="/assets/gursch-marke-sticker-tjock.png" alt="" />
+        <div>
+          <div class="lobby-eyebrow">Rumskod</div>
+          <div class="room-code" id="lobby-code">----</div>
+        </div>
       </div>
       <div class="invite">
-        <div class="eyebrow">Inbjudningslänk</div>
+        <label class="lobby-link-label" for="lobby-link">Inbjudningslänk</label>
         <div class="invite-row">
-          <input id="lobby-link" readonly aria-label="Inbjudningslänk" />
-          <button class="btn btn-sm" id="btn-copy">Kopiera</button>
+          <input id="lobby-link" class="gk-input" readonly />
+          <button class="gk-btn gk-ghost-light" id="btn-copy">Kopiera</button>
         </div>
       </div>
     </header>
 
     <div class="lobby-grid">
-      <div class="panel">
-        <h2>Spelare <span class="muted" id="lobby-count"></span></h2>
+      <div class="gk-panel lobby-panel">
+        <h2 class="gk-panel-titel">Spelare <span class="lobby-count" id="lobby-count"></span></h2>
         <ul class="player-list" id="lobby-players"></ul>
-        <p class="hint" id="lobby-hint"></p>
-        <button id="btn-add-bot" class="btn">+ Lägg till bot</button>
-        <button id="btn-start" class="btn btn-primary btn-lg">Starta spelet</button>
-        <button id="btn-leave" class="btn btn-ghost">Lämna rummet</button>
+        <button id="btn-add-bot" class="gk-btn gk-ghost-dark gk-btn-streckad">+ Lägg till bot</button>
+        <p class="lobby-hint" id="lobby-hint"></p>
+        <div class="lobby-actions">
+          <button id="btn-start" class="gk-btn gk-press-dark">Starta spelet</button>
+          <button id="btn-leave" class="gk-btn gk-ghost-dark">Lämna rummet</button>
+        </div>
       </div>
 
-      <div class="panel">
-        <h2>Inställningar</h2>
+      <div class="gk-panel lobby-panel">
+        <h2 class="gk-panel-titel">Inställningar</h2>
         <div class="settings" id="settings">
-          <label>Multiplier
-            <select data-setting="multiplierPreset" id="set-mult">
+          <div class="settings-grid">
+          <label class="gk-field">Multiplier
+            <select class="gk-input gk-select" data-setting="multiplierPreset" id="set-mult">
               <option value="1">×1</option><option value="5">×5</option>
               <option value="10" selected>×10</option><option value="25">×25</option>
               <option value="50">×50</option><option value="100">×100</option>
@@ -100,46 +110,49 @@
               <option value="flop:3">flopmult ×3</option><option value="flop:4">flopmult ×4</option>
             </select>
           </label>
-          <label>Mini-gursch-gräns
-            <select data-setting="miniGurschCap">
+          <label class="gk-field">Mini-gursch-gräns
+            <select class="gk-input gk-select" data-setting="miniGurschCap">
               <option value="0">Ingen begränsning</option>
               <option value="1">Endast mini-gursch</option>
               <option value="2">Mini-mini-gursch</option>
               <option value="3">3 nivåer</option>
             </select>
           </label>
-          <label>Turtimer
-            <select data-setting="turnSeconds">
+          <label class="gk-field">Turtimer
+            <select class="gk-input gk-select" data-setting="turnSeconds">
               <option value="0">Av</option>
               <option value="20">20 s</option><option value="30">30 s</option>
               <option value="45" selected>45 s</option><option value="60">60 s</option>
               <option value="90">90 s</option>
             </select>
           </label>
-          <label>Förhandlingstid
-            <select data-setting="negotiationSeconds">
+          <label class="gk-field">Förhandlingstid
+            <select class="gk-input gk-select" data-setting="negotiationSeconds">
               <option value="10">10 s</option><option value="15">15 s</option>
               <option value="20" selected>20 s</option><option value="30">30 s</option>
               <option value="45">45 s</option><option value="60">60 s</option>
             </select>
           </label>
-          <label>Tid att syna slask
-            <select data-setting="slaskCallSeconds">
+          <label class="gk-field">Tid att syna slask
+            <select class="gk-input gk-select" data-setting="slaskCallSeconds">
               <option value="5">5 s</option><option value="7" selected>7 s</option>
               <option value="10">10 s</option><option value="15">15 s</option>
             </select>
           </label>
-          <label>Max antal slask
-            <select data-setting="maxSlasks">
+          <label class="gk-field">Max antal slask
+            <select class="gk-input gk-select" data-setting="maxSlasks">
               <option value="1">1</option><option value="2">2</option>
               <option value="3" selected>3</option><option value="5">5</option>
             </select>
           </label>
-          <label class="toggle"><input type="checkbox" data-setting="chatEnabled" checked /> <span>Chatt</span></label>
-          <label class="toggle"><input type="checkbox" data-setting="animations" checked /> <span>Animationer</span></label>
-          <label class="toggle"><input type="checkbox" data-setting="sound" checked /> <span>Ljud</span></label>
         </div>
-        <p class="hint">Alla börjar på 0 kr.</p>
+        <div class="lobby-checks">
+          <label class="lobby-check"><input type="checkbox" class="gk-check" data-setting="chatEnabled" checked /> Chatt</label>
+          <label class="lobby-check"><input type="checkbox" class="gk-check" data-setting="animations" checked /> Animationer</label>
+          <label class="lobby-check"><input type="checkbox" class="gk-check" data-setting="sound" checked /> Ljud</label>
+        </div>
+        </div>
+        <p class="lobby-foot">Alla börjar på 0 kr.</p>
       </div>
     </div>
   </div>
@@ -150,125 +163,175 @@
   <div class="game-layout">
     <header class="topbar">
       <div class="topbar-left">
-        <button class="btn btn-tool" id="btn-leave-game" aria-label="Lämna spelet" title="Lämna spelet"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></button>
-        <span class="chip chip-round" id="chip-round">Runda 1</span>
-        <span class="chip" id="chip-code" title="Rumskod"></span>
-        <span class="chip chip-beta" id="chip-beta" title="Testversion – rapportera allt som blir fel">BETA</span>
+        <img class="topbar-logo" src="/assets/gursch-marke-sticker-tjock.png" alt="" />
+        <span class="topbar-title" aria-hidden="true">GURSCH</span>
+        <div class="topbar-tags">
+          <span class="chip chip-round" id="chip-round">Runda 1</span>
+          <span class="chip chip-mult" id="chip-mult"></span>
+          <span class="chip" id="chip-code" title="Rumskod"></span>
+          <span class="chip chip-beta" id="chip-beta" title="Testversion – rapportera allt som blir fel">BETA</span>
+        </div>
       </div>
       <div class="topbar-right">
-        <!-- Ikoner: Lucide (ISC-licens). Etiketterna döljs på smala skärmar, aria-label finns alltid. -->
-        <button class="btn btn-tool" id="btn-report-top" aria-label="Rapportera fel" title="Rapportera ett fel – även mitt i rundan"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg><span class="tool-label">Rapportera fel</span></button>
-        <button class="btn btn-tool" id="btn-history" aria-label="Historik" title="Historik"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg><span class="tool-label">Historik</span></button>
-        <button class="btn btn-tool" id="btn-chat-toggle" aria-label="Chatt" title="Chatt"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span class="tool-label">Chatt</span><span class="unread-dot" id="chat-unread" hidden></span></button>
+        <!-- Ikoner: Lucide (ISC-licens). På dator syns texten, på smala skärmar bara ikonen. aria-label finns alltid. -->
+        <button class="gk-btn gk-btn-sm gk-ghost-warn topbar-btn" id="btn-report-top" aria-label="Rapportera fel" title="Rapportera ett fel – även mitt i rundan"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg><span class="tool-label">Rapportera fel</span></button>
+        <button class="gk-btn gk-btn-sm gk-ghost-light topbar-btn" id="btn-history" aria-label="Historik" title="Historik"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg><span class="tool-label">Historik</span></button>
+        <button class="gk-btn gk-btn-sm gk-ghost-light topbar-btn" id="btn-chat-toggle" aria-label="Chatt" title="Chatt"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span class="tool-label">Chatt</span><span class="unread-dot" id="chat-unread" hidden></span></button>
+        <button class="gk-btn gk-btn-sm gk-ghost-light topbar-btn" id="btn-leave-game" aria-label="Lämna spelet" title="Lämna spelet"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg><span class="tool-label">Lämna</span></button>
+        <!-- Mobil (560 px och smalare): knapparna ovan ligger i en meny bakom den här knappen -->
+        <button class="gk-btn gk-ghost-light topbar-menu" id="btn-menu" type="button" aria-label="Meny" aria-expanded="false" aria-controls="game-menu">
+          <svg class="icon icon-open" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+          <svg class="icon icon-close" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+          <span class="unread-dot" id="menu-unread" hidden></span>
+        </button>
       </div>
     </header>
 
+    <!-- Mobilmenyn: en krämfärgad panel under menyknappen, slöja över resten. Stängs med knappen,
+         Escape eller ett tryck utanför. Varje val trycker på motsvarande knapp i topplisten. -->
+    <div class="game-menu" id="game-menu" hidden>
+      <nav class="game-menu-panel" aria-label="Meny">
+        <button type="button" class="gk-btn gk-ghost-dark" data-for="btn-history">Historik</button>
+        <button type="button" class="gk-btn gk-ghost-dark" data-for="btn-chat-toggle" id="menu-chat">Chatt<span class="unread-dot" id="menu-chat-unread" hidden></span></button>
+        <button type="button" class="gk-btn gk-ghost-warn" data-for="btn-report-top">Rapportera fel</button>
+        <button type="button" class="gk-btn gk-ghost-dark" data-for="btn-leave-game">Lämna spelet</button>
+      </nav>
+    </div>
+
     <main class="table-area">
-      <div class="felt">
-        <div class="table-center">
-          <div class="pause-banner" id="pause-banner" role="status" aria-live="polite" hidden></div>
-          <div class="phase-banner" id="phase-banner">Slängning</div>
-          <div class="phase-sub" id="phase-sub"></div>
-          <!-- Senaste händelsen (slask synad, tiden tog slut …) - ligger kvar tills nästa, täcker aldrig handen -->
-          <div class="table-note" id="table-note" role="status" aria-live="polite"></div>
-          <div class="piles" id="piles" hidden>
-            <div class="pile" id="pile-deck"><div class="card back pile-card"></div><div class="pile-label">Lek <span id="deck-count"></span></div></div>
-            <div class="pile" id="pile-discard"><div class="card back pile-card"></div><div class="pile-label">Slängt</div></div>
-          </div>
-          <div class="trick-area" id="trick-area"></div>
-          <div class="table-foot" id="table-foot"></div>
+      <!-- Bordet: fem fåtöljer under en oval med krämfärgad kant och filt (design-handoff/referens/bord.html) -->
+      <div class="table">
+        <div class="chairs" aria-hidden="true">
+          <div class="chair chair-tl"><img src="/assets/fatolj.png" alt="" /></div>
+          <div class="chair chair-tr"><img src="/assets/fatolj.png" alt="" /></div>
+          <div class="chair chair-left"><img src="/assets/fatolj.png" alt="" /></div>
+          <div class="chair chair-right"><img src="/assets/fatolj.png" alt="" /></div>
+          <div class="chair chair-me"><img src="/assets/fatolj.png" alt="" /></div>
         </div>
-        <div class="seats" id="seats"></div>
-        <div class="seat-me" id="seat-me"></div>
+        <div class="table-rim">
+          <div class="felt" id="felt">
+            <div class="table-center">
+              <!-- Gurktrycket ritas först - allt annat ligger ovanpå. Ordet syns bara när mitten är tom.
+                   Det ligger i mitten-rutan så att mobilen kan lägga det i flödet (se CSS). -->
+              <div class="table-print" aria-hidden="true">
+                <img src="/assets/gurktryck-filt.png" alt="" />
+                <span class="table-print-word">GURSCH</span>
+              </div>
+              <div class="pause-banner" id="pause-banner" role="status" aria-live="polite" hidden></div>
+              <div class="phase-banner" id="phase-banner">Slängning</div>
+              <div class="phase-sub" id="phase-sub"></div>
+              <!-- Senaste händelsen (slask synad, tiden tog slut …) - ligger kvar tills nästa, täcker aldrig handen -->
+              <div class="table-note" id="table-note" role="status" aria-live="polite"></div>
+              <div class="piles" id="piles" hidden>
+                <div class="pile" id="pile-deck"><div class="card back pile-card"></div><div class="pile-label">Lek <span id="deck-count"></span></div></div>
+                <div class="pile" id="pile-discard"><div class="card back pile-card"></div><div class="pile-label">Slängt</div></div>
+              </div>
+              <div class="trick-area" id="trick-area"></div>
+            </div>
+            <div class="seats" id="seats"></div>
+            <div class="seat-me" id="seat-me"></div>
+          </div>
+        </div>
       </div>
       <div class="fx-layer" id="fx"></div>
     </main>
 
+    <!-- Underlägget med din hand: turtimer, uppmaning, handen och knappraden (räknare · knappar · tid) -->
     <footer class="handbar" id="handbar">
-      <div class="hand-timer" aria-hidden="true"><div class="hand-timer-bar" id="hand-timer-bar"></div></div>
-      <div class="hand-info">
-        <span id="hand-hint">Dina kort</span>
+      <div class="hand-pad">
+        <div class="hand-timer" aria-hidden="true"><div class="hand-timer-bar" id="hand-timer-bar"></div></div>
+        <div class="hand-hint" id="hand-hint">Dina kort</div>
+        <div class="hand" id="hand" role="group" aria-label="Din hand"></div>
         <span class="sel-count" id="sel-count"></span>
+        <div class="actions" id="actions"></div>
         <span class="turn-clock" id="turn-clock"></span>
       </div>
-      <div class="hand" id="hand" role="group" aria-label="Din hand"></div>
-      <div class="actions" id="actions"></div>
     </footer>
   </div>
 
+  <!-- Sidopaneler: krämfärgade, från höger, full höjd. Ingen slöja bakom. -->
   <aside class="side-panel" id="chat-panel" role="dialog" aria-labelledby="chat-title">
-    <div class="side-head"><h3 id="chat-title">Chatt</h3><button class="btn btn-icon" data-close="chat-panel" aria-label="Stäng chatten">✕</button></div>
+    <div class="side-head"><h3 id="chat-title">Chatt</h3><button class="gk-btn gk-ghost-dark side-close" data-close="chat-panel" aria-label="Stäng chatten"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></button></div>
     <div class="chat-log" id="chat-log"></div>
     <form class="chat-form" id="chat-form">
-      <input id="chat-input" maxlength="300" placeholder="Skriv…" autocomplete="off" aria-label="Meddelande" />
-      <button class="btn btn-sm btn-primary">Skicka</button>
+      <input id="chat-input" class="gk-input" maxlength="300" placeholder="Skriv…" autocomplete="off" aria-label="Meddelande" />
+      <button class="gk-btn gk-solid-dark">Skicka</button>
     </form>
   </aside>
 
   <aside class="side-panel" id="history-panel" role="dialog" aria-labelledby="history-title">
-    <div class="side-head"><h3 id="history-title">Historik</h3><button class="btn btn-icon" data-close="history-panel" aria-label="Stäng historiken">✕</button></div>
+    <div class="side-head"><h3 id="history-title">Historik</h3><button class="gk-btn gk-ghost-dark side-close" data-close="history-panel" aria-label="Stäng historiken"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></button></div>
     <div class="history" id="history"></div>
   </aside>
 
-  <div class="slask-overlay" id="slask-overlay" role="alertdialog" aria-labelledby="slask-title" aria-describedby="slask-text">
-    <div class="slask-box">
-      <div class="slask-title" id="slask-title">SLASK</div>
-      <div class="slask-text" id="slask-text"></div>
-      <div class="slask-count" id="slask-count" aria-hidden="true"></div>
-      <div class="slask-timer"><div class="slask-bar" id="slask-bar"></div></div>
-      <button class="btn btn-primary btn-lg" id="btn-call-slask">Syna slask</button>
+  <!-- Slask: krämfärgad ruta mitt på skärmen, ljusare slöja så att bordet syns -->
+  <div class="gk-overlay gk-overlay-ljus slask-overlay" id="slask-overlay" role="alertdialog" aria-labelledby="slask-title" aria-describedby="slask-text">
+    <div class="gk-panel gk-dialog slask-box">
+      <div class="slask-title" id="slask-title">SLASK!</div>
+      <p class="gk-dialog-text slask-text" id="slask-text"></p>
+      <div class="slask-timer-row">
+        <div class="slask-timer" aria-hidden="true"><div class="slask-bar" id="slask-bar"></div></div>
+        <div class="slask-count" id="slask-count" aria-hidden="true"></div>
+      </div>
+      <button class="gk-btn gk-press-dark" id="btn-call-slask">Syna slask</button>
     </div>
   </div>
 
-  <!-- Inte modal: toppraden (historik, chatt, lämna) går att nå medan resultatet visas -->
+  <!-- Rundresultatet. Inte modal: toppraden (historik, chatt, lämna) går att nå medan resultatet visas. -->
   <div class="result-overlay" id="result-overlay" role="dialog" aria-labelledby="result-title" aria-describedby="result-why">
-    <div class="result-box">
-      <h2 id="result-title" tabindex="-1">Rundan är slut</h2>
-      <div class="result-meta" id="result-meta"></div>
+    <div class="gk-panel result-box">
+      <img class="result-logo" src="/assets/gursch-marke-sticker-tjock.png" alt="" />
+      <div class="result-head">
+        <h2 id="result-title" tabindex="-1">Rundan klar</h2>
+        <div class="result-meta" id="result-meta"></div>
+      </div>
       <p class="result-why" id="result-why"></p>
       <div class="result-rows" id="result-rows"></div>
       <div class="result-extra" id="result-extra"></div>
       <div class="result-actions">
-        <button class="btn btn-primary btn-lg" id="btn-play-again">Ny runda</button>
-        <button class="btn btn-lg" id="btn-to-lobby">Till lobbyn</button>
+        <button class="gk-btn gk-press-dark" id="btn-play-again">Spela igen</button>
+        <button class="gk-btn gk-ghost-dark" id="btn-to-lobby">Till lobbyn</button>
       </div>
-      <p class="hint" id="result-hint"></p>
-      <button class="btn btn-ghost btn-sm btn-report" id="btn-report">Rapportera fel</button>
+      <p class="result-hint" id="result-hint"></p>
+      <div class="result-more">
+        <button class="gk-btn gk-btn-sm gk-ghost-warn btn-report" id="btn-report">Rapportera regelfel</button>
+      </div>
     </div>
   </div>
 </section>
 
-<div class="result-overlay report-overlay" id="report-overlay" role="dialog" aria-modal="true" aria-labelledby="report-title">
-  <div class="result-box report-box">
-    <h2 id="report-title">Rapportera fel</h2>
-    <p class="hint">Beskriv vad som blev fel i runda <span id="report-round"></span>. Rapporten sparas
+<!-- Dialoger: krämfärgad panel mitt på skärmen, mörk slöja bakom (utan oskärpa) -->
+<div class="gk-overlay report-overlay" id="report-overlay" role="dialog" aria-modal="true" aria-labelledby="report-title">
+  <div class="gk-panel gk-dialog report-box">
+    <h2 class="gk-panel-titel" id="report-title">Rapportera fel</h2>
+    <p class="gk-dialog-text">Beskriv vad som blev fel i runda <span id="report-round"></span>. Rapporten sparas
       med rundans alla drag, så att felet kan spelas upp och rättas. Ingen annan spelare ser den.</p>
-    <label>Vad gäller det?
-      <select id="report-category">
+    <label class="gk-field">Vad gäller det?
+      <select id="report-category" class="gk-input gk-select">
         <option value="regel">Spelreglerna</option>
         <option value="bugg">Något krånglade eller hängde sig</option>
         <option value="utseende">Utseende eller text</option>
         <option value="annat">Annat / förslag</option>
       </select>
     </label>
-    <label>Vad blev fel?
-      <textarea id="report-text" rows="4" maxlength="2000" placeholder="T.ex. Leo fick lägga en 9:a på en ensam 7:a"></textarea>
+    <label class="gk-field">Vad blev fel?
+      <textarea id="report-text" class="gk-input" rows="4" maxlength="2000" placeholder="T.ex. Leo fick lägga en 9:a på en ensam 7:a"></textarea>
     </label>
-    <div class="result-actions">
-      <button class="btn btn-primary btn-lg" id="btn-report-save">Spara rapport</button>
-      <button class="btn btn-lg" id="btn-report-cancel">Avbryt</button>
+    <div class="gk-dialog-actions">
+      <button class="gk-btn gk-press-dark" id="btn-report-save">Spara rapport</button>
+      <button class="gk-btn gk-ghost-dark" id="btn-report-cancel">Avbryt</button>
     </div>
   </div>
 </div>
 
 <!-- Bekräftelse (t.ex. Lämna spelet). Avbryt ligger först och får fokus; det farliga valet är aldrig förvalt. -->
-<div class="result-overlay confirm-overlay" id="confirm-overlay" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text">
-  <div class="result-box confirm-box">
-    <h2 id="confirm-title"></h2>
-    <p class="confirm-text" id="confirm-text"></p>
-    <div class="result-actions">
-      <button class="btn btn-lg" id="confirm-cancel">Avbryt</button>
-      <button class="btn btn-lg btn-danger" id="confirm-ok"></button>
+<div class="gk-overlay confirm-overlay" id="confirm-overlay" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+  <div class="gk-panel gk-dialog confirm-box">
+    <h2 class="gk-panel-titel" id="confirm-title"></h2>
+    <p class="gk-dialog-text" id="confirm-text"></p>
+    <div class="gk-dialog-actions">
+      <button class="gk-btn gk-ghost-dark" id="confirm-cancel"></button>
+      <button class="gk-btn gk-solid-warn" id="confirm-ok"></button>
     </div>
   </div>
 </div>

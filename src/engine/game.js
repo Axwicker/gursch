@@ -1394,8 +1394,10 @@ export class GurschGame {
       discard: r && this.phase === PHASE.INITIAL_DISCARD ? {
         discardRound: r.discardRound,
         requiredCount: r.proposal.count,
-        // Tills någon valt antal är det den som har turen som bestämmer.
-        proposerId: r.proposal.count === null ? turnPlayerId : r.proposal.proposerId,
+        // Tills någon valt antal är det den som har turen som bestämmer. Turen räknas här även
+        // under slaskfönstret (då är turnPlayerId null för att ingen turtimer ska gå, men turen
+        // ligger kvar hos slaskaren - hen väljer igen på sin nya hand, R17).
+        proposerId: r.proposal.count === null ? this.currentTurnPlayerId() : r.proposal.proposerId,
         isFirstPhase: true,
       } : null,
       trick: ctx?.currentTrick ? {

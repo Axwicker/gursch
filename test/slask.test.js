@@ -129,3 +129,15 @@ test('[R18] slask blockerar andra actions tills fönstret stängs', () => {
   assert.throws(() => g.handleAction('erik', { type: 'stay' }), /slaskfönstret/);
   assert.equal(g.phase, PHASE.INITIAL_DISCARD);
 });
+
+test('[R9] [R17] under slaskfönstret visas den som slaskade som den som bestämmer antalet (inte "?")', () => {
+  // turnPlayerId är null medan slasken pågår (ingen turtimer), men turen ligger kvar hos
+  // slaskaren - hen väljer igen på sin nya hand. Visningsfältet proposerId ska följa turen.
+  const g = makeGame(['Axel', 'Erik', 'Leo', 'Oskar']);
+  startWithFlopWinner(g, 'leo');
+  g.handleAction('leo', { type: 'slask' });
+  const s = g.publicState();
+  assert.equal(s.turnPlayerId, null);
+  assert.equal(s.discard.requiredCount, null);
+  assert.equal(s.discard.proposerId, 'leo');
+});

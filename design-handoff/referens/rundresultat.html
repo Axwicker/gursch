@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>Gursch – rundresultat</title>
+<!-- Referens for den nya Gursch-designen. Statisk mockup: valt kort, vald botniva och all speldata ar harkodade exempel. Stilarna (farger, typsnitt, matt, skuggor) ar de som ska galla. -->
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#c9a55a}a:hover{color:#e2c684}
+button:focus-visible{outline:3px solid #2f7a56;outline-offset:2px}
+.gk-btn,.gk-press-dark,.gk-press-light,.gk-card,.gk-input{transition:transform .12s cubic-bezier(.2,.8,.2,1),box-shadow .12s cubic-bezier(.2,.8,.2,1),background-color .12s ease-out,border-color .12s ease-out,color .12s ease-out}
+@media (hover:hover){
+.gk-press-dark:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #10211b!important}
+.gk-press-light:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #f0e8cc!important}
+.gk-ghost-dark:hover{background-color:#10211b!important;border-color:#10211b!important;color:#f0e8cc!important}
+.gk-solid-dark:hover{background-color:#1f3d30!important}
+.gk-ghost-light:hover{background-color:rgba(240,232,204,.12)!important;border-color:#f0e8cc!important}
+.gk-ghost-warn:hover{background-color:#c05a48!important;color:#10211b!important}
+.gk-card:hover{transform:translateY(-4px)!important}
+.gk-card.is-sel:hover{transform:translateY(-11px)!important}
+.gk-input:hover{background-color:#fffdf4!important}
+}
+.gk-press-dark:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #10211b!important}
+.gk-press-light:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #f0e8cc!important}
+.gk-btn:active{transform:translateY(2px)}
+.gk-card:active{transform:translateY(-1px)!important}
+.gk-card.is-sel:active{transform:translateY(-5px)!important}
+.gk-input:focus{outline:2px solid #10211b;outline-offset:0;box-shadow:6px 6px 0 #c9a55a}
+@media (prefers-reduced-motion:reduce){.gk-btn,.gk-press-dark,.gk-press-light,.gk-card,.gk-input{transition:none}}
+</style>
+</head>
+<body>
+<div style="position: relative; width: 1280px; height: 800px; box-sizing: border-box; padding-top: 62px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #10211b; color: #10211b; font-family: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <div style="position: absolute; left: 50%; top: 50%; width: 800px; height: 800px; transform: translate(-50%, -50%); border-radius: 50%; background: #1f3d30"></div>
+  <section style="position: relative; width: 560px; box-sizing: border-box; padding: 72px 28px 22px; display: flex; flex-direction: column; gap: 10px; border-radius: 6px; border: 2px solid #0a1612; background: #f0e8cc; box-shadow: 8px 8px 0 #0a1612">
+    <img src="../assets/gursch-marke-sticker-tjock.png" alt="" style="position: absolute; left: 50%; top: -64px; height: 126px; width: auto; transform: translateX(-50%)">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 8px">
+      <h2 style="margin: 0; font-family: 'Alfa Slab One', Rockwell, Georgia, serif; font-weight: 400; font-size: 34px; line-height: 1; letter-spacing: 0.05em; color: #10211b; text-shadow: 3px 3px 0 #c9a55a">RUNDAN KLAR</h2>
+      <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 15px; font-weight: 600; line-height: 1.2; letter-spacing: 0.12em; color: #4f5f55">RUNDA 1 · MULTIPLIKATOR ×10</div>
+      <p style="margin: 4px 0 0; font-size: 15px; line-height: 1.4; text-align: center; color: #3c4d43"><strong style="font-weight: 600; color: #10211b">Du förlorade rundan.</strong> Du hade högst slutvärde (13) och betalar 13 × 10 = 130 kr till var och en av de 3 andra (390 kr).</p>
+    </div>
+    
+      <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; border-radius: 4px; background: #fbf7e9; border: 2px solid #0a1612; box-shadow: 4px 4px 0 #c9a55a">
+        <div style="display: flex; align-items: baseline; gap: 12px">
+          <div style="flex: 1 1 auto; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 21px; font-weight: 700; line-height: 1.15; letter-spacing: 0.03em">Axel</div>
+          <div style="font-size: 14px; color: #4f5f55">slutvärde 13</div>
+          <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.15; color: #a8322a">−390 kr</div>
+        </div>
+        <div style="font-size: 14px; color: #4f5f55">Saldo: −400 kr · gick ut på K</div>
+      </div>
+    
+      <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; border-radius: 4px; background: #fbf7e9; border: 2px solid #d6cdaf; box-shadow: none">
+        <div style="display: flex; align-items: baseline; gap: 12px">
+          <div style="flex: 1 1 auto; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 21px; font-weight: 700; line-height: 1.15; letter-spacing: 0.03em">Bot Greta</div>
+          <div style="font-size: 14px; color: #4f5f55">slutvärde 4</div>
+          <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.15; color: #1f6b45">+130 kr</div>
+        </div>
+        <div style="font-size: 14px; color: #4f5f55">Saldo: +130 kr · gick ut på 4</div>
+      </div>
+    
+      <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; border-radius: 4px; background: #fbf7e9; border: 2px solid #d6cdaf; box-shadow: none">
+        <div style="display: flex; align-items: baseline; gap: 12px">
+          <div style="flex: 1 1 auto; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 21px; font-weight: 700; line-height: 1.15; letter-spacing: 0.03em">Bot Sixten</div>
+          <div style="font-size: 14px; color: #4f5f55">slutvärde 4</div>
+          <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.15; color: #1f6b45">+130 kr</div>
+        </div>
+        <div style="font-size: 14px; color: #4f5f55">Saldo: +140 kr · gick ut på 4</div>
+      </div>
+    
+      <div style="display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; border-radius: 4px; background: #fbf7e9; border: 2px solid #d6cdaf; box-shadow: none">
+        <div style="display: flex; align-items: baseline; gap: 12px">
+          <div style="flex: 1 1 auto; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 21px; font-weight: 700; line-height: 1.15; letter-spacing: 0.03em">Bot Bengt</div>
+          <div style="font-size: 14px; color: #4f5f55">slutvärde 3</div>
+          <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.15; color: #1f6b45">+130 kr</div>
+        </div>
+        <div style="font-size: 14px; color: #4f5f55">Saldo: +130 kr · gick ut på 3</div>
+      </div>
+    
+    <p style="margin: 6px 0 4px; font-size: 14px; color: #3c4d43">SLASK: Axel (7,6,6,3,A) synad av Bot Sixten · 1 klätt kort · 10 kr</p>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+      <button type="button" class="gk-press-dark" style="min-height: 48px; border: 2px solid #10211b; border-radius: 4px; background: #c9a55a; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 19px; font-weight: 700; letter-spacing: 0.1em; box-shadow: 4px 4px 0 #10211b; cursor: pointer">SPELA IGEN</button>
+      <button type="button" class="gk-btn gk-ghost-dark" style="min-height: 48px; border: 2px solid #10211b; border-radius: 4px; background: transparent; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 19px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer">TILL LOBBYN</button>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 10px; margin-top: 8px">
+      <button type="button" class="gk-btn gk-ghost-dark" style="min-height: 36px; padding: 0 14px; border: 2px solid #10211b; border-radius: 4px; background: transparent; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer">TIDIGARE HÄNDER</button>
+      <button type="button" class="gk-btn gk-ghost-warn" style="min-height: 36px; padding: 0 14px; border: 2px solid #c05a48; border-radius: 4px; background: transparent; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.1em; cursor: pointer">RAPPORTERA REGELFEL</button>
+    </div>
+  </section>
+</div>
+</body>
+</html>

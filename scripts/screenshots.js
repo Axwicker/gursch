@@ -79,9 +79,20 @@ async function selectCards(page, ids) {
   for (const id of ids) await page.locator(`.hand .card[data-id="${id}"]`).click({ timeout: 5000 });
 }
 
+/** Knapparna i topplisten. På mobil ligger de i menyn - då öppnas den först. */
+async function clickTopbar(page, id) {
+  if (await page.locator(`#${id}`).isVisible()) return page.locator(`#${id}`).click();
+  await page.locator('#btn-menu').click();
+  await page.locator(`#game-menu [data-for="${id}"]`).click();
+}
+async function topbarHas(page, id) {
+  return (await page.locator(`#${id}`).isVisible())
+    || (await page.locator(`#game-menu [data-for="${id}"]:not([hidden])`).count()) > 0;
+}
+
 /** Öppnar en sidopanel, tar bilden när den glidit in och stänger den igen. */
-async function openPanel(page, button, panelId, capture) {
-  await page.locator(button).click();
+async function openPanel(page, buttonId, panelId, capture) {
+  await clickTopbar(page, buttonId);
   await page.waitForTimeout(450);
   await capture();
   await page.locator(`[data-close="${panelId}"]`).click();
@@ -120,7 +131,7 @@ async function playRound(page, shot) {
       await page.waitForSelector('.fx-reveal', { timeout: 9000 }).then(() => once('10b-slask-avslojad', 700), () => {});
     } else if (st.phase === 'ROUND_RESULT') {
       await once('13-resultat', 1900);   // 0,9 s paus på bordet + rutan och uppräkningen
-      await page.locator('#btn-leave-game').click();
+      await clickTopbar(page, 'btn-leave-game');
       await once('16-lamna', 300);
       await page.locator('#confirm-cancel').click();
       return taken;
@@ -174,9 +185,9 @@ async function playRound(page, shot) {
       await once('12b-stick-motstandare');
       // Sidopanelerna fotograferas under stickspelet: efter rundan ligger de bakom resultatrutan.
       if (!taken.has('14-historik')) {
-        await openPanel(page, '#btn-history', 'history-panel', () => once('14-historik'));
-        if (await page.locator('#btn-chat-toggle').isVisible()) {
-          await openPanel(page, '#btn-chat-toggle', 'chat-panel', () => once('15-chatt'));
+        await openPanel(page, 'btn-history', 'history-panel', () => once('14-historik'));
+        if (await topbarHas(page, 'btn-chat-toggle')) {
+          await openPanel(page, 'btn-chat-toggle', 'chat-panel', () => once('15-chatt'));
         }
       }
     }

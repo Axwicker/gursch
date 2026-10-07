@@ -126,374 +126,628 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 }
 .panel h2 { font-size: var(--text-body); font-weight: 600; color: var(--text); margin-bottom: 16px; }
 
-/* ---------------------------------------------------------- home */
+/* ---------------------------------------------------------- home
+ * Ny design: design-handoff/referens/start.html (ritad i 1280 × 800) och gk.css.
+ * Vänster en scen med lampa och gurkman som följer fönstrets höjd, höger titel och två paneler.
+ */
+#screen-home { background: var(--gk-grund); color: var(--gk-kram); font-family: var(--gk-font-text); }
 .home-wrap {
-  max-width: 880px; margin: 0 auto;
-  padding: calc(6vh + var(--safe-top)) max(20px, var(--safe-right)) calc(40px + var(--safe-bottom)) max(20px, var(--safe-left));
+  display: flex; align-items: center; gap: 44px;
+  max-width: 1280px; min-height: 100%; margin: 0 auto;
+  padding: var(--safe-top) max(48px, var(--safe-right)) var(--safe-bottom) max(48px, var(--safe-left));
+  overflow-x: clip;   /* lampan sticker ut åt vänster och ljuskäglan åt höger */
 }
-.brand { text-align: center; margin-bottom: 34px; }
-/* Loggan gungar en gång när sidan öppnas - ingen oändlig loop. */
-.logo { width: 92px; height: 92px; filter: drop-shadow(0 8px 20px rgba(80,180,60,.25)); animation: bob 2.4s ease-in-out 1; }
-@keyframes bob { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-7px) rotate(2deg); } }
-.brand h1 { font-size: 54px; letter-spacing: .22em; margin-top: 6px; background: linear-gradient(180deg,#fff,#c9b37a); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.tagline { color: var(--muted); font-size: var(--text-subhead); margin-top: 4px; }
-.home-panel { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
-.home-panel > label { margin-bottom: 0; }
-.home-invite { margin: 0; padding: 10px 14px; border-radius: var(--radius-control); background: rgba(232,200,119,.1);
-  border: 1px solid rgba(232,200,119,.35); font-size: var(--text-subhead); line-height: 1.4; }
+/* Scenen: 500 × 800 i referensen. Alla mått i procent av den, så att allt skalas tillsammans. */
+.home-scene {
+  position: relative; flex: none;
+  width: min(500px, 62.5dvh, 39vw); aspect-ratio: 500 / 800;
+}
+.home-light { position: absolute; left: 0; top: 0; width: 112%; height: 100%; }   /* 560 × 800 */
+.home-lamp { position: absolute; left: -6%; top: 27.875%; height: 61.625%; width: auto; }           /* -30, 223, h 493 */
+.home-mascot { position: absolute; left: 38.8%; top: 11.375%; height: 85.375%; width: auto; }       /* 194, 91, h 683 */
+
+.home-main {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; gap: 30px;
+  container-type: inline-size;   /* titelns storlek följer kolumnens bredd */
+}
+.home-title {
+  margin: 0;
+  font-family: var(--gk-font-titel); font-weight: 400; line-height: .95; letter-spacing: .03em;
+  font-size: min(124px, 19.5cqi);   /* GURSCH är ca 4,8 em brett */
+  color: var(--gk-kram); text-shadow: 6px 6px 0 var(--gk-guld);
+}
+/* Två paneler bredvid varandra, under varandra när kolumnen är smal. Lika höga. */
+.home-panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 26px; }
+.home-split { margin-top: auto; }
+.home-join-btn { margin-top: auto; }
+.home-invite {
+  margin: 0; padding: 10px 12px; border: var(--gk-ram) solid var(--gk-guld); border-radius: var(--gk-radie);
+  background: var(--gk-papper); color: var(--gk-grund); font-size: 15px; line-height: 1.4;
+}
 .home-invite[hidden] { display: none; }
-.home-bots { display: flex; flex-direction: column; gap: 10px; }
-.field-label { font-size: var(--text-footnote); color: var(--muted); }
-/* Segmenterad kontroll: riktiga radioknappar (piltangenter, skärmläsare), utseende som iOS */
-.segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px;
-  background: rgba(0,0,0,.35); border: 1px solid var(--panel-line); border-radius: var(--radius-control); }
-.segmented label { margin: 0; position: relative; }
-.segmented input { position: absolute; inset: 0; opacity: 0; margin: 0; min-height: 0; cursor: pointer; }
-.segmented span { display: flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 8px;
-  font-size: var(--text-subhead); font-weight: 600; color: var(--muted); transition: background-color .15s, color .15s; }
-.segmented input:checked + span { background: rgba(255,255,255,.14); color: var(--text); }
-.segmented input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 1px; }
-.home-divider { display: flex; align-items: center; gap: 12px; margin: 6px 0 0; color: var(--muted); font-size: var(--text-footnote); }
-.home-divider::before, .home-divider::after { content: ""; flex: 1; height: 1px; background: var(--panel-line); }
-.join-row { display: flex; gap: 8px; align-items: flex-end; }
-.join-row label { flex: 1; margin: 0; }
-.join-row .btn { flex: none; min-width: 96px; min-height: 46px; }
-/* Inbjuden via länk: namn, inbjudan och Gå med först - bottarna längre ned */
-.home-panel.invited > label { order: -3; }
-.home-panel.invited .home-invite { order: -2; }
-.home-panel.invited .join-row { order: -1; }
-.home-panel.invited .home-divider { display: none; }
-.home-panel.invited .home-bots { margin-top: 10px; }
-.home-error { color: var(--red); text-align: center; min-height: 20px; margin-top: 14px; font-size: var(--text-footnote); }
-.home-foot { text-align: center; color: var(--muted); font-size: var(--text-footnote); }
-.beta-note { margin-top: 6px; color: var(--gold-dim); }
+/* Inbjuden via länk: Gå med-panelen först (Gå med är då huvudknappen, se setInvitedLayout i app.js) */
+.home-panels.invited .home-join { order: -1; }
+
+.home-error { margin: 0; color: var(--gk-minus-morkt); font-size: 15px; font-weight: 600; line-height: 1.4; }
+.home-error:empty { display: none; }
+.home-notes { display: flex; flex-direction: column; gap: 6px; }
+.home-foot {
+  margin: 0;
+  font-family: var(--gk-font-rubrik); font-weight: 600; font-size: 17px; line-height: 1.3;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--gk-dampad-morkt);
+  text-wrap: balance;   /* inga ensamma ord på sista raden */
+}
+
+/* Mobil: en kolumn - gurkmannen och lampan överst i mindre storlek, titeln, panelerna under varandra */
+@media (max-width: 560px) {
+  .home-wrap {
+    flex-direction: column; align-items: stretch; gap: 20px;
+    padding: calc(12px + var(--safe-top)) max(16px, var(--safe-right)) calc(32px + var(--safe-bottom)) max(16px, var(--safe-left));
+  }
+  /* Bildens tyngdpunkt ligger lite till höger om scenens mitt (gurkmannen sticker ut) - flytta tillbaka */
+  .home-scene { width: 170px; align-self: center; translate: -4% 0; }
+  .home-main { gap: 22px; }
+  .home-title { text-align: center; }
+  .home-panels { gap: 20px; }
+  .home-notes { text-align: center; }
+  .home-foot { font-size: 15px; }
+}
+
 .chip-beta { color: var(--gold); border-color: rgba(232,200,119,.35); letter-spacing: .06em; font-weight: 700; }
 @media (max-width: 420px) { .chip-beta { display: none; } }   /* toppraden är full på mobil; versionen står på startsidan */
 
-/* ---------------------------------------------------------- lobby */
+/* ---------------------------------------------------------- lobby
+ * Ny design: design-handoff/referens/lobby.html. Rumskoden stor överst, inbjudningslänken med
+ * KOPIERA, och panelerna SPELARE och INSTÄLLNINGAR bredvid varandra.
+ */
+#screen-lobby { background: var(--gk-grund); color: var(--gk-kram); font-family: var(--gk-font-text); }
 .lobby-wrap {
-  max-width: 980px; margin: 0 auto;
-  padding: calc(5vh + var(--safe-top)) max(20px, var(--safe-right)) calc(40px + var(--safe-bottom)) max(20px, var(--safe-left));
+  max-width: 1280px; min-height: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 26px;
+  padding: calc(34px + var(--safe-top)) max(56px, var(--safe-right)) calc(40px + var(--safe-bottom)) max(56px, var(--safe-left));
 }
-.lobby-head { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 22px; }
-.room-code { font-size: 44px; font-weight: 800; letter-spacing: .28em; color: var(--text); }
-.invite { min-width: 320px; flex: 1; max-width: 460px; }
-.invite-row { display: flex; gap: 8px; }
-.invite-row input { margin: 0; }
-.lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.player-list { list-style: none; margin: 0 0 6px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lobby-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px 40px; flex-wrap: wrap; }
+.lobby-brand { display: flex; align-items: center; gap: 22px; min-width: 0; }
+.lobby-logo { height: 132px; width: auto; flex: none; }
+.lobby-eyebrow { margin-bottom: 8px; font-family: var(--gk-font-rubrik); font-size: 17px; font-weight: 700; line-height: 1;
+  letter-spacing: .24em; text-transform: uppercase; color: var(--gk-guld); }
+.room-code { font-family: var(--gk-font-titel); font-size: 92px; line-height: .95; letter-spacing: .12em;
+  color: var(--gk-kram); text-shadow: 5px 5px 0 var(--gk-guld); }
+.invite { width: min(520px, 100%); display: flex; flex-direction: column; gap: 6px; padding-bottom: 6px; }
+.lobby-link-label { margin: 0; font-size: 14px; font-weight: 600; color: var(--gk-dampad-morkt); }
+.invite-row { display: flex; gap: 10px; }
+.invite-row .gk-input { flex: 1 1 auto; min-width: 0; font-size: 16px; }
+.invite-row .gk-btn { --gk-ghost-ram: var(--gk-dampad-morkt); }
+.lobby-grid { flex: 1 1 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px; align-items: stretch; }
+.lobby-panel { padding: 22px 24px; gap: 14px; }
+.lobby-count { color: var(--gk-dampad-ljust); }
+/* Spelarrader: pappersrader. Din rad har mörk ram och guldskugga. */
+.player-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .player-list li {
-  display: flex; align-items: center; gap: 10px; min-height: 52px;
-  padding: 4px 6px 4px 14px; border-radius: var(--radius-control);
-  background: rgba(0,0,0,.25); border: 1px solid var(--panel-line);
+  min-height: 56px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 7px 12px;
+  border-radius: var(--gk-radie); background: var(--gk-papper); border: var(--gk-ram) solid var(--gk-linje);
 }
-.tag {
-  font-size: var(--text-caption2); font-weight: 600; letter-spacing: var(--eyebrow-spacing); text-transform: uppercase;
-  padding: 3px 7px; border-radius: 999px; border: 1px solid rgba(255,255,255,.3); color: var(--text); white-space: nowrap;
+.player-list li.me { border-color: var(--gk-black); box-shadow: var(--gk-skugga-du); }
+.player-list .nick { font-family: var(--gk-font-rubrik); font-size: 21px; font-weight: 700; line-height: 1.15; letter-spacing: .03em; overflow-wrap: anywhere; }
+.player-list .spacer { flex: 1 1 auto; }
+.player-list .bal { font-family: var(--gk-font-rubrik); font-size: 20px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--gk-dampad-ljust); }
+.player-list .bal.pos { color: var(--gk-plus); } .player-list .bal.neg { color: var(--gk-rod-fylld); }
+/* Märken: HOST (mörk), DU (guld), BOT (ram) */
+.tag { padding: 3px 7px; border-radius: var(--gk-radie); border: var(--gk-ram) solid var(--gk-grund); color: var(--gk-grund);
+  font-family: var(--gk-font-rubrik); font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.tag-host { background: var(--gk-grund); color: var(--gk-kram); }
+.tag-you { background: var(--gk-guld); }
+.bot-level { flex: none; }
+.btn-remove-bot { width: var(--tap); min-height: var(--tap); padding: 0; }
+.btn-remove-bot .icon { width: 18px; height: 18px; }
+#btn-add-bot { min-height: var(--tap); }
+.lobby-hint { margin: auto 0 0; font-size: 15px; line-height: 1.45; color: var(--gk-etikett); }
+.lobby-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; }
+/* Inställningar: rullistor i två kolumner, kryssrutorna under en linje */
+.settings { display: flex; flex-direction: column; gap: 16px; }
+.settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
+.lobby-checks { display: flex; flex-wrap: wrap; gap: 4px 28px; padding-top: 14px; border-top: var(--gk-ram) solid var(--gk-linje); }
+.lobby-check { display: flex; align-items: center; gap: 10px; min-height: var(--tap); margin: 0; cursor: pointer;
+  font-size: 16px; font-weight: 600; color: var(--gk-grund); }
+.lobby-foot { margin: auto 0 0; font-size: 15px; color: var(--gk-etikett); }
+@media (max-width: 1000px) {
+  .lobby-logo { height: 96px; }
+  .room-code { font-size: 64px; }
 }
-.tag-you { border-color: var(--gold-dim); color: var(--gold); }
-.player-list .bal { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.settings { display: grid; gap: 4px; }
-.toggle { display: flex; align-items: center; gap: 10px; min-height: var(--tap); color: var(--text); font-size: var(--text-callout); margin-bottom: 4px; cursor: pointer; }
-.toggle input { width: 20px; height: 20px; min-height: 0; margin: 0; accent-color: var(--gold); }
+@media (max-width: 860px) {
+  .lobby-grid { grid-template-columns: minmax(0, 1fr); }   /* panelerna under varandra */
+}
+/* Mobil: en kolumn i full bredd med 12 px marginal */
+@media (max-width: 560px) {
+  .lobby-wrap { gap: 20px; padding: calc(16px + var(--safe-top)) max(12px, var(--safe-right)) calc(24px + var(--safe-bottom)) max(12px, var(--safe-left)); }
+  .lobby-head { flex-direction: column; align-items: stretch; gap: 16px; }
+  .lobby-brand { gap: 14px; }
+  .lobby-logo { height: 72px; }
+  .room-code { font-size: 52px; text-shadow: 4px 4px 0 var(--gk-guld); }
+  .invite { width: 100%; }
+  .lobby-grid { gap: 20px; }
+  .lobby-panel { padding: 18px 16px; }
+  .settings-grid { grid-template-columns: minmax(0, 1fr); }
+  .lobby-actions { grid-template-columns: minmax(0, 1fr); }
+  .player-list .bal { font-size: 18px; }
+}
 
-/* ---------------------------------------------------------- game */
-.game-layout { display: flex; flex-direction: column; height: 100dvh; }
+/* ---------------------------------------------------------- game
+ * Ny design: design-handoff/referens/bord.html (ritad i 1280 × 800) och DESIGN.md "Bordet på dator".
+ * Plankgolv, topplist, ovalt bord med fem fåtöljer, gurktryck, skyltar och underlägget med handen.
+ * Bordets mått är procent av referensens, så att allt följer bordet när fönstret ändrar storlek.
+ */
+#screen-game { font-family: var(--gk-font-text); color: var(--gk-kram); }
+.game-layout {
+  display: flex; flex-direction: column; height: 100dvh;
+  /* Plankgolv: Mahogny med plankmönstret över, mörkare ut mot kanterna */
+  background: var(--gk-mahogny) url(/assets/planktextur.svg) center top / 640px 256px;
+  box-shadow: inset 0 0 180px rgba(0,0,0,.55);
+}
+
+/* ---- topplisten ---- */
 .topbar {
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
-  padding: max(8px, var(--safe-top)) max(16px, var(--safe-right)) 8px max(16px, var(--safe-left));
-  border-bottom: 1px solid var(--panel-line);
-  background: rgba(0,0,0,.25);
   /* Ligger över resultat- och slaskrutans skärm, så att historik och chatt alltid går att nå. */
-  position: relative; z-index: 61; background-color: #0e1513;
+  position: relative; z-index: 61; flex: none;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  height: calc(52px + var(--safe-top));
+  padding: var(--safe-top) max(16px, var(--safe-right)) 0 max(16px, var(--safe-left));
+  background: rgba(9,6,4,.72); box-shadow: 0 3px 0 rgba(0,0,0,.6), 0 12px 20px rgba(0,0,0,.35);
 }
-.topbar-left, .topbar-right { display: flex; gap: 8px; align-items: center; }
-.btn-tool { padding: 0 12px; font-size: var(--text-footnote); position: relative; }
-.icon { width: 20px; height: 20px; flex: none; }
-.unread-dot { position: absolute; top: 8px; right: 8px; width: 9px; height: 9px; border-radius: 50%;
-  background: var(--gold); box-shadow: 0 0 0 2px #0e1513; }
-.unread-dot[hidden] { display: none; }
+.topbar-left, .topbar-right { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.topbar-left { gap: 18px; padding-left: 94px; }
+/* Huvudmärket hänger ner över listens underkant */
+.topbar-logo { position: absolute; left: max(12px, var(--safe-left)); top: calc(5px + var(--safe-top)); height: 114px; width: auto; pointer-events: none; }
+.topbar-title { font-family: var(--gk-font-titel); font-size: 27px; line-height: 1; letter-spacing: .04em; color: var(--gk-kram); }
+.topbar-tags { display: flex; gap: 8px; }
 .chip {
-  font-size: var(--text-caption1); font-weight: 600; font-variant-numeric: tabular-nums;
-  padding: 6px 11px; border-radius: 999px;
-  background: rgba(255,255,255,.07); border: 1px solid var(--panel-line);
+  padding: 5px 10px; border: var(--gk-ram) solid var(--gk-ram-morkt); border-radius: var(--gk-radie);
+  font-family: var(--gk-font-rubrik); font-size: 15px; font-weight: 700; line-height: 1; letter-spacing: .1em;
+  text-transform: uppercase; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--gk-kram);
 }
-.chip-mult { font-weight: 700; }
+.chip-mult { background: var(--gk-guld); border-color: var(--gk-guld); color: var(--gk-grund); }
+.chip-mult:empty { display: none; }
+.chip-beta { color: var(--gk-guld); }
+.topbar-btn { position: relative; }
+.topbar-btn .icon { display: none; width: 20px; height: 20px; flex: none; }
+.unread-dot { position: absolute; top: -5px; right: -5px; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--gk-guld); box-shadow: 0 0 0 2px var(--gk-black); }
+.unread-dot[hidden] { display: none; }
 
-.table-area { flex: 1; position: relative; padding: 14px max(14px, var(--safe-right)) 14px max(14px, var(--safe-left)); min-height: 0; }
+/* ---- bordet ---- */
+.table-area {
+  flex: 1; position: relative; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: clamp(36px, 8.25vh, 66px) max(clamp(24px, 6.6vw, 84px), var(--safe-right)) clamp(30px, 7.25vh, 58px) max(clamp(24px, 6.6vw, 84px), var(--safe-left));
+  container-type: size;
+}
+/* Ovalen fyller bredden och tar den höjd som finns - men blir aldrig rundare än 2,2 : 1
+   (höga fönster) eller längre än 3,6 : 1 (mycket breda). I 1280 × 800 blir den som referensen. */
+.table { position: relative; display: flex; width: 100%; max-width: 360cqh; height: min(100cqh, 100cqw / 2.2); }
+.table-rim {
+  position: relative; flex: 1; display: flex; padding: 7px;
+  border-radius: 9999px; background: var(--gk-kram);
+  box-shadow: 0 10px 0 rgba(0,0,0,.6), 0 30px 50px rgba(0,0,0,.55);
+}
 .felt {
-  position: relative; height: 100%;
-  border-radius: 200px / 140px;
-  background:
-    radial-gradient(120% 90% at 50% 20%, #2a6b45 0%, #1c5134 45%, #0f3a24 100%),
-    #174a2f;
-  background-color: #1a5636;
-  box-shadow: inset 0 0 90px rgba(0,0,0,.55), 0 20px 60px rgba(0,0,0,.5), 0 0 0 10px #2a1c12, 0 0 0 12px #3d2a1a;
-  border: 2px solid rgba(255,255,255,.07);
-  overflow: hidden;
+  position: relative; flex: 1; min-width: 0;
+  border-radius: 9999px; border: var(--gk-ram) solid var(--gk-black); background: var(--gk-filt);
+  container-type: size;   /* gurktryckets ord skalas med bordet (cqi) */
 }
-.felt::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background-image: radial-gradient(rgba(255,255,255,.035) 1px, transparent 1px);
-  background-size: 5px 5px;
+
+/* Fåtöljerna står inskjutna under bordet. Storlek och plats i procent av ovalen. */
+.chairs { position: absolute; inset: 0; pointer-events: none; }
+.chair { position: absolute; height: 39%; aspect-ratio: 1; translate: -50% -50%; filter: drop-shadow(0 8px 5px rgba(0,0,0,.6)); }
+.chair img { display: block; width: 100%; height: 100%; }
+.chair-tl { left: 25.4%; top: 1%; }      .chair-tl img { rotate: -6deg; }
+.chair-tr { left: 74.6%; top: 1%; }      .chair-tr img { rotate: 6deg; }
+.chair-left { left: -.7%; top: 50.8%; }  .chair-left img { rotate: -90deg; }
+.chair-right { left: 100.7%; top: 50.8%; } .chair-right img { rotate: 90deg; }
+.chair-me { left: 50%; top: 98.4%; }     .chair-me img { rotate: 180deg; }
+
+/* Gurktrycket: ritas först på filten, halvgenomskinligt så att det följer filtens färg. Det ligger
+   i .table-center men placeras mot filten (cqi/cqh = filtens bredd/höjd): 6,6 % ner, 49,4 % brett.
+   z-index -1: bakom allt annat i mitten. */
+.table-print { position: absolute; left: 50%; top: calc(6.6cqh - var(--center-top)); width: 49.4cqi; aspect-ratio: 540 / 214;
+  translate: -50% 0; z-index: -1; pointer-events: none; }
+.table-print img { display: block; width: 100%; height: 100%; }
+.table-print-word {
+  position: absolute; left: 0; right: 2%; top: 33.6%; text-align: center;
+  font-family: var(--gk-font-titel); font-size: 4.2cqi; line-height: 1; letter-spacing: .05em; color: rgba(8,18,14,.55);
+  transition: opacity .2s ease;
 }
+.felt:not(.center-empty) .table-print-word { opacity: 0; }
+
+/* Mitten: fasen i guld och statusraden. Under ordet GURSCH när mitten är tom, annars högre upp. */
 .table-center {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
-  width: min(560px, 76%); text-align: center; z-index: 2;
+  /* Lite högre än referensen (17 %): händelseraden under statusraden tar en egen rad */
+  --center-top: 12cqh;
+  position: absolute; left: 50%; top: var(--center-top); translate: -50% 0;
+  width: min(600px, 56%); text-align: center; z-index: 2;
 }
+.felt.center-empty .table-center { --center-top: 41cqh; }
+/* Lågt bord: mitten börjar högre upp, så att sticket inte når ner till din skylt */
+@container (max-height: 345px) { .felt:not(.center-empty) .table-center { --center-top: 7cqh; } }
 .phase-banner {
-  font-size: var(--text-body); font-weight: 700; color: var(--on-felt);
-  text-shadow: 0 2px 12px rgba(0,0,0,.5);
+  font-family: var(--gk-font-rubrik); font-size: 20px; font-weight: 700; line-height: 1;
+  letter-spacing: .24em; text-transform: uppercase; color: var(--gk-guld);
 }
-.phase-sub { font-size: var(--text-subhead); color: var(--on-felt-secondary); margin-top: 4px; min-height: 20px; line-height: 1.35; }
+.phase-sub { margin-top: 7px; min-height: 1.15em; font-size: 17px; font-weight: 500; line-height: 1.15; color: var(--gk-kram); }
 /* Senaste händelsen. Platsen är reserverad (min-height) så att högarna aldrig flyttar sig när texten kommer. */
-.table-note { min-height: 1.35em; margin-top: 6px; font-size: var(--text-footnote); line-height: 1.35; color: var(--on-felt);
+.table-note { min-height: 1.3em; margin-top: 4px; font-size: 14px; line-height: 1.3; color: #c6d1c4;
   opacity: 0; transition: opacity .2s ease; }
 .table-note.show { opacity: 1; }
-.table-foot { font-size: var(--text-caption1); color: var(--on-felt-secondary); margin-top: 8px; min-height: 16px; }
-.trick-area { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 14px; min-height: 108px; align-items: flex-start; }
+/* ---- sticket ----
+ * En ruta per spelare som lagt: namnet överst, korten (överlappar 14 px) och kombinationens namn
+ * på en mörk etikett. Vinnaren av ett avgjort stick: guldnamn och guldring runt korten. Förra
+ * sticket ligger kvar nedtonat med etiketten FÖRRA STICKET. Sista sticket visar slutvärdena, och
+ * högst (den som förlorar) får rött namn och röd ring.
+ */
+.trick-area { display: flex; justify-content: center; gap: 8px 20px; flex-wrap: wrap; margin-top: 8px; min-height: 90px; align-items: flex-start; }
 .trick-area:empty { min-height: 0; margin-top: 0; }   /* inget stick: ta ingen plats (t.ex. under slängningen) */
 .trick-play { display: flex; flex-direction: column; align-items: center; gap: 5px; transition: opacity .3s ease; }
-.trick-play .who { font-size: var(--text-caption1); color: var(--on-felt-secondary); white-space: nowrap; }
-.trick-play.winner .cards { filter: drop-shadow(0 0 10px rgba(255,255,255,.55)); }
-.trick-play.winner .who { color: #fff; font-weight: 700; }
-.trick-area.previous .trick-play { opacity: .55; }
-.trick-area.previous .trick-play.winner { opacity: .9; }
-.trick-caption {
-  flex-basis: 100%; text-align: center; font-size: var(--text-caption2); font-weight: 600;
-  letter-spacing: var(--eyebrow-spacing); text-transform: uppercase; color: var(--on-felt-secondary);
+.trick-play .who, .trick-caption, .tb-name {
+  font-family: var(--gk-font-rubrik); font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: .1em;
+  text-transform: uppercase; white-space: nowrap; color: #c6d1c4;
 }
 .trick-play .cards { display: flex; }
 .trick-play .cards .card:not(:first-child) { margin-left: -14px; }   /* alla valörer syns */
-.trick-play .combo { font-size: var(--text-caption1); color: var(--on-felt);
-  background: rgba(0,0,0,.35); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
-.trick-play .combo.mixed { color: rgba(255,255,255,.72); }
+.trick-play .combo, .tb-pick {
+  padding: 2px 7px; border-radius: 3px; background: var(--gk-black); color: var(--gk-kram);
+  font-size: 12px; font-weight: 500; line-height: 1.25; white-space: nowrap;
+}
+.trick-play.winner .who { color: var(--gk-guld); }
+.trick-play.winner .card { box-shadow: var(--gk-ring), 2px 3px 0 rgba(0,0,0,.42); }
+.trick-area.previous .trick-play { opacity: .55; }
+.trick-caption { flex-basis: 100%; text-align: center; letter-spacing: .2em; }
 /* Sista sticket (R26): slutvärdet visas, och högst markeras i rött - det förlorar */
 .trick-play .final-value { display: none; }
 .trick-area.final .final-value { display: inline-block; }
 .trick-area.previous.final .trick-play { opacity: 1; }   /* sista sticket ligger kvar fullt synligt */
 .trick-area.final .trick-play .combo:not(.final-value) { display: none; }
-.trick-play.highest .cards { filter: drop-shadow(0 0 10px rgba(226,86,74,.75)); }
-.trick-play.highest .who { color: #ffb3aa; font-weight: 700; }
+.trick-play.highest .who { color: var(--gk-minus-morkt); }
+.trick-play.highest .card { box-shadow: var(--gk-ring-rod), 2px 3px 0 rgba(0,0,0,.42); }
 
-/* seats */
+/* ---- skyltar ----
+ * Motspelare: mörk skylt med namn och saldo · status. Din: krämfärgad med guldskugga.
+ * Den som är på tur får guldringen. Kort under motspelarnas skyltar, märken som nålar i hörnen.
+ */
 .seats { position: absolute; inset: 0; z-index: 3; pointer-events: none; }   /* klick går igenom till bordet (t.ex. dragningen) */
 .seats > * { pointer-events: auto; }
 .seat-me:empty { display: none; }
-.seat {
-  position: absolute; transform: translate(-50%,-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  min-width: 128px;
-}
+.seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 8px; translate: -50% 0; }
+/* Platserna i procent av filten (referensen: filten 1094 × 364) */
+.seat[data-pos="tl"] { left: 24.4%; top: 3.8%; }
+.seat[data-pos="tr"] { left: 75.6%; top: 3.8%; }
+.seat[data-pos="left"] { left: 12%; top: 37.4%; }
+.seat[data-pos="right"] { left: 88%; top: 37.4%; }
+.seat[data-pos="me"] { left: 50%; bottom: 3.8%; gap: 10px; }
 .seat-badge {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 8px 14px; border-radius: 12px;
-  background: rgba(8,16,12,.72); border: 1px solid rgba(255,255,255,.12);
-  box-shadow: var(--shadow);
-  transition: border-color .2s, box-shadow .2s, transform .2s;
+  position: relative; min-width: 118px; padding: 9px 16px; border-radius: var(--gk-radie);
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--gk-black); color: var(--gk-kram); text-align: center;
+  transition: box-shadow var(--gk-tid) ease-out, opacity .2s;
 }
-.seat.turn .seat-badge { border-color: rgba(255,255,255,.8); box-shadow: 0 0 0 2px rgba(255,255,255,.18), var(--shadow); }
-.seat.me.turn .seat-badge { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(232,200,119,.3), var(--shadow); }
+.seat .nick { font-family: var(--gk-font-rubrik); font-size: 19px; font-weight: 700; line-height: 1.2; letter-spacing: .04em; white-space: nowrap; }
+.seat-line { display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; line-height: 1.3; white-space: nowrap; color: var(--gk-dampad-morkt); }
+.seat .bal { font-variant-numeric: tabular-nums; }
+.bal.pos { color: var(--gk-plus-morkt); } .bal.neg { color: var(--gk-minus-morkt); } .bal.zero { color: var(--gk-dampad-morkt); }
+.seat .status { font-family: var(--gk-font-rubrik); font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: .12em; text-transform: uppercase; color: var(--gk-kram); }
+.seat .status:not(:empty)::before { content: "·"; margin: 0 .4em; font-family: var(--gk-font-text); font-weight: 600; letter-spacing: 0; color: var(--gk-dampad-morkt); }
+.seat .status.thinking { color: var(--gk-guld); }
+.seat .status.slask { color: var(--gk-minus-morkt); }
+.seat.turn .seat-badge { box-shadow: var(--gk-ring); }
+.seat.loser .seat-badge { box-shadow: var(--gk-ring-rod); }
 .seat.disconnected .seat-badge { opacity: .55; }
-.seat .nick { font-weight: 600; font-size: var(--text-subhead); }
-.seat .bal { font-size: var(--text-footnote); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.bal.pos { color: var(--green); } .bal.neg { color: var(--red); } .bal.zero { color: var(--muted); }
-.seat .status {
-  font-size: var(--text-caption2); font-weight: 600; letter-spacing: var(--eyebrow-spacing); text-transform: uppercase;
-  color: var(--on-felt-secondary); min-height: 13px;
-}
-.seat .status.note { color: #fff; }
-.seat-cards { display: flex; gap: 3px; }
-.seat-marks { display: flex; gap: 5px; font-size: var(--text-caption2); font-weight: 600; color: var(--on-felt); }
-.mark { padding: 2px 7px; border-radius: 999px; background: rgba(0,0,0,.35); }
-.mark.dealer { background: #f3e7c6; color: #2a2010; font-weight: 800; }
-.mark.flop { background: rgba(0,0,0,.35); }
-.mark.mini { background: rgba(0,0,0,.35); color: #ffb3aa; }
+/* Nedräkningen står i underlägget ("BOT GRETA · 41 s") - ingen egen list på skylten */
+.seat .turn-timer { display: none; }
 
-/* cards */
+/* Din skylt */
+.seat.me .seat-badge { padding: 9px 18px; background: var(--gk-kram); color: var(--gk-grund); border: var(--gk-ram) solid var(--gk-black); box-shadow: 5px 5px 0 var(--gk-guld); }
+.seat.me .nick { font-size: 21px; }
+.seat.me .seat-line { font-size: 15px; color: var(--gk-dampad-ljust); }
+.seat.me .bal.pos { color: var(--gk-plus); } .seat.me .bal.neg { color: var(--gk-rod-fylld); } .seat.me .bal.zero { color: var(--gk-dampad-ljust); }
+.seat.me .status { color: var(--gk-grund); }
+.seat.me .status::before { color: var(--gk-dampad-ljust); }
+.seat.me .status.thinking { color: var(--gk-guld); }
+.seat.me .status.slask { color: var(--gk-rod-fylld); }
+.seat.me.turn .seat-badge { box-shadow: var(--gk-ring), 5px 5px 0 var(--gk-guld); }
+.seat.me.loser .seat-badge { box-shadow: var(--gk-ring-rod), 5px 5px 0 var(--gk-guld); }
+
+/* Märken: D-brickan (rund), FLOP (guld), SLASK 1/3 och Mini (mörka) */
+.seat-marks { display: flex; gap: 6px; align-items: center; }
+.mark {
+  padding: 4px 8px; border: var(--gk-ram) solid var(--gk-black); border-radius: var(--gk-radie);
+  font-family: var(--gk-font-rubrik); font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: .08em;
+  text-transform: uppercase; white-space: nowrap; background: var(--gk-black); color: var(--gk-kram);
+}
+.mark.dealer { border-radius: 999px; letter-spacing: 0; background: var(--gk-kram); color: var(--gk-grund); }
+.mark.flop { background: var(--gk-guld); color: var(--gk-grund); }
+.mark.mini { color: var(--gk-minus-morkt); }
+/* Motspelare: D uppe till vänster och FLOP uppe till höger som nålar i skyltens hörn */
+.seat-badge > .mark.dealer { position: absolute; left: -10px; top: -11px; }
+.seat-badge > .mark.flop { position: absolute; right: -10px; top: -11px; }
+/* ... och slaskräknaren vid sidan av skylten, mot bordets mitt */
+.seat:not(.me) .seat-marks { position: absolute; top: 14px; flex-direction: column; align-items: flex-start; }
+.seat[data-pos="left"] .seat-marks, .seat[data-pos="tl"] .seat-marks { left: calc(100% + 8px); }
+.seat[data-pos="right"] .seat-marks, .seat[data-pos="tr"] .seat-marks { right: calc(100% + 8px); align-items: flex-end; }
+
+.seat-cards { display: flex; gap: 3px; }
+
+/* ---- kort ----
+ * Papper med mörk kontur och hård skugga. Röda valörer i Kortröd. Sjuor har ett litet guldhörn.
+ * Baksidor: mörka med ljusa kritstrecksränder (2 px breda, 4 px mellanrum).
+ */
 .card {
+  --seven-corner: 11px;
   width: var(--card-w); height: var(--card-h);
-  border-radius: 8px; position: relative; flex: none;
-  background: linear-gradient(160deg,#fff 0%,#f2f4f1 100%);
-  color: #14201a; border: 1px solid rgba(0,0,0,.25);
-  box-shadow: 0 4px 12px rgba(0,0,0,.4);
+  position: relative; flex: none; border-radius: 5px;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 800; user-select: none; -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .16s cubic-bezier(.2,.8,.3,1), box-shadow .16s;
+  border: var(--gk-ram) solid var(--gk-black); background: var(--gk-papper); color: var(--gk-grund);
+  box-shadow: 3px 4px 0 rgba(0,0,0,.42);
+  font-family: var(--gk-font-rubrik); font-weight: 700;
+  user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: transform var(--gk-tid) var(--gk-kurva), box-shadow var(--gk-tid) var(--gk-kurva), opacity var(--gk-tid) ease-out;
 }
-.card .rank { font-size: 26px; line-height: 1; }
-.card .corner { position: absolute; font-size: 11px; font-weight: 700; }
-.card .corner.tl { top: 4px; left: 5px; } .card .corner.br { bottom: 4px; right: 5px; transform: rotate(180deg); }
-.card.red { color: #c0392b; }
-.card.seven { background: linear-gradient(160deg,#fff 0%,#eaf7dd 100%); box-shadow: 0 4px 12px rgba(0,0,0,.4), inset 0 0 0 2px rgba(110,180,70,.5); }
+.card .rank { font-size: calc(var(--card-w) * .52); line-height: 1; }
+.card .corner { position: absolute; font-size: calc(var(--card-w) * .23); font-weight: 700; line-height: 1; }
+.card .corner.tl { top: 5px; left: 6px; } .card .corner.br { bottom: 5px; right: 6px; transform: rotate(180deg); }
+.card.red { color: var(--gk-kortrod); }
+.card.seven { background: linear-gradient(225deg, var(--gk-guld) 0 var(--seven-corner), var(--gk-papper) var(--seven-corner)); }
 .card.back {
-  background:
-    repeating-linear-gradient(45deg, #24513a 0 6px, #1d4430 6px 12px);
-  border-color: rgba(255,255,255,.18); color: transparent;
+  background: repeating-linear-gradient(90deg, var(--gk-black) 0 4px, #3d6455 4px 6px);
+  border-color: var(--gk-kram); color: transparent;
 }
-.card.back::after { content: "🥒"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 22px; opacity: .55; }
-.card.mini-card { --card-w: 40px; --card-h: 58px; width: 40px; height: 58px; }
+.card.mini-card { --card-w: 40px; --card-h: 58px; --seven-corner: 7px; width: 40px; height: 58px; }
 .card.mini-card .rank { font-size: 16px; }
 .card.mini-card .corner { display: none; }
-.seat-cards .card { width: 30px; height: 43px; border-radius: 5px; }
-.seat-cards .card .rank { font-size: 14px; }
+.seat-cards .card { --seven-corner: 6px; width: 30px; height: 43px; border-radius: 3px; box-shadow: none; }
+.seat-cards .card .rank { font-size: 20px; }
 .seat-cards .card .corner { display: none; }
-.seat-cards .card.back::after { font-size: 13px; }
-.trick-play .card { width: 52px; height: 74px; }
-.trick-play .card .rank { font-size: 20px; }
+.card .suit { display: none; }
+/* Kort i sticket: valör och färg under varandra till vänster, så att de syns när korten överlappar */
+.trick-play .card { --seven-corner: 9px; width: 38px; height: 54px; border-radius: 3px; padding-left: 5px;
+  flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; box-shadow: 2px 3px 0 rgba(0,0,0,.42); }
+.trick-play .card .rank { font-size: 21px; }
+.trick-play .card .suit { display: block; font-size: 13px; line-height: 1; }
 .trick-play .card .corner { display: none; }
 
-/* hand */
+/* ---- underlägget med handen ----
+ * Mörkt läderunderlägg med streckad guldsöm, centrerat under bordet och bara så brett som
+ * handen kräver. Uppifrån: turtimern, uppmaningen, handen, knappraden (räknare · knappar · tid).
+ */
 .handbar {
-  position: relative;
-  border-top: 1px solid var(--panel-line);
-  background: rgba(0,0,0,.35);
-  transition: background-color .2s ease, border-color .2s ease;
-  padding: 10px max(16px, var(--safe-right)) calc(14px + var(--safe-bottom)) max(16px, var(--safe-left));
-  display: flex; flex-direction: column; gap: 8px; align-items: center;
+  position: relative; flex: none; display: flex; justify-content: center;
+  padding: 0 max(16px, var(--safe-right)) calc(10px + var(--safe-bottom)) max(16px, var(--safe-left));
+  background: linear-gradient(180deg, rgba(9,6,4,0) 0%, rgba(9,6,4,.62) 100%);
 }
-/* Ditt drag: ljusare yta och guldkant - bara färg, ingen layoutändring (flygningarna mäter handen). */
-.handbar.my-move { background: rgba(232,200,119,.08); border-top-color: rgba(232,200,119,.6); }
-.handbar.my-move #hand-hint { color: var(--text); }
-.hand-timer { position: absolute; left: 0; right: 0; top: -1px; height: 3px; pointer-events: none; }
-.hand-timer-bar { height: 100%; width: 0; background: var(--gold); transition: width .2s linear, background-color .3s; }
-.hand-timer-bar.urgent { background: var(--red); }
-.hand-info { display: flex; gap: 12px; align-items: center; font-size: var(--text-footnote); color: var(--muted); }
-.sel-count { color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums; }
-/* Luft ovanför korten: ett markerat kort lyfts 16 px och bär då etiketten "Uppvänd" (15 px) med sig. */
-.hand { display: flex; gap: 8px; padding-top: 32px; min-height: var(--card-h); justify-content: center; flex-wrap: wrap; }
+.hand-pad {
+  position: relative; min-width: min(620px, 100%); max-width: 100%;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas: "timer timer timer" "hint hint hint" "hand hand hand" "count actions clock";
+  /* Knappraden är alltid 44 px hög - annars hoppar bordet när turen går över till någon annan */
+  grid-template-rows: auto auto auto minmax(44px, auto);
+  column-gap: 16px; row-gap: 10px; align-items: center;
+  padding: 12px 34px 18px; border-radius: 14px;
+  border: var(--gk-ram) solid #0a0705; background: var(--gk-underlagg);
+  box-shadow: 0 6px 0 rgba(0,0,0,.55), 0 18px 30px rgba(0,0,0,.45);
+}
+.hand-pad::before { content: ""; position: absolute; inset: 6px; border: 2px dashed rgba(201,165,90,.42); border-radius: 9px; pointer-events: none;
+  transition: border-color .2s ease; }
+/* Din tur: den streckade guldsömmen går upp till full styrka (ingen annan färgändring) */
+.handbar.my-move .hand-pad::before { border-color: var(--gk-guld); }
+.hand-timer { grid-area: timer; height: 6px; margin: 0 -10px; border-radius: 2px; background: rgba(240,232,204,.14); pointer-events: none; }
+.hand-timer-bar { height: 100%; width: 0; border-radius: 2px; background: var(--gk-guld); transition: width .2s linear, background-color .3s; }
+.hand-timer-bar.urgent { background: var(--gk-varning); }
+.hand-hint { grid-area: hint; min-height: 1.2em; text-align: center; font-size: 15px; font-weight: 500; line-height: 1.2; color: var(--gk-kram); text-wrap: balance; }
+.sel-count { grid-area: count; font-family: var(--gk-font-rubrik); font-size: 15px; font-weight: 700; line-height: 1.2; letter-spacing: .1em;
+  text-transform: uppercase; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--gk-guld); }
+.actions { grid-area: actions; display: flex; gap: 10px; justify-content: center; align-items: center; min-height: 44px; }
+.actions .gk-btn { min-height: 44px; min-width: 84px; padding: 0 18px; letter-spacing: .12em; }
+.actions .gk-press-light { min-width: 132px; padding: 0 22px; }
+.actions .gk-ghost-light { --gk-ghost-ram: var(--gk-ram-morkt-stark); }
+/* Inte din tur: inga knappar - bara vem som är på tur och tiden, i mitten */
+.hand-pad:has(> .actions:empty) .actions { display: none; }
+.hand-pad:has(> .actions:empty) .turn-clock { grid-area: actions; text-align: center; }
+
+/* Handen: lyfter 4 px vid hover, valt kort ligger 8 px upp med guldring. Gråa kort rör sig inte. */
+.hand { grid-area: hand; display: flex; gap: 8px; align-items: flex-end; justify-content: center; flex-wrap: wrap;
+  padding-top: 14px; min-height: calc(var(--card-h) + 14px); }
 .hand .card { cursor: pointer; }
-.hand .card:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-.hand .card.selected { transform: translateY(-16px); box-shadow: 0 0 0 3px var(--gold), 0 14px 26px rgba(0,0,0,.5); }
+.hand .card:focus-visible { outline: 3px solid var(--gk-fokus-morkt); outline-offset: 3px; }
+.hand .card.selected { transform: translateY(-8px); box-shadow: var(--gk-ring), 5px 9px 0 rgba(0,0,0,.42); }
 @media (hover: hover) {
-  .hand .card:hover:not(.locked):not(.selected) { transform: translateY(-6px); box-shadow: 0 12px 22px rgba(0,0,0,.45); }
+  .hand .card:hover:not(.locked):not(.unplayable):not(.selected) { transform: translateY(-4px); }
+  .hand .card.selected:hover:not(.locked) { transform: translateY(-11px); }
 }
-.hand .card.locked { cursor: default; opacity: .96; }
-.hand .card.unplayable { opacity: .45; filter: grayscale(.6); }
+.hand .card:active:not(.locked):not(.unplayable):not(.selected) { transform: translateY(-1px); }
+.hand .card.selected:active:not(.locked) { transform: translateY(-5px); }
+.hand .card.locked { cursor: default; }
+.hand .card.unplayable { opacity: .42; cursor: not-allowed; }
 .hand .card.unplayable.selected { opacity: .8; }
 .hand .card.faceup-marker::before {
-  content: "Uppvänd"; position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
-  font-size: var(--text-caption2); font-weight: 600; color: var(--gold); white-space: nowrap;
+  content: "Uppvänd"; position: absolute; left: -6px; right: -6px; top: -17px; text-align: center;
+  font-family: var(--gk-font-rubrik); font-size: 12px; font-weight: 700; line-height: 1; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--gk-guld); white-space: nowrap;
 }
-.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; min-height: var(--tap); }
-.actions .btn { min-width: 120px; }
 
-/* side panels */
+/* ---- sidopaneler: historik och chatt ----
+ * Krämfärgade paneler från höger, 400 px breda och i full höjd, mörk kant och hård skugga åt
+ * vänster. Ingen slöja bakom. Överst rubrik och stängknapp, sedan en mörk linje.
+ */
 .side-panel {
-  position: fixed; top: 0; right: 0; height: 100dvh; width: min(360px, 92vw);
+  --gk-fokusring: var(--gk-fokus-ljust);
+  position: fixed; top: 0; right: 0; height: 100dvh; width: min(400px, 100vw);
   padding-top: var(--safe-top); padding-right: var(--safe-right);
-  background: rgba(10,18,15,.97); border-left: 1px solid var(--panel-line);
-  transform: translateX(105%); visibility: hidden;
-  transition: transform .26s cubic-bezier(.2,.8,.3,1), visibility 0s linear .26s;
   display: flex; flex-direction: column; z-index: 65;   /* över resultat- och slaskrutan (60), under rapporten (70) */
+  background: var(--gk-kram); color: var(--gk-grund); font-family: var(--gk-font-text);
+  border-left: var(--gk-ram) solid var(--gk-black); box-shadow: -8px 0 0 var(--gk-black);
+  transform: translateX(calc(100% + 12px)); visibility: hidden;
+  transition: transform .26s cubic-bezier(.2,.8,.3,1), visibility 0s linear .26s;
 }
 .side-panel.open { transform: translateX(0); visibility: visible; transition: transform .26s cubic-bezier(.2,.8,.3,1); }
-.side-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 6px 6px 16px; border-bottom: 1px solid var(--panel-line); }
-.side-head h3 { font-size: var(--text-body); font-weight: 600; color: var(--text); }
-.chat-log, .history { flex: 1; overflow: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 9px; }
-.chat-msg { font-size: var(--text-subhead); line-height: 1.4; }
-.chat-msg .who { color: var(--text); font-weight: 700; margin-right: 6px; }
-.chat-msg.system { color: var(--muted); font-style: italic; }
-.chat-form { display: flex; gap: 8px; padding: 12px 12px calc(12px + var(--safe-bottom)); border-top: 1px solid var(--panel-line); }
-.chat-form input { margin: 0; }
-.hist-round {
-  font-size: var(--text-caption1); font-weight: 600; letter-spacing: var(--eyebrow-spacing); text-transform: uppercase;
-  color: var(--muted); margin-top: 6px;
-}
-.hist-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; font-size: var(--text-footnote); padding: 8px 10px; background: rgba(255,255,255,.04); border-radius: 8px; }
-.hist-row .amt { font-weight: 700; font-variant-numeric: tabular-nums; }
-.hist-row .sub { grid-column: 1 / -1; color: var(--muted); font-size: var(--text-caption1); }
+.side-head { flex: none; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 16px 20px 14px; border-bottom: var(--gk-ram) solid var(--gk-grund); }
+.side-head h3 { margin: 0; font-family: var(--gk-font-rubrik); font-size: 26px; font-weight: 700; line-height: 1;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--gk-grund); }
+.side-close { width: var(--tap); min-height: var(--tap); padding: 0; }
+.side-close .icon { width: 18px; height: 18px; }
+.chat-log, .history { flex: 1; min-height: 0; overflow: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+.history .hint { color: var(--gk-dampad-ljust); font-size: 15px; }
+/* Chatten: andras meddelanden till vänster, dina egna till höger med mörk ram och guldskugga */
+.chat-msg { align-self: flex-start; max-width: min(290px, 85%); display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 12px; border-radius: var(--gk-radie); background: var(--gk-papper); border: var(--gk-ram) solid var(--gk-linje); }
+.chat-msg.mine { align-self: flex-end; border-color: var(--gk-black); box-shadow: var(--gk-skugga-du); }
+.chat-msg .who { font-family: var(--gk-font-rubrik); font-size: 14px; font-weight: 700; line-height: 1.2; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--gk-dampad-ljust); }
+.chat-msg .text { font-size: 16px; line-height: 1.35; color: var(--gk-grund); overflow-wrap: anywhere; }
+.chat-form { flex: none; display: flex; gap: 10px; padding: 14px 20px calc(18px + var(--safe-bottom)); border-top: var(--gk-ram) solid var(--gk-grund); }
+.chat-form .gk-input { flex: 1 1 auto; min-width: 0; }
+/* Historiken: en etikett per runda och en pappersrad per pengahändelse */
+.hist-round { margin-top: 4px; font-family: var(--gk-font-rubrik); font-size: 14px; font-weight: 700; line-height: 1;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--gk-dampad-ljust); }
+.hist-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 3px 10px;
+  padding: 9px 12px; border-radius: var(--gk-radie); background: var(--gk-papper); border: var(--gk-ram) solid var(--gk-linje); }
+.hist-row .what { font-family: var(--gk-font-rubrik); font-size: 19px; font-weight: 700; line-height: 1.15; letter-spacing: .03em; }
+.hist-row .event { font-weight: 600; color: var(--gk-dampad-ljust); }
+.hist-row .amt { font-family: var(--gk-font-rubrik); font-size: 20px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.hist-row .amt.pos { color: var(--gk-plus); } .hist-row .amt.neg { color: var(--gk-rod-fylld); }
+.hist-row .sub { grid-column: 1 / -1; font-size: 14px; color: var(--gk-dampad-ljust); }
 
 /* overlays */
-.slask-overlay, .result-overlay {
-  position: fixed; inset: 0; display: none; place-items: center; z-index: 60;
-  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
-  background: rgba(4,9,7,.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+/* ---- rundresultatet ----
+ * Ny design: design-handoff/referens/rundresultat.html. Krämfärgad panel mot en stor cirkel i Filt,
+ * huvudmärket på panelens överkant. Mörk slöja utan oskärpa. Under topplisten (60 < 61), så att
+ * historik och chatt går att nå medan resultatet visas.
+ */
+.result-overlay {
+  position: fixed; inset: 0; z-index: 60; display: none; overflow-y: auto;
+  padding: calc(var(--safe-top) + 116px) max(16px, var(--safe-right)) calc(var(--safe-bottom) + 16px) max(16px, var(--safe-left));
+  background: rgba(6,10,8,.74);
 }
-.slask-overlay.open, .result-overlay.open { display: grid; }
-/* Resultat och rapport: börjar under toppraden och kan scrollas när rutan är högre än skärmen.
-   margin: auto centrerar när det finns plats, utan att toppen hamnar utanför när det inte gör det. */
-.result-overlay { overflow-y: auto; place-items: start center;
-  padding: calc(var(--safe-top) + 72px) var(--safe-right) calc(var(--safe-bottom) + 16px) var(--safe-left); }
-.result-overlay .result-box { margin: auto 0; }
-/* Slask: förankrad nedtill utan oskärpa - bordet (vem som slaskar) syns bakom. */
-.slask-overlay { place-items: end center; background: rgba(4,9,7,.4); backdrop-filter: none; -webkit-backdrop-filter: none;
-  padding-bottom: calc(var(--safe-bottom) + 16px); }
-.slask-overlay .slask-box { animation: sheetIn .24s cubic-bezier(.2,.8,.3,1); }
-@keyframes sheetIn { from { opacity: 0; transform: translateY(24px); } }
-.slask-box, .result-box {
-  background: linear-gradient(180deg, #16241d, #0e1814);
-  border: 1px solid var(--panel-line); border-radius: 18px;
-  padding: 26px 28px; width: min(560px, 92vw); box-shadow: var(--shadow);
-  animation: popIn .26s cubic-bezier(.2,.9,.3,1); text-align: center;
-}
-@keyframes popIn { from { opacity: 0; transform: scale(.94) translateY(10px); } }
-.slask-title { font-size: var(--text-title1); letter-spacing: .2em; color: var(--red); font-weight: 800; }
-.slask-text { margin: 10px 0 16px; color: rgba(255,255,255,.88); font-size: var(--text-subhead); }
-.slask-timer { height: 5px; background: rgba(255,255,255,.12); border-radius: 999px; overflow: hidden; margin-bottom: 16px; }
-.slask-bar { height: 100%; background: var(--gold); width: 100%; }
-.slask-count { font-size: var(--text-title3); font-weight: 700; font-variant-numeric: tabular-nums; margin-bottom: 8px; min-height: 1.25em; }
-.result-box { text-align: left; }
-.result-box h2 { font-size: var(--text-title2); font-weight: 700; color: var(--text); text-align: center; }
-.result-meta { text-align: center; color: var(--muted); font-size: var(--text-footnote); margin: 6px 0 10px; }
-.result-why { margin: 0 0 14px; font-size: var(--text-subhead); line-height: 1.4; text-align: center; color: var(--text); }
-.result-rows { display: flex; flex-direction: column; gap: 8px; max-height: 42vh; overflow: auto; }
+.result-overlay.open { display: grid; grid-template-columns: minmax(0, 1fr); place-items: start center; }
+/* Cirkeln i Filt bakom panelen */
+.result-overlay::before { content: ""; position: fixed; left: 50%; top: 50%; width: min(800px, 140vw); aspect-ratio: 1;
+  translate: -50% -50%; border-radius: 50%; background: var(--gk-filt); pointer-events: none; }
+.result-box { position: relative; width: 560px; max-width: 100%; margin: auto 0; padding: 68px 28px 20px; gap: 8px;
+  animation: gkDialogIn var(--gk-tid) ease-out; }
+.result-logo { position: absolute; left: 50%; top: -64px; height: 126px; width: auto; translate: -50% 0; pointer-events: none; }
+.result-head { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 4px; }
+.result-head h2 { margin: 0; text-align: center; font-family: var(--gk-font-titel); font-weight: 400; font-size: 34px; line-height: 1;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--gk-grund); text-shadow: 3px 3px 0 var(--gk-guld); }
+.result-head h2:focus { outline: none; }
+.result-meta { font-family: var(--gk-font-rubrik); font-size: 15px; font-weight: 600; line-height: 1.2; letter-spacing: .12em;
+  text-transform: uppercase; text-align: center; color: var(--gk-dampad-ljust); }
+.result-why { margin: 0 0 4px; font-size: 15px; line-height: 1.45; text-align: center; color: var(--gk-etikett); text-wrap: balance; }
+.result-why strong { font-weight: 700; color: var(--gk-grund); }
+.result-rows { display: flex; flex-direction: column; gap: 8px; }
 .result-row {
-  display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center;
-  padding: 11px 13px; background: rgba(255,255,255,.05); border-radius: var(--radius-control);
-  border: 1px solid transparent;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: baseline; gap: 4px 12px;
+  padding: 8px 14px; border-radius: var(--gk-radie); background: var(--gk-papper); border: var(--gk-ram) solid var(--gk-linje);
 }
-.result-row.loser { border-color: rgba(226,86,74,.5); }
-.result-row .name { font-weight: 700; font-size: var(--text-callout); }
-.result-row .val { color: var(--muted); font-size: var(--text-footnote); }
-.result-row .chg { font-weight: 800; font-size: var(--text-callout); font-variant-numeric: tabular-nums; }
-.result-row .bal { grid-column: 1 / -1; color: var(--muted); font-size: var(--text-caption1); }
-.result-extra { margin-top: 12px; color: var(--muted); font-size: var(--text-footnote); line-height: 1.55; }
-.result-actions { display: flex; gap: 10px; margin-top: 18px; }
-.result-actions .btn { flex: 1 1 0; min-width: 0; }   /* knapparna delar bredden - sticker aldrig ut */
+.result-row.loser { border-color: var(--gk-varning); }
+.result-row.me { border-color: var(--gk-black); box-shadow: var(--gk-skugga-du); }
+.result-row .name { font-family: var(--gk-font-rubrik); font-size: 21px; font-weight: 700; line-height: 1.15; letter-spacing: .03em; overflow-wrap: anywhere; }
+.result-row .val { font-size: 14px; color: var(--gk-dampad-ljust); white-space: nowrap; }
+.result-row .chg { font-family: var(--gk-font-rubrik); font-size: 22px; font-weight: 700; line-height: 1.15; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.result-row .chg.pos { color: var(--gk-plus); } .result-row .chg.neg { color: var(--gk-rod-fylld); }
+.result-row .bal { grid-column: 1 / -1; font-size: 14px; color: var(--gk-dampad-ljust); }
+/* Slask, mini-gursch, dragning och quint: en rad var */
+.result-extra { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 2px; font-size: 14px; line-height: 1.45; color: var(--gk-etikett); }
+.result-extra:empty { display: none; }
+.result-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.result-hint { margin: 0; font-size: 14px; text-align: center; color: var(--gk-etikett); }
+.result-hint:empty { display: none; }
+.result-more { display: flex; justify-content: center; gap: 10px; margin-top: 4px; }
 @media (max-width: 560px) {
-  .result-actions { flex-direction: column; }
-  .slask-box, .result-box { padding: 20px 18px; }
+  .result-overlay { padding-left: max(12px, var(--safe-left)); padding-right: max(12px, var(--safe-right)); padding-top: calc(var(--safe-top) + 128px); }
+  .result-box { padding: 66px 16px 20px; }
+  .result-logo { height: 110px; top: -56px; }
+  .result-head h2 { font-size: 30px; }
+  .result-actions { gap: 10px; }
+  .result-actions .gk-btn { padding: 0 8px; font-size: 17px; letter-spacing: .08em; white-space: nowrap; }
 }
+
+/* ---- dialoger ----
+ * Krämfärgad panel (gk-panel) med 2 px mörk ram och skuggan 8px 8px 0, mitt på skärmen.
+ * Bakom en mörk slöja utan oskärpa. Slaskrutan har en ljusare slöja så att bordet syns.
+ */
+.gk-overlay {
+  position: fixed; inset: 0; z-index: 70; display: none; align-items: center; justify-content: center; overflow-y: auto;
+  padding: calc(16px + var(--safe-top)) max(16px, var(--safe-right)) calc(16px + var(--safe-bottom)) max(16px, var(--safe-left));
+  background: rgba(6,10,8,.74);
+}
+.gk-overlay.open { display: flex; }
+.gk-overlay-ljus { background: rgba(6,10,8,.6); }
+.gk-dialog { width: 440px; max-width: 100%; margin: auto; padding: 26px 28px 24px; gap: 14px; animation: gkDialogIn var(--gk-tid) ease-out; }
+@keyframes gkDialogIn { from { opacity: 0; transform: translateY(6px); } }
+.gk-dialog-text { margin: 0; font-size: 15px; line-height: 1.45; color: var(--gk-etikett); }
+.gk-dialog-actions { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 14px; margin-top: 4px; }
+.gk-dialog-actions .gk-btn[hidden] { display: none; }
+.report-overlay { z-index: 70; }
+.report-box { width: 500px; }
+.confirm-overlay { z-index: 75; }
+/* Slask: SLASK! i rött, en mening, nedräkningen som list och sekunder, SYNA SLASK.
+   Under topplisten (60 < 61), så att historik och chatt går att nå medan slasken pågår. */
+.slask-overlay { z-index: 60; }
+.slask-box { width: 400px; padding: 24px 28px; }
+.slask-title { text-align: center; font-family: var(--gk-font-titel); font-size: 44px; line-height: 1; letter-spacing: .05em;
+  color: var(--gk-rod-fylld); text-shadow: 3px 3px 0 var(--gk-grund); }
+.slask-text { text-align: center; }
+.slask-timer-row { display: flex; align-items: center; gap: 12px; }
+.slask-timer { flex: 1 1 auto; height: 8px; border: var(--gk-ram) solid var(--gk-grund); border-radius: 2px; background: var(--gk-papper); overflow: hidden; }
+.slask-bar { height: 100%; width: 100%; background: var(--gk-grund); }
+.slask-count { min-width: 2.4em; text-align: right; font-family: var(--gk-font-rubrik); font-size: 17px; font-weight: 700;
+  letter-spacing: .08em; font-variant-numeric: tabular-nums; color: var(--gk-grund); }
+.slask-count:empty { display: none; }
 
 /* fx */
 .fx-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
+/* Beloppen som flyger från en skylt: Barlow Condensed, grönt eller rött, hård mörk skugga */
 .fx-money {
-  position: absolute; font-weight: 800; font-size: var(--text-body);
-  animation: floatUp 1.5s cubic-bezier(.2,.8,.3,1) forwards; text-shadow: 0 2px 10px rgba(0,0,0,.6);
+  position: absolute; font-family: var(--gk-font-rubrik); font-weight: 700; font-size: 22px; letter-spacing: .02em;
+  text-shadow: 2px 2px 0 var(--gk-black);
+  animation: floatUp 1.5s cubic-bezier(.2,.8,.3,1) forwards;
 }
+.fx-money.pos { color: var(--gk-plus-morkt); }
+.fx-money.neg { color: var(--gk-minus-morkt); }
 @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%,0) scale(.8); } 20% { opacity: 1; transform: translate(-50%,-14px) scale(1.12); } 100% { opacity: 0; transform: translate(-50%,-64px) scale(1); } }
-/* Spelets stora ögonblick (SLASK!, FLOP …) får behålla sina versaler. */
+/* Spelets stora ögonblick (FLOP: Axel A, SLASK! …): Alfa Slab One, kräm med hård mörk skugga.
+   Ingen glöd, ingen oskärpa, ingen ruta bakom. SLASK! i rött. */
 .fx-banner {
   position: absolute; left: 50%; top: 42%; transform: translate(-50%,-50%);
-  font-size: clamp(22px, 5vw, 48px); font-weight: 900; letter-spacing: .1em; line-height: 1.15;
-  color: var(--gold); text-shadow: 0 4px 20px rgba(0,0,0,.6);
-  background: rgba(8,16,12,.85); padding: 12px 24px; border-radius: 18px; border: 1px solid rgba(232,200,119,.35);
-  width: max-content; max-width: min(92%, 760px); text-align: center;
+  font-family: var(--gk-font-titel); font-weight: 400; font-size: clamp(28px, 5vw, 56px); letter-spacing: .05em; line-height: 1.1;
+  color: var(--gk-kram); text-shadow: 4px 4px 0 var(--gk-black);
+  width: max-content; max-width: min(92%, 860px); text-align: center; text-wrap: balance;
   animation: bannerPop 1.9s cubic-bezier(.2,.8,.3,1) forwards;
 }
+.fx-banner.slask { color: var(--gk-minus-morkt); }
 @keyframes bannerPop { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.6); } 15% { opacity: 1; transform: translate(-50%,-50%) scale(1.06); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,-62%) scale(1); } }
-/* Synad slask: den gamla handen mitt på bordet, face cards markerade */
-.fx-reveal {
-  position: absolute; left: 50%; top: 46%; transform: translate(-50%,-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 16px 20px; border-radius: 18px; max-width: 92%;
-  background: rgba(8,16,12,.92); border: 1px solid rgba(255,255,255,.18); box-shadow: var(--shadow);
+/* Krämfärgad ruta mitt på bordet: synad slask, paus och dragningens förklaring (DESIGN.md "Slask") */
+.fx-reveal, .tb-intro, .pause-banner {
+  border-radius: var(--gk-radie-panel); border: var(--gk-ram) solid var(--gk-black);
+  background: var(--gk-kram); color: var(--gk-grund); box-shadow: var(--gk-skugga-panel);
 }
-.reveal-title { font-size: var(--text-subhead); font-weight: 600; text-align: center; }
-.reveal-cards { display: flex; gap: 6px; }
-.reveal-card { width: 44px; height: 62px; }
-.reveal-card .rank { font-size: 20px; }
-.reveal-card.face { box-shadow: 0 0 0 3px var(--gold), 0 4px 12px rgba(0,0,0,.4); }
-.reveal-verdict { font-size: var(--text-subhead); font-weight: 700; color: var(--gold); text-align: center; text-wrap: balance; }
-/* Multipliern steg (mini-gursch): chipen lyser i guld medan talet räknas upp */
-.chip-round { transition: color .4s ease, border-color .4s ease, background-color .4s ease; }
-.chip-round.bump { color: var(--gold); border-color: var(--gold-dim); background: rgba(232,200,119,.12); }
-/* Rundans slut: losern markeras på bordet innan resultatrutan kommer */
-.seat.loser .seat-badge { border-color: var(--red); box-shadow: 0 0 0 2px rgba(226,86,74,.3), var(--shadow); }
+.reveal-title, .tb-intro-title, .pause-title {
+  font-family: var(--gk-font-rubrik); font-size: 20px; font-weight: 700; line-height: 1.1; letter-spacing: .1em;
+  text-transform: uppercase; text-align: center; color: var(--gk-grund);
+}
+/* Synad slask: den gamla handen, guldring runt de klädda korten, resultatet i rött */
+.fx-reveal {
+  position: absolute; left: 50%; top: 23%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  padding: 16px 22px; max-width: 92%;
+}
+.reveal-cards { display: flex; gap: 8px; }
+.reveal-card { --seven-corner: 9px; width: 46px; height: 64px; border-radius: 3px; box-shadow: 2px 3px 0 rgba(0,0,0,.42); }
+.reveal-card .rank { font-size: 26px; }
+.reveal-card.face { box-shadow: var(--gk-ring), 2px 3px 0 rgba(0,0,0,.42); }
+.reveal-verdict { font-size: 15px; font-weight: 600; line-height: 1.2; color: var(--gk-rod-fylld); text-align: center; text-wrap: balance; }
+/* Multipliern steg (mini-gursch): taggen lyser upp i kräm medan talet räknas upp */
+.chip-mult { transition: color .4s ease, border-color .4s ease, background-color .4s ease; }
+.chip-mult.bump { background: var(--gk-kram); border-color: var(--gk-kram); }
+/* (Rundans slut: losern får den röda ringen på skylten, se .seat.loser under "skyltar") */
 /* En bot funderar: tre prickar som fylls på (ingen rörelse, bara fler prickar) */
-.seat .status.thinking { color: var(--on-felt); }
 .seat .status.thinking::after {
   content: "..."; display: inline-block; width: 0; overflow: hidden; vertical-align: bottom;
   animation: thinkDots 1.2s steps(4, jump-none) infinite;
@@ -501,160 +755,229 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 @keyframes thinkDots { to { width: 1.1em; } }
 body.no-anim * { animation: none !important; transition: none !important; }
 
-/* Överst (som iOS-notiser) - täcker aldrig handen eller knapparna. */
+/* Små meddelanden ("Återansluten"): mörk skylt med guldram mitt under topplisten.
+   Fel ("Tappade anslutningen") får ram i Röd varning. Täcker aldrig handen eller knapparna. */
 .toast {
-  position: fixed; top: calc(10px + var(--safe-top)); left: 50%; transform: translate(-50%, -16px);
-  background: rgba(20,32,26,.97); border: 1px solid var(--panel-line);
-  padding: 11px 18px; border-radius: var(--radius-control); font-size: var(--text-subhead); z-index: 90;
-  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
-  box-shadow: var(--shadow); max-width: 92vw; text-align: center;
+  position: fixed; top: calc(66px + var(--safe-top)); left: 50%; transform: translate(-50%, -8px); z-index: 90;
+  max-width: calc(100vw - 24px); padding: 9px 16px; text-align: center; text-wrap: balance;
+  border: var(--gk-ram) solid var(--gk-guld); border-radius: var(--gk-radie); background: var(--gk-black); color: var(--gk-kram);
+  font-family: var(--gk-font-rubrik); font-size: 16px; font-weight: 700; line-height: 1.2; letter-spacing: .1em; text-transform: uppercase;
+  box-shadow: 4px 4px 0 rgba(0,0,0,.5);
+  opacity: 0; pointer-events: none; transition: opacity var(--gk-tid) ease-out, transform var(--gk-tid) ease-out;
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
-.toast.error { border-color: rgba(226,86,74,.6); color: #ffc9c3; }
+.toast.error { border-color: var(--gk-varning); }
+.toast.long { font-family: var(--gk-font-text); font-size: 15px; font-weight: 500; line-height: 1.35; letter-spacing: 0; text-transform: none; }
 
 /* -------------------------------------------------------- responsive */
 @media (max-width: 860px) {
-  .lobby-grid { grid-template-columns: 1fr; }
-  .brand h1 { font-size: 40px; }
   :root { --card-w: 54px; --card-h: 78px; }
-  .table-area { padding: 8px max(8px, var(--safe-right)) 8px max(8px, var(--safe-left)); }
-  .felt { border-radius: 26px; box-shadow: inset 0 0 60px rgba(0,0,0,.55), 0 0 0 6px #2a1c12; }
-  .seat { min-width: 96px; }
-  .seat-badge { padding: 6px 9px; }
-  .seat .nick { font-size: var(--text-footnote); } .seat .bal { font-size: var(--text-caption1); }
-  .seat-cards .card { width: 20px; height: 29px; }
-  .seat-cards .card.back::after { font-size: 9px; }
-  .table-center { width: 86%; }
-  .trick-play .card { width: 40px; height: 57px; }
-  .trick-play .cards .card:not(:first-child) { margin-left: -11px; }
-  .trick-play .card .rank { font-size: 15px; }
+  .seat-badge { min-width: 96px; padding: 7px 10px; }
+  .seat .nick { font-size: 16px; } .seat-line { font-size: 13px; }
+  .seat.me .nick { font-size: 18px; } .seat.me .seat-line { font-size: 14px; }
+  .seat-cards .card { width: 22px; height: 32px; }
+  .seat-cards .card .rank { font-size: 15px; }
+  .table-center { width: 64%; }
+  .hand-pad { padding-left: 22px; padding-right: 22px; }
   .hand { gap: 5px; }
-  .actions .btn { min-width: 92px; padding: 10px 12px; }
-  .room-code { font-size: 34px; }
-  .invite { min-width: 0; }
+  .actions .gk-btn { min-width: 0; padding: 0 12px; }
+  .actions .gk-press-light { min-width: 0; }
+}
+/* Topplisten: ordet GURSCH först bort, sedan bara ikoner på knapparna */
+@media (max-width: 1080px) { .topbar-title { display: none; } }
+@media (max-width: 900px) {
+  .topbar-btn { width: 40px; padding: 0; }
+  .topbar-btn .icon { display: block; }
+  .tool-label { display: none; }
 }
 @media (max-height: 620px) {
   .seat-cards { display: none; }
 }
-@media (max-width: 560px) {
-  /* Håll spelarlistan borta från bordskanten: visa bara face-up-korten */
+/* Mobilmenyn finns bara på smala skärmar (se @media nedan) */
+.topbar-menu, .game-menu { display: none; }
+
+/* Mobillayouten gäller under 560 px, och upp till 768 px när fönstret är stående (högre än brett).
+   Samma gräns finns i app.js (NARROW_QUERY). */
+@media (max-width: 560px), (max-width: 768px) and (orientation: portrait) {
+  /* ---- mobil: design-handoff/referens/bord-mobil.html, mobil-stick, mobil-slangning,
+     mobil-forhandling och mobil-meny. Inget plankgolv och inga fåtöljer; bordet är en rundad
+     rektangel som fyller bredden. Alla tryckytor minst 44 px. ---- */
+  /* Högst 560 px brett och centrerat - bordet dras inte ut på en stående surfplatta */
+  #screen-game { background: var(--gk-grund); }
+  .game-layout { max-width: 560px; margin: 0 auto; background: var(--gk-grund); box-shadow: none; }
+
+  /* Dialoger i full bredd med 12 px marginal, sidopanelerna i full bredd */
+  .gk-overlay { padding-left: max(12px, var(--safe-left)); padding-right: max(12px, var(--safe-right)); }
+  .gk-dialog { width: 100%; padding: 22px 20px 20px; }
+  .gk-dialog-actions { gap: 10px; }
+  .gk-dialog-actions .gk-btn { padding: 0 8px; font-size: 17px; letter-spacing: .08em; white-space: nowrap; }
+  .slask-title { font-size: 40px; }
+  .side-panel { width: 100vw; border-left: 0; box-shadow: none; }
+  .toast { top: calc(72px + var(--safe-top)); }
+
+  /* Topplisten: huvudmärket, taggarna och menyknappen (44 × 44) */
+  .topbar { height: calc(60px + var(--safe-top)); gap: 8px; flex-wrap: nowrap; background: var(--gk-black); box-shadow: none;
+    padding-left: max(12px, var(--safe-left)); padding-right: max(12px, var(--safe-right)); }
+  .topbar-left { padding-left: 0; gap: 8px; }
+  .topbar-logo { position: static; height: 48px; margin-right: 2px; }
+  .topbar-tags { gap: 8px; }
+  .chip { padding: 5px 9px; font-size: 14px; border-color: #3b5347; }
+  .chip-mult { border-color: var(--gk-guld); }
+  .topbar-btn { display: none; }
+  .topbar-menu { display: flex; position: relative; width: var(--tap); height: var(--tap); min-height: var(--tap); padding: 0; --gk-ghost-ram: #3b5347; }
+  .topbar-menu .icon { display: block; width: 20px; height: 20px; }
+  .topbar-menu .icon-close { display: none; }
+  .topbar-menu[aria-expanded="true"] { background: var(--gk-kram); border-color: var(--gk-kram); color: var(--gk-grund); }
+  .topbar-menu[aria-expanded="true"] .icon-open { display: none; }
+  .topbar-menu[aria-expanded="true"] .icon-close { display: block; }
+  .topbar-menu[aria-expanded="true"] .unread-dot { display: none; }
+  /* Menyn: slöja över allt under topplisten, krämfärgad panel uppe till höger */
+  .game-menu:not([hidden]) { display: block; position: fixed; left: 0; right: 0; bottom: 0; top: calc(60px + var(--safe-top)); z-index: 62; background: rgba(6,10,8,.74); }
+  .game-menu-panel {
+    position: absolute; right: max(12px, var(--safe-right), calc((100vw - 560px) / 2 + 12px)); top: 8px; width: min(240px, calc(100vw - 24px));
+    display: flex; flex-direction: column; gap: 8px; padding: 12px;
+    border: var(--gk-ram) solid var(--gk-black); border-radius: var(--gk-radie-panel);
+    background: var(--gk-kram); box-shadow: 6px 6px 0 var(--gk-black);
+  }
+  .game-menu-panel .gk-btn { justify-content: flex-start; padding: 0 14px; color: var(--gk-grund); }
+  .game-menu-panel .gk-btn[hidden] { display: none; }
+  .game-menu-panel .unread-dot { position: static; margin-left: auto; box-shadow: none; }
+  .game-menu-panel .unread-dot[hidden] { display: none; }
+
+  /* Bordet */
+  .chairs { display: none; }
+  .table-area { display: flex; padding: 8px max(8px, var(--safe-right)) 12px max(8px, var(--safe-left)); container-type: normal; }
+  .table { max-width: none; width: auto; height: auto; flex: 1; align-self: stretch; }
+  .table-rim { border-radius: 28px; padding: 6px; box-shadow: 0 6px 0 #07100c; }
+  .felt { border-radius: 22px; display: flex; flex-direction: column; padding: 12px 10px 14px; container-type: inline-size; }
+
+  /* Motspelarna i en rad överst, lika breda. Status på en egen rad i skylten. Under skylten bara
+     det uppvända kortet och märkena. Långa namn kortas med tre punkter. */
+  .seats.strip { position: static; order: 0; display: flex; gap: 6px; padding: 0; }
+  .seats.strip .seat { position: static; translate: none; flex: 1 1 0; min-width: 0; gap: 6px; }
+  .seats.strip .seat-badge { width: 100%; min-width: 0; padding: 7px 4px; }
+  .seats.strip .nick { display: block; max-width: 100%; font-size: 17px; overflow: hidden; text-overflow: ellipsis; }
+  .seats.strip .seat-line { flex-direction: column; font-size: 13px; }
+  .seats.strip .seat-line .status:not(:empty)::before { content: none; }
+  .seats.strip .seat-line .status:not(:empty) { margin-top: 4px; font-size: 13px; }
+  .seats.strip .proposal-chip { margin: 4px 0 0; }
+  .seat-under { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; justify-content: center; min-height: 0; }
+  /* (Stark selektor: datorns regel lägger motspelarnas märken vid sidan av skylten) */
+  .seats.strip .seat .seat-under .seat-marks { position: static; left: auto; right: auto; top: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 4px; }
+  .seat-under .mark { font-size: 13px; }
   .seat-cards .card.back { display: none; }
-  .seat { min-width: 0; max-width: 38vw; }
-  /* Smal skärm: motståndarna på en rad överst, sticket i mitten, egen plats längst ned.
-     Då kan sticket aldrig hamna ovanpå någons plats. */
-  .felt { display: flex; flex-direction: column; }
-  .seats.strip { position: static; order: 0; display: flex; justify-content: space-around; align-items: flex-start;
-    gap: 4px; padding: 10px 6px 0; }
-  .seats.strip .seat { position: static; transform: none; flex: 1 1 0; min-width: 0; max-width: none; }
-  .seats.strip .nick { overflow-wrap: anywhere; text-align: center; }
-  .table-center { position: static; order: 1; flex: 1 1 auto; min-height: 0; overflow-y: auto;
-    transform: none; width: 100%; padding: 12px 8px; z-index: 5; }
-  .seat-me { order: 2; display: flex; justify-content: center; padding: 0 0 10px; position: relative; z-index: 3; }
-  .seat-me .seat { position: static; transform: none; }
-  .phase-sub { min-height: 2.7em; }   /* högarna flyttar sig inte när texten ändras */
-  .trick-area { margin-top: 10px; min-height: 80px; }
-  .table-foot { display: none; }
-  .chip { padding: 5px 8px; }
-  .topbar { padding-top: max(6px, var(--safe-top)); padding-bottom: 6px; padding-left: max(10px, var(--safe-left)); padding-right: max(10px, var(--safe-right)); }
-  .seat-marks { flex-wrap: wrap; justify-content: center; }
-  /* Sticket ska rymmas på en rad ovanför platserna, med etiketterna synliga */
-  .trick-area { gap: 8px; }
-  .trick-play { gap: 3px; }
-  .trick-play .who { font-size: var(--text-caption2); }
-  .trick-play .card { width: 34px; height: 48px; border-radius: 6px; }
-  .trick-play .card .rank { font-size: 13px; }
-  .trick-play .cards .card:not(:first-child) { margin-left: -10px; }
-  .trick-play .combo { font-size: var(--text-caption2); padding: 1px 6px; }
-  /* Fem kort på EN rad - annars tar handen halva skärmen och bordet blir för lågt */
-  .hand { --card-w: 44px; --card-h: 64px; gap: 4px; padding-top: 31px; }
-  .hand .card .rank { font-size: 20px; }
-  .hand .card .corner { font-size: var(--text-caption2); }
-  .hand .card .corner.tl { top: 3px; left: 4px; } .hand .card .corner.br { bottom: 3px; right: 4px; }
-  /* Ledtexten får en egen rad i full bredd */
-  .hand-info { flex-wrap: wrap; justify-content: center; row-gap: 4px; }
-  /* Fast höjd på ledtext och knapprad - annars hoppar handen när texten eller knapparna
-     ändras (t.ex. när turen kommer), och korten som flyger dit landar fel. */
-  #hand-hint { flex-basis: 100%; text-align: center; line-height: 1.35;
-    min-height: 2.7em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .actions { flex-wrap: nowrap; gap: 6px; }
-  .actions .btn { min-width: 0; flex: 1 1 0; padding-left: 8px; padding-right: 8px; white-space: nowrap; }
-  .actions .btn-primary { flex-grow: 2.2; }   /* huvudknappen ("Släng 2 kort") får plats på en rad */
-  .actions .propose-group { flex: 3 1 0; }
-  .actions .propose-btn { min-width: 0; flex: 1 1 0; }
-  .turn-clock { margin-left: 0; }
-  .sel-count, .turn-clock { min-height: 1.35em; }   /* raden finns även när den är tom */
-  /* Topprad på en rad: bara ikoner, rumskoden syns i lobbyn */
-  .topbar { flex-wrap: nowrap; }
-  #chip-code { display: none; }
-  .btn-tool { width: var(--tap); padding: 0; }
-  .tool-label { display: none; }
-  /* Den egna platsen på en rad (namn, saldo, markeringar) - handraden visar redan din tur och tid */
-  .seat-me .seat { flex-direction: row; gap: 8px; max-width: none; }
-  .seat-me .nick, .seat-me .seat-marks { white-space: nowrap; }
-  .seat-me .seat-marks { flex-wrap: nowrap; }
-  .seat-me .seat-badge { flex-direction: row; gap: 10px; padding: 6px 12px; }
-  .seat-me .seat-badge .status:empty { display: none; }
-  .seat-me .proposal-chip { margin-top: 0; }
-  .seat-me .turn-timer { display: none; }
-  .table-note { min-height: 2.7em; }
+  .seat-cards .card { width: 24px; height: 34px; }
+  .seat-cards .card .rank { font-size: 17px; }
+
+  /* Din skylt längst ner på filten, märkena i en rad under */
+  .seat-me { order: 2; display: flex; justify-content: center; position: relative; z-index: 3; }
+  .seat-me .seat { position: static; translate: none; }
+  .seat.me .seat-badge { min-width: 110px; padding: 8px 16px; box-shadow: 4px 4px 0 var(--gk-guld); }
+  .seat.me.turn .seat-badge { box-shadow: var(--gk-ring), 4px 4px 0 var(--gk-guld); }
+  .seat.me.loser .seat-badge { box-shadow: var(--gk-ring-rod), 4px 4px 0 var(--gk-guld); }
+  .seat.me .nick { font-size: 20px; } .seat.me .seat-line { font-size: 14px; }
+
+  /* Mitten: gurktrycket mitt på filten. Tom mitt: GURSCH på gurkan, fasen och statusraden under
+     trycket. Kort i mitten: fasen och statusraden över trycket, korten under (ovanpå gurkan). */
+  /* Gurktrycket i flödet: när mitten är tom står det först och fasen under; annars står fasen och
+     statusraden först och korten läggs ovanpå trycket (negativ marginal = korten börjar på gurkan). */
+  .table-print { --print-w: min(324px, 86cqi); position: relative; left: auto; top: auto; translate: none; flex: none;
+    width: var(--print-w); order: 1; margin: 6px 0 calc(var(--print-w) * -.396 + 34px); }
+  .felt.center-empty .table-print { order: -1; margin: 0 0 14px; }
+  .table-print-word { font-size: min(36px, 9.5cqi); }
+  .piles, .trick-area { order: 2; }   /* händelseraden står kvar direkt under statusraden */
+  .table-center { position: relative; left: auto; top: auto; order: 1; flex: 1 1 auto; min-height: 0; overflow-y: auto;
+    translate: none; width: 100%; padding: 12px 0; z-index: 5;
+    display: flex; flex-direction: column; justify-content: safe center; align-items: center; }
+  .phase-sub { margin-top: 6px; min-height: 2.3em; text-wrap: balance; }   /* högarna flyttar sig inte när texten ändras */
+  .table-note { min-height: 1.3em; }
+  .pause-banner { top: 0; }
+  /* Sticket radbryts: två eller tre rutor per rad */
+  .trick-area { margin-top: 8px; min-height: 80px; gap: 8px 14px; max-width: 300px; }
+  .trick-play .who { font-size: 12px; }
+  .trick-play .cards .card:not(:first-child) { margin-left: -12px; }
+  .trick-play .combo { font-size: 11px; padding: 1px 6px; }
+
+  /* Under bordet: turtimern som en list över hela bredden, uppmaningen, räknare och tid på en rad,
+     handen, och knapparna i en rad över hela bredden. */
+  .handbar { padding: 14px max(12px, var(--safe-right)) calc(22px + var(--safe-bottom)) max(12px, var(--safe-left)); background: var(--gk-black); }
+  .hand-pad { position: static; width: 100%; min-width: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "hint hint" "count clock" "hand hand" "actions actions";
+    grid-template-rows: auto auto auto minmax(48px, auto); row-gap: 10px; }
+  .hand-pad::before { display: none; }
+  .hand-timer { grid-area: auto; position: absolute; left: 0; right: 0; top: 0; height: 5px; margin: 0; border-radius: 0; }
+  .hand-timer-bar { border-radius: 0; }
+  .hand-hint { font-size: 15px; line-height: 1.3; min-height: 2.6em; display: flex; align-items: center; justify-content: center; }
+  .sel-count, .turn-clock { font-size: 14px; min-height: 1.2em; }   /* raden finns även när den är tom */
+  .turn-clock { text-align: right; }
+  .hand-pad:has(> .actions:empty) .turn-clock { grid-area: clock; text-align: right; }
+  .hand-pad:has(> .actions:empty) .actions { display: flex; }   /* raden står kvar, så att handen inte hoppar */
+  /* Fem kort på EN rad */
+  .hand { --card-w: 56px; --card-h: 76px; gap: 6px; padding-top: 8px; min-height: 84px; flex-wrap: nowrap; }
+  .hand .card { border-radius: 5px; }
+  .hand .card .corner.tl { top: 4px; left: 5px; } .hand .card .corner.br { display: none; }
+  .hand .card .rank { margin-top: 8px; }
+  /* Flygande kopior av handkorten (utdelning, slängning) ser likadana ut medan de landar */
+  .ghost-card:not(.small) .corner.br { display: none; }
+  .ghost-card:not(.small) .rank { margin-top: 8px; }
+  .actions { flex-wrap: nowrap; gap: 10px; min-height: 48px; }
+  .actions .gk-btn { min-height: 48px; min-width: 0; flex: 1 1 0; padding: 0 8px; white-space: nowrap; letter-spacing: .1em; }
+  .actions .gk-press-light { flex-grow: 1.8; }   /* SLÄNG 2 KORT är bredast */
+  /* Förhandlingen: väljaren 1–4 tar det mesta av raden, STAY resten */
+  .actions .propose-group { flex: 3 1 0; display: grid; }
+  .actions .propose-btn { width: auto; min-height: 48px; }
 }
 
 /* ---- turtimer ---- */
 .turn-timer { height: 3px; margin-top: 5px; border-radius: 2px; background: rgba(255,255,255,.12); overflow: hidden; }
-.turn-timer-bar { height: 100%; width: 100%; background: var(--gold); transition: width .2s linear, background-color .3s; }
-.turn-timer-bar.urgent { background: var(--red); }
-.seat:not(.me) .turn-timer-bar:not(.urgent), .center-timer .turn-timer-bar:not(.urgent) { background: rgba(255,255,255,.85); }
-.turn-clock { margin-left: auto; font-size: var(--text-footnote); color: rgba(255,255,255,.7); font-variant-numeric: tabular-nums; }
-.turn-clock.urgent { color: var(--red); font-weight: 700; animation: clockPulse 1s ease-in-out infinite; }
+.turn-timer-bar { height: 100%; width: 100%; background: var(--gk-guld); transition: width .2s linear, background-color .3s; }
+.turn-timer-bar.urgent { background: var(--gk-varning); }
+.center-timer .turn-timer-bar:not(.urgent) { background: rgba(240,232,204,.85); }
+/* Tiden i knappraden: "DIN TUR · 45 s" - röd när det är knappt och din tur */
+.turn-clock { grid-area: clock; text-align: right; font-family: var(--gk-font-rubrik); font-size: 15px; font-weight: 700; line-height: 1.2;
+  letter-spacing: .1em; white-space: nowrap; font-variant-numeric: tabular-nums; color: #b9c4b6; }
+.turn-clock .clock-label { text-transform: uppercase; }
+.turn-clock.urgent { color: var(--gk-varning); animation: clockPulse 1s ease-in-out infinite; }
 @keyframes clockPulse { 50% { opacity: .55; } }
 
-/* ---- bottar ---- */
-.bot-level { width: auto; padding: 6px 8px; margin: 0; }   /* 16 px som andra fält - annars zoomar iOS */
-#btn-add-bot { width: 100%; margin-bottom: 10px; border-style: dashed; }
-.tag-bot { border-color: rgba(255,255,255,.3); color: rgba(255,255,255,.75); }
-.btn-remove-bot { margin-left: 2px; min-width: var(--tap); padding: 0; font-size: var(--text-callout); }
-
-/* ---- slängförhandling ---- */
-.proposal-chip { margin-top: 5px; padding: 3px 10px; border-radius: 999px; font-size: var(--text-caption1); font-weight: 700;
-  background: rgba(255,255,255,.88); color: #111; text-align: center; white-space: nowrap; }
-.proposal-chip.mine { background: var(--gold); color: #1a1a1a; }
-.proposal-chip.empty { background: rgba(255,255,255,.12); color: rgba(255,255,255,.75); }
-.proposal-chip.skipped { background: transparent; border: 1px dashed rgba(255,255,255,.35); color: rgba(255,255,255,.75); font-weight: 500; }
-.proposal-chip.agreed { background: var(--green); color: #0d1f0d; }
-.propose-group { display: inline-flex; gap: 6px; }
-.propose-btn { min-width: var(--tap); font-size: var(--text-body); font-weight: 700; flex-direction: column; gap: 0; padding-top: 4px; padding-bottom: 4px; }
-.propose-votes { font-size: 10px; line-height: 1; min-height: 10px; letter-spacing: .1em; }   /* en prick per spelare som vill samma */
+/* ---- slängförhandling ----
+ * Förslaget som en liten bricka efter saldot: fylld för ett förslag, bara ram för den som inte
+ * valt än, streckad för den som står över. (Förhandlingsläget kläs om helt i nästa steg.)
+ */
+.proposal-chip { margin-left: 8px; padding: 2px 6px; border: var(--gk-ram) solid var(--gk-kram); border-radius: var(--gk-radie);
+  font-family: var(--gk-font-rubrik); font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--gk-kram); color: var(--gk-grund); white-space: nowrap; }
+.proposal-chip.mine { background: var(--gk-guld); border-color: var(--gk-guld); }
+.proposal-chip.empty { background: transparent; border-color: var(--gk-ram-morkt-stark); color: var(--gk-kram); }
+.proposal-chip.skipped { background: transparent; border-style: dashed; border-color: var(--gk-ram-morkt-stark); color: var(--gk-dampad-morkt); }
+.proposal-chip.agreed { background: var(--gk-plus-morkt); border-color: var(--gk-plus-morkt); color: var(--gk-grund); }
+.seat.me .proposal-chip.empty, .seat.me .proposal-chip.skipped { border-color: var(--gk-dampad-ljust); color: var(--gk-grund); }
 .center-timer { flex-basis: 100%; max-width: 260px; margin: 6px auto 0; height: 4px; }
 
 /* ---- felrapport ---- */
-.btn-report { display: flex; width: fit-content; margin: 10px auto 0; opacity: .8; }
-@media (hover: hover) { .btn-report:hover { opacity: 1; } }
-.report-overlay { z-index: 70; }
-.confirm-overlay { z-index: 75; }
-.confirm-box { width: min(440px, 92vw); text-align: center; }
-.confirm-box h2 { font-size: var(--text-title3); }
-.confirm-text { color: rgba(255,255,255,.85); font-size: var(--text-subhead); line-height: 1.45; margin: 10px 0 0; }
-#confirm-ok[hidden] { display: none; }
 textarea { resize: vertical; line-height: 1.4; }
 
 /* ---- paus (felrapport) ---- */
-.pause-banner { display: inline-block; margin-bottom: 12px; max-width: 100%;
-  padding: 8px 16px; border-radius: 16px; text-align: center; line-height: 1.35;
-  background: rgba(8,16,12,.9); border: 1px solid rgba(255,255,255,.35); color: var(--text);
-  font-size: var(--text-footnote); font-weight: 600; box-shadow: var(--shadow); }
+/* Ligger ovanpå fasraden (inte i flödet), så att sticket och högarna inte flyttar sig när spelet pausas */
+.pause-banner { position: absolute; left: 50%; top: -10px; translate: -50% 0; z-index: 5;
+  display: flex; flex-direction: column; gap: 4px; width: max-content; max-width: 100%; padding: 12px 20px; text-align: center; }
 .pause-banner[hidden] { display: none; }
+.pause-text { font-size: 15px; font-weight: 500; line-height: 1.3; }
 
 /* ---- högar och flygande kort (utdelning / slängning) ---- */
-.piles { display: flex; justify-content: center; gap: 28px; margin: 12px 0 2px; }
+/* Lek och slänghög: två små kortbaksidor med etiketterna LEK 32 och SLÄNGT. Leken ser ut som en
+   bunt, det översta slängda kortet ligger snett. Tom hög: streckad ram. */
+.piles { display: flex; justify-content: center; gap: 34px; margin: 12px 0 2px; }
 .piles[hidden] { display: none; }
-.pile { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.pile .pile-card { width: 34px; height: 48px; border-radius: 6px; }
-.pile .pile-card.back::after { font-size: 14px; }
-.pile.empty .pile-card { background: transparent; border: 1px dashed rgba(255,255,255,.3); box-shadow: none; }
-.pile.empty .pile-card::after { content: none; }
+.pile { display: flex; flex-direction: column; align-items: center; gap: 9px; }
+.pile .pile-card { width: 34px; height: 48px; border-radius: 3px; }
+#pile-deck .pile-card { box-shadow: 3px 3px 0 var(--gk-black), 5px 5px 0 var(--gk-kram); }
+#pile-discard .pile-card { box-shadow: 2px 3px 0 rgba(0,0,0,.42); rotate: 7deg; }
+.pile.empty .pile-card { background: transparent; border: var(--gk-ram) dashed rgba(240,232,204,.5); box-shadow: none; rotate: none; }
 .pile-label {
-  font-size: var(--text-caption2); font-weight: 600; letter-spacing: var(--eyebrow-spacing); text-transform: uppercase;
-  color: var(--on-felt-secondary); font-variant-numeric: tabular-nums;
+  font-family: var(--gk-font-rubrik); font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: .14em;
+  text-transform: uppercase; font-variant-numeric: tabular-nums; color: #c6d1c4;
 }
 .card-fx { position: fixed; inset: 0; pointer-events: none; z-index: 45; }
 .ghost-card { position: absolute; transform-origin: 0 0; will-change: transform, opacity; }
@@ -665,30 +988,28 @@ textarea { resize: vertical; line-height: 1.4; }
 .seats .seat-cards { transition: opacity .2s ease; }
 .seats.dealing .seat-cards { opacity: 0; }
 
-/* [R31] dragning: dolda kort på bordet, valda kort vänds upp med namnet under */
+/* [R31] dragning: dolda kort på bordet, valda kort vänds upp med namnet under.
+   Korten är vanliga kort, etiketterna som i sticket. */
 .trick-area.tiebreak { flex-direction: column; align-items: center; gap: 10px; }
 .tb-picks { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-.tb-pick { padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,.08); font-weight: 700;
-  font-size: var(--text-footnote); font-variant-numeric: tabular-nums; }
-.tb-pick.lowest { background: rgba(226,86,74,.25); color: #ffb3aa; }
-.tb-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 0; max-width: min(760px, 100%); padding: 0 8px 14px 22px; }
-.tb-slot { position: relative; margin-left: -22px; padding: 0; border: 0; background: none; min-height: 0; border-radius: 6px;
-  transition: transform .16s cubic-bezier(.2,.8,.3,1); perspective: 400px; }
+.tb-pick { font-variant-numeric: tabular-nums; }
+.tb-pick.lowest { color: var(--gk-minus-morkt); }
+.tb-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 0; max-width: min(760px, 100%); padding: 0 8px 18px 22px; }
+.tb-slot { position: relative; margin-left: -22px; padding: 0; border: 0; background: none; min-height: 0; border-radius: 5px;
+  transition: transform var(--gk-tid) var(--gk-kurva); perspective: 400px; }
 .tb-slot:disabled { cursor: default; opacity: 1; }
 .tb-slot.pickable { cursor: pointer; }
+.tb-slot:focus-visible { outline: 3px solid var(--gk-fokus-morkt); outline-offset: 2px; }
 .tb-slot.pickable:hover, .tb-slot.pickable:focus-visible { transform: translateY(-8px); z-index: 2; }
 .tb-slot.taken { z-index: 3; transform: translateY(-6px); margin-right: 20px; }
 .tb-slot.taken.old { opacity: .45; }
-.tb-name { position: absolute; left: 50%; bottom: -14px; transform: translateX(-50%); white-space: nowrap;
-  font-size: var(--text-caption2); font-weight: 700; color: var(--gold); }
+.tb-name { position: absolute; left: 50%; bottom: -17px; transform: translateX(-50%); }
 .tb-intro {
   position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%);
-  width: min(440px, 88%); padding: 18px 22px; border-radius: 18px; text-align: center;
-  background: rgba(8,16,12,.94); border: 1px solid rgba(232,200,119,.45); box-shadow: var(--shadow);
+  width: min(440px, 88%); padding: 18px 22px; text-align: center;
   animation: tbIntro 5.2s cubic-bezier(.2,.8,.3,1) forwards;
 }
-.tb-intro p { margin: 8px 0 0; font-size: var(--text-subhead); line-height: 1.4; }
-.tb-intro-title { font-size: clamp(22px, 4vw, 34px); font-weight: 900; letter-spacing: .14em; color: var(--gold); }
+.tb-intro p { margin: 8px 0 0; font-size: 15px; line-height: 1.4; }
 @keyframes tbIntro { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.7); } 6% { opacity: 1; transform: translate(-50%,-50%) scale(1.05); }
   10% { transform: translate(-50%,-50%) scale(1); } 88% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 0; transform: translate(-50%,-56%) scale(.98); } }
 
@@ -696,8 +1017,7 @@ textarea { resize: vertical; line-height: 1.4; }
 /* Ingen förflyttning, skalning eller gungning - korta toningar i stället. Kortflygningarna
    stängs redan av i app.js (flightsOn) när prefers-reduced-motion är satt. */
 @media (prefers-reduced-motion: reduce) {
-  .logo { animation: none; }
-  .slask-box, .result-box { animation: fadeIn .2s ease-out; }
+  .result-box, .gk-dialog { animation: fadeIn .2s ease-out; }
   .fx-money { transform: translate(-50%, -24px); animation-name: fadeInOut; }
   .fx-banner { animation-name: fadeInOut; }
   .tb-intro { animation-name: fadeInOut; }
@@ -705,11 +1025,10 @@ textarea { resize: vertical; line-height: 1.4; }
   .turn-clock.urgent { animation: none; }
   .seat .status.thinking::after { animation: none; width: auto; }
   .toast, .toast.show { transform: translate(-50%, 0); }
-  .slask-overlay .slask-box { animation: fadeIn .2s ease-out; }
   .side-panel { transform: none; opacity: 0; transition: opacity .2s ease, visibility 0s linear .2s; }
   .side-panel.open { opacity: 1; transition: opacity .2s ease; }
   .btn:active:not(:disabled) { scale: none; }
-  .hand .card { transition: box-shadow .16s; }
+  .hand .card { transition: none; }
 }
 @keyframes fadeIn { from { opacity: 0; } }
 @keyframes fadeInOut { 0% { opacity: 0; } 15% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }

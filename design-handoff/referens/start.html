@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>Gursch – start</title>
+<!-- Referens for den nya Gursch-designen. Statisk mockup: valt kort, vald botniva och all speldata ar harkodade exempel. Stilarna (farger, typsnitt, matt, skuggor) ar de som ska galla. -->
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#c9a55a}a:hover{color:#e2c684}
+input::placeholder{color:#6d6b58}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid #2f7a56;outline-offset:2px}
+.gk-seg:focus-visible{outline-offset:-5px;outline-color:#c9a55a}
+.gk-btn,.gk-press-dark,.gk-press-light,.gk-card,.gk-input,.gk-seg{transition:transform .12s cubic-bezier(.2,.8,.2,1),box-shadow .12s cubic-bezier(.2,.8,.2,1),background-color .12s ease-out,border-color .12s ease-out,color .12s ease-out}
+@media (hover:hover){
+.gk-press-dark:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #10211b!important}
+.gk-press-light:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #f0e8cc!important}
+.gk-ghost-dark:hover{background-color:#10211b!important;border-color:#10211b!important;color:#f0e8cc!important}
+.gk-solid-dark:hover{background-color:#1f3d30!important}
+.gk-ghost-light:hover{background-color:rgba(240,232,204,.12)!important;border-color:#f0e8cc!important}
+.gk-ghost-warn:hover{background-color:#c05a48!important;color:#10211b!important}
+.gk-card:hover{transform:translateY(-4px)!important}
+.gk-card.is-sel:hover{transform:translateY(-11px)!important}
+.gk-input:hover{background-color:#fffdf4!important}
+.gk-seg[aria-pressed="false"]:hover{background-color:#e4dab8!important}
+}
+.gk-press-dark:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #10211b!important}
+.gk-press-light:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #f0e8cc!important}
+.gk-btn:active{transform:translateY(2px)}
+.gk-card:active{transform:translateY(-1px)!important}
+.gk-card.is-sel:active{transform:translateY(-5px)!important}
+.gk-input:focus{outline:2px solid #10211b;outline-offset:0;box-shadow:6px 6px 0 #c9a55a}
+@media (prefers-reduced-motion:reduce){.gk-btn,.gk-press-dark,.gk-press-light,.gk-card,.gk-input,.gk-seg{transition:none}}
+</style>
+</head>
+<body>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; padding: 0 48px; display: flex; align-items: center; gap: 44px; overflow: hidden; background: #10211b; color: #f0e8cc; font-family: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <div style="position: relative; flex: 0 0 500px; height: 800px">
+    <svg viewBox="0 0 560 800" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 560px; height: 800px"><polygon points="69,349 200,309 512,716 22,716" fill="#1a3329"></polygon><ellipse cx="270" cy="716" rx="248" ry="50" fill="#28503e"></ellipse></svg>
+    <img src="../assets/golvlampa.png" alt="" style="position: absolute; left: -30px; top: 223px; height: 493px; width: auto">
+    <img src="../assets/gursch-maskot-med-skugga.png" alt="Gurkan: en gurka i fedora, solglasögon och kritstrecksrandig kostym med cigarr" style="position: absolute; left: 194px; top: 91px; height: 683px; width: auto">
+  </div>
+  <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 30px">
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <h1 style="margin: 0; font-family: 'Alfa Slab One', Rockwell, Georgia, serif; font-weight: 400; font-size: 124px; line-height: 0.95; letter-spacing: 0.03em; color: #f0e8cc; text-shadow: 6px 6px 0 #c9a55a">GURSCH</h1>
+      <button type="button" class="gk-btn gk-ghost-light" style="align-self: flex-start; min-height: 44px; padding: 0 18px; border: 2px solid #9fb0a2; border-radius: 4px; background: transparent; color: #f0e8cc; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.1em; cursor: pointer">LÄR DIG GURSCH</button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px">
+      <div style="display: flex; flex-direction: column; gap: 16px; padding: 24px; box-sizing: border-box; background: #f0e8cc; color: #10211b; border: 2px solid #0a1612; border-radius: 6px; box-shadow: 8px 8px 0 #0a1612">
+        <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: 0.08em; color: #10211b">SKAPA SPEL</h2>
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #3c4d43">Smeknamn<input class="gk-input" type="text" placeholder="Ditt smeknamn" style="min-height: 46px; padding: 10px 12px; font-family: inherit; font-size: 17px; color: #10211b; background: #fbf7e9; border: 2px solid #10211b; border-radius: 4px; box-sizing: border-box"></label>
+        <button type="button" class="gk-press-dark" style="min-height: 48px; border: 2px solid #10211b; border-radius: 4px; background: #c9a55a; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.1em; box-shadow: 4px 4px 0 #10211b; cursor: pointer">SKAPA SPEL</button>
+        <div style="height: 2px; margin-top: auto; background: #d6cdaf"></div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <div id="botniva" style="font-size: 14px; font-weight: 600; color: #3c4d43">Botnivå</div>
+          <div role="group" aria-labelledby="botniva" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 2px solid #10211b; border-radius: 4px; overflow: hidden; background: #fbf7e9">
+            
+              <button type="button" class="gk-seg" aria-pressed="false" style="min-height: 44px; padding: 0 6px; border: 0; border-left: 0; background: transparent; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.08em; cursor: pointer">Lätt</button>
+            
+              <button type="button" class="gk-seg" aria-pressed="true" style="min-height: 44px; padding: 0 6px; border: 0; border-left: 2px solid #10211b; background: #10211b; color: #f0e8cc; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.08em; cursor: pointer">Medel</button>
+            
+              <button type="button" class="gk-seg" aria-pressed="false" style="min-height: 44px; padding: 0 6px; border: 0; border-left: 2px solid #10211b; background: transparent; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.08em; cursor: pointer">Svår</button>
+            
+          </div>
+        </div>
+        <button type="button" class="gk-btn gk-ghost-dark" style="min-height: 48px; padding: 0 8px; border: 2px solid #10211b; border-radius: 4px; background: transparent; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.1em; cursor: pointer">SPELA MOT BOTTAR</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 16px; padding: 24px; box-sizing: border-box; background: #f0e8cc; color: #10211b; border: 2px solid #0a1612; border-radius: 6px; box-shadow: 8px 8px 0 #0a1612">
+        <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: 0.08em; color: #10211b">GÅ MED I SPEL</h2>
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #3c4d43">Smeknamn<input class="gk-input" type="text" placeholder="Ditt smeknamn" style="min-height: 46px; padding: 10px 12px; font-family: inherit; font-size: 17px; color: #10211b; background: #fbf7e9; border: 2px solid #10211b; border-radius: 4px; box-sizing: border-box"></label>
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #3c4d43">Rumskod<input class="gk-input" type="text" placeholder="ABCD" style="min-height: 46px; padding: 10px 12px; font-family: inherit; font-size: 17px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #10211b; background: #fbf7e9; border: 2px solid #10211b; border-radius: 4px; box-sizing: border-box"></label>
+        <button type="button" class="gk-btn gk-solid-dark" style="margin-top: auto; min-height: 48px; border: 2px solid #10211b; border-radius: 4px; background: #10211b; color: #f0e8cc; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.1em; cursor: pointer">GÅ MED</button>
+      </div>
+    </div>
+    <p style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 600; font-size: 17px; letter-spacing: 0.14em; text-transform: uppercase; color: #9fb0a2">2–5 spelare · en kortlek · alla börjar på 0 kr</p>
+  </div>
+</div>
+</body>
+</html>

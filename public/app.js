@@ -58,6 +58,8 @@ function toast(msg, isError = false) {
   const t = $('toast');
   t.textContent = msg;
   t.classList.toggle('error', isError);
+  // Högst tre ord i versaler ("ÅTERANSLUTEN"), längre meddelanden som vanlig text.
+  t.classList.toggle('long', msg.trim().split(/\s+/).length > 3);
   t.classList.add('show');
   clearTimeout(t._t);
   // Lång text får längre tid - ungefär läshastighet, minst 2,6 s.
@@ -118,6 +120,7 @@ const isShown = (n) => n.getClientRects().length > 0 && getComputedStyle(n).visi
 const focusablesIn = (root) => [...root.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea, a[href], [tabindex]:not([tabindex="-1"])')].filter(isShown);
 
 function openDialog(dialog, focusTarget) {
+  if (!$('game-menu').hidden) setMenu(false, { focusButton: true });   // mobilmenyn stängs när en dialog eller panel öppnas
   if (!dialog.classList.contains('open')) dialog._returnFocus = document.activeElement;
   dialog.classList.add('open');
   (focusTarget ?? focusablesIn(dialog)[0])?.focus({ preventScroll: true });
@@ -139,6 +142,7 @@ function mayMoveFocus() {
 
 document.addEventListener('keydown', (e) => {
   const modal = [...document.querySelectorAll('[aria-modal="true"].open')].at(-1);
+  if (e.key === 'Escape' && !$('game-menu').hidden) { e.preventDefault(); setMenu(false, { focusButton: true }); return; }
   if (e.key === 'Escape') {
     if (modal) { e.preventDefault(); modal.id === 'report-overlay' ? closeReport() : closeDialog(modal); return; }
     const panel = document.querySelector('.side-panel.open');
@@ -199,12 +203,18 @@ $('btn-practice').onclick = () => createRoom(3, selectedLevel());   // eget rum 
 
 const LEVEL_TEXT = { easy: 'Lätt', medium: 'Medel', hard: 'Svår' };
 
-/** Namnet behövs för alla tre vägarna - saknas det hamnar fokus i fältet. */
-function requireNickname() {
+// Namnfältet finns i båda panelerna (Skapa spel och Gå med i spel) och visar samma värde.
+const nickFields = [$('player-nick'), $('player-nick-join')];
+for (const field of nickFields) {
+  field.addEventListener('input', () => { for (const other of nickFields) if (other !== field) other.value = field.value; });
+}
+
+/** Namnet behövs för alla tre vägarna - saknas det hamnar fokus i fältet i samma panel. */
+function requireNickname(field = $('player-nick')) {
   const nickname = $('player-nick').value.trim();
   if (!nickname) {
     $('home-error').textContent = 'Skriv ditt namn först';
-    $('player-nick').focus();
+    field.focus();
   }
   return nickname;
 }
@@ -226,7 +236,7 @@ $('join-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('bt
 
 function joinRoom(roomCode) {
   if (!roomCode) { $('home-error').textContent = 'Skriv rumskoden'; $('join-code').focus(); return; }
-  const nickname = requireNickname();
+  const nickname = requireNickname($('player-nick-join'));
   if (!nickname) return;
   store.nickname = nickname;
   socket.emit('joinRoom', { code: roomCode, nickname, playerId: store.playerId || undefined, token: store.token || undefined }, (res) => {
@@ -238,16 +248,23 @@ function joinRoom(roomCode) {
 }
 
 $('join-code').addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase(); });
-for (const id of ['player-nick', 'join-code']) $(id).addEventListener('input', () => { $('home-error').textContent = ''; });
+for (const id of ['player-nick', 'player-nick-join', 'join-code']) $(id).addEventListener('input', () => { $('home-error').textContent = ''; });
+
+/** Bara en huvudknapp på startsidan: Skapa spel normalt, Gå med när man är inbjuden. */
+function setInvitedLayout(invited) {
+  $('home-invite').hidden = !invited;
+  $('btn-create').classList.toggle('gk-press-dark', !invited);
+  $('btn-create').classList.toggle('gk-ghost-dark', invited);
+  $('btn-join').classList.toggle('gk-press-dark', invited);
+  $('btn-join').classList.toggle('gk-solid-dark', !invited);
+  $('home-panels').classList.toggle('invited', invited);
+}
 
 /** Inbjuden via länk (/join/KOD): koden är ifylld och "Gå med" blir huvudknappen. */
 function showInvite(roomCode) {
   $('join-code').value = roomCode;
-  $('home-invite').hidden = false;
   $('home-invite').textContent = `Du är inbjuden till rum ${roomCode}. Skriv ditt namn och tryck Gå med.`;
-  $('btn-join').classList.add('btn-primary');
-  $('btn-practice').classList.remove('btn-primary');
-  document.querySelector('.home-panel').classList.add('invited');
+  setInvitedLayout(true);
 }
 
 /** Tillbaka till startsidan (efter att ha lämnat ett rum). */
@@ -256,10 +273,7 @@ function goHome() {
   S = null; code = null;
   selected.clear();
   history.replaceState({}, '', '/');
-  $('home-invite').hidden = true;
-  $('btn-join').classList.remove('btn-primary');
-  $('btn-practice').classList.add('btn-primary');
-  document.querySelector('.home-panel').classList.remove('invited');
+  setInvitedLayout(false);
   showScreen('screen-home');
 }
 
@@ -344,33 +358,45 @@ function renderLobby() {
   $('lobby-count').textContent = `${S.players.length}/5`;
 
   const list = $('lobby-players');
+  const isHostView = S.hostId === me;
+  // Raderna byggs om vid varje uppdatering - fokus läggs tillbaka på samma alternativ efteråt,
+  // så att man kan byta nivå med piltangenterna.
+  const focusKey = document.activeElement?.dataset?.focusKey ?? null;
   const entries = keyedNodes(lobbyNodes, S.players.map((p) => p.id), () => el('li'));
   entries.forEach(({ node: li, isNew }, i) => {
     const p = S.players[i];
     if (isNew) enter(li, { opacity: 0, transform: 'translateY(6px)' }, { duration: 250 });
     // Innehållet byggs om (taggar, saldo), men raden ligger kvar - ingen ny in-animation.
     li.replaceChildren();
+    li.classList.toggle('me', p.id === me);   // din rad: mörk ram och guldskugga
     li.append(el('span', 'nick', p.nickname));
-    if (p.isHost) li.append(el('span', 'tag', 'Host'));
-    if (p.isBot && S.hostId !== me) li.append(el('span', 'tag tag-bot', `Bot · ${LEVEL_TEXT[p.botLevel] ?? ''}`));
-    if (p.isBot && S.hostId === me) {
-      li.append(el('span', 'tag tag-bot', 'Bot'));
-      const sel = el('select', 'bot-level');
-      sel.setAttribute('aria-label', `Nivå för ${p.nickname}`);
-      for (const [value, text] of [['easy', 'Lätt'], ['medium', 'Medel'], ['hard', 'Svår']]) {
-        const o = el('option', '', text); o.value = value; sel.append(o);
-      }
-      sel.value = p.botLevel;
-      sel.onchange = () => emit('setBotLevel', { botId: p.id, level: sel.value });
-      li.append(sel);
-    }
+    // Märken: HOST (mörk), DU (guld), BOT (ram)
+    if (p.isHost) li.append(el('span', 'tag tag-host', 'Host'));
     if (p.id === me) li.append(el('span', 'tag tag-you', 'Du'));
+    if (p.isBot) li.append(el('span', 'tag tag-bot', isHostView ? 'Bot' : `Bot · ${LEVEL_TEXT[p.botLevel] ?? ''}`));
     if (!p.connected) li.append(el('span', 'tag', 'Offline'));
-    const bal = el('span', `bal ${p.balance > 0 ? 'pos' : p.balance < 0 ? 'neg' : 'zero'}`, kr(p.balance));
-    bal.style.marginLeft = 'auto';
-    li.append(bal);
-    if (p.isBot && S.hostId === me) {
-      const rm = el('button', 'btn btn-sm btn-ghost btn-remove-bot', '✕');
+    li.append(el('span', 'spacer'));
+    li.append(el('span', `bal ${p.balance > 0 ? 'pos' : p.balance < 0 ? 'neg' : 'zero'}`, kr(p.balance)));
+    if (p.isBot && isHostView) {
+      // Botens nivå: den lilla tredelade väljaren (radioknappar under ytan), bara för hosten.
+      const seg = el('div', 'gk-seg gk-seg-light gk-seg-sm bot-level');
+      seg.setAttribute('role', 'radiogroup');
+      seg.setAttribute('aria-label', `Nivå för ${p.nickname}`);
+      for (const [value, text] of [['easy', 'Lätt'], ['medium', 'Medel'], ['hard', 'Svår']]) {
+        const label = el('label');
+        const input = el('input');
+        input.type = 'radio';
+        input.name = `bot-level-${p.id}`;
+        input.value = value;
+        input.checked = p.botLevel === value;
+        input.dataset.focusKey = `level:${p.id}:${value}`;
+        input.onchange = () => emit('setBotLevel', { botId: p.id, level: value });
+        label.append(input, el('span', 'gk-seg-val', text));
+        seg.append(label);
+      }
+      li.append(seg);
+      const rm = el('button', 'gk-btn gk-ghost-dark btn-remove-bot');
+      rm.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>';
       rm.title = `Ta bort ${p.nickname}`;
       rm.setAttribute('aria-label', `Ta bort ${p.nickname}`);
       rm.onclick = () => emit('removeBot', { botId: p.id });
@@ -378,6 +404,7 @@ function renderLobby() {
     }
   });
   syncChildren(list, entries.map((e) => e.node));
+  if (focusKey) list.querySelector(`[data-focus-key="${focusKey}"]`)?.focus({ preventScroll: true });
 
   const isHost = S.hostId === me;
   $('btn-start').disabled = !isHost || S.players.length < 2;
@@ -409,7 +436,8 @@ function cardNode(card, extraClass = '') {
   n.append(el('div', 'rank', RANK_LABELS[card.rank]));
   const tl = el('div', 'corner tl', `${RANK_LABELS[card.rank]}${SUIT_SYMBOL[card.suit]}`);
   const br = el('div', 'corner br', `${RANK_LABELS[card.rank]}${SUIT_SYMBOL[card.suit]}`);
-  n.append(tl, br);
+  // Färgtecknet för sig: i sticket står valör och färg under varandra (se .trick-play .card i CSS).
+  n.append(tl, br, el('div', 'suit', SUIT_SYMBOL[card.suit]));
   return n;
 }
 function backNode(extraClass = '') { return el('div', `card back ${extraClass}`); }
@@ -449,16 +477,22 @@ function keyedNodes(cache, keys, create) {
 
 // ------------------------------------------------------------------ bord
 
-const SEAT_POS = {
-  1: [[50, 86]],
-  2: [[50, 86], [50, 13]],
-  3: [[50, 86], [13, 36], [87, 36]],
-  4: [[50, 86], [10, 50], [50, 12], [90, 50]],
-  5: [[50, 86], [9, 58], [27, 14], [73, 14], [91, 58]],
+// Fem fasta platser runt bordet, var och en med sin fåtölj: du nere i mitten (me), en på varje
+// kortsida (left, right) och två upptill (tl, tr). Spelarna sitter medurs från dig. Tomma platser
+// visar bara fåtöljen. Var platserna ligger på bordet står i CSS (.seat[data-pos]).
+const SEAT_SLOTS = {
+  1: ['me'],
+  2: ['me', 'left'],
+  3: ['me', 'left', 'right'],
+  4: ['me', 'left', 'tl', 'right'],
+  5: ['me', 'left', 'tl', 'tr', 'right'],
 };
 // På smala skärmar ryms inte ett ovalt bord: motståndarna läggs på en rad överst,
 // sticket i mitten och den egna platsen längst ned (se .seats.strip i CSS).
-const isNarrow = () => window.innerWidth <= 560;
+// Samma gräns som mobilblocket i styles.css.
+const NARROW_QUERY = '(max-width: 560px), (max-width: 768px) and (orientation: portrait)';
+const narrowMedia = window.matchMedia(NARROW_QUERY);
+const isNarrow = () => narrowMedia.matches;
 
 function renderSeats() {
   const seats = $('seats');
@@ -468,33 +502,27 @@ function renderSeats() {
   const ordered = idx === -1 ? S.players : S.players.slice(idx).concat(S.players.slice(0, idx));
   const strip = isNarrow();
   seats.classList.toggle('strip', strip);
-  const pos = SEAT_POS[ordered.length] || SEAT_POS[5];
+  const slots = SEAT_SLOTS[ordered.length] || SEAT_SLOTS[5];
 
   ordered.forEach((p, i) => {
     const seat = el('div', 'seat');
     seat.dataset.playerId = p.id;
     if (p.id === me) seat.classList.add('me');
-    if (!strip) {
-      const [left, top] = pos[i];
-      seat.style.left = `${left}%`;
-      seat.style.top = `${top}%`;
-    }
+    seat.dataset.pos = slots[i];
     if (S.turnPlayerId === p.id) seat.classList.add('turn');
     if (S.phase === 'ROUND_RESULT' && S.result?.loserId === p.id) seat.classList.add('loser');
     if (!p.connected) seat.classList.add('disconnected');
 
     const badge = el('div', 'seat-badge');
     const nick = el('div', 'nick');
-    if (p.isBot) {
-      const robot = el('span', '', '🤖 ');
-      robot.setAttribute('aria-hidden', 'true');
-      nick.append(robot);
-      nick.title = `Bot · ${LEVEL_TEXT[p.botLevel] ?? ''}`;
-    }
+    // Botarnas namn börjar redan med "Bot" - nivån står i tooltipen och för skärmläsare.
+    if (p.isBot) nick.title = `Bot · ${LEVEL_TEXT[p.botLevel] ?? ''}`;
     nick.append(document.createTextNode(p.nickname + (p.id === me ? ' (du)' : '')));
     if (p.isBot) nick.append(el('span', 'sr-only', ` (bot, ${(LEVEL_TEXT[p.botLevel] ?? '').toLowerCase()})`));
     badge.append(nick);
-    badge.append(el('div', `bal ${p.balance > 0 ? 'pos' : p.balance < 0 ? 'neg' : 'zero'}`, kr(p.balance)));
+    // Saldot och status på samma rad: "0 kr · TÄNKER …", "+10 kr · STAY", "−30 kr · SYNAD".
+    const line = el('div', 'seat-line');
+    line.append(el('span', `bal ${p.balance > 0 ? 'pos' : p.balance < 0 ? 'neg' : 'zero'}`, kr(p.balance)));
     const status = p.status || (!p.connected ? 'Återansluter…' : (p.decided ? 'Klar' : ''));
     const note = seatNote(p.id);
     const neg = S.negotiation;
@@ -502,18 +530,19 @@ function renderSeats() {
       // Allas förslag syns i realtid. Ditt eget i guld, de andras neutrala, grönt när alla är överens.
       const proposal = neg.proposals[p.id];
       const chip = neg.participants.includes(p.id)
-        ? el('div', `proposal-chip${proposal ? '' : ' empty'}${p.id === me ? ' mine' : ''}${neg.agreedCount ? ' agreed' : ''}`, proposal ? `${proposal} kort` : '…')
-        : el('div', 'proposal-chip skipped', 'Står över');
-      badge.append(chip);
+        ? el('span', `proposal-chip${proposal ? '' : ' empty'}${p.id === me ? ' mine' : ''}${neg.agreedCount ? ' agreed' : ''}`, proposal ? `${proposal} kort` : '…')
+        : el('span', 'proposal-chip skipped', 'Står över');
+      line.append(chip);
     } else if (note) {
-      badge.append(el('div', 'status note', note));
+      line.append(el('span', 'status note', note));
     } else if (p.isBot && S.turnPlayerId === p.id && !S.pendingSlask) {
-      badge.append(el('div', 'status thinking', 'Tänker'));   // prickarna i CSS
+      line.append(el('span', 'status thinking', 'Tänker'));   // prickarna i CSS
     } else if (S.discardSelect?.participants.includes(p.id) && !S.discardSelect.done.includes(p.id)) {
-      badge.append(el('div', 'status', 'Väljer kort…'));
+      line.append(el('span', 'status', 'Väljer kort…'));
     } else {
-      badge.append(el('div', 'status', status));
+      line.append(el('span', `status${status === 'SLASK' ? ' slask' : ''}`, status));
     }
+    badge.append(line);
     if (S.turnPlayerId === p.id && S.turnDeadline) {
       const timer = el('div', 'turn-timer');
       const bar = el('div', 'turn-timer-bar');
@@ -524,21 +553,41 @@ function renderSeats() {
     }
     seat.append(badge);
 
+    // Märken. Motspelare: D-brickan och FLOP som nålar i skyltens hörn, slaskräknaren vid sidan
+    // av skylten. Din plats: alla märken i en rad under skylten.
     const marks = el('div', 'seat-marks');
-    if (p.isDealer) marks.append(el('span', 'mark dealer', 'D'));
-    if (S.flopWinnerId === p.id) marks.append(el('span', 'mark flop', 'Flop'));
+    const pins = p.id === me || strip ? marks : badge;   // smal skärm: märkena i raden under skylten
+    if (p.isDealer) {
+      const d = el('span', 'mark dealer', 'D');
+      d.title = 'Dealer';
+      d.append(el('span', 'sr-only', ' (dealer)'));
+      pins.append(d);
+    }
+    if (S.flopWinnerId === p.id) {
+      const f = el('span', 'mark flop', 'Flop');
+      if (S.flopRank) f.title = `Flop (${RANK_LABELS[S.flopRank]})`;
+      pins.append(f);
+    }
     if (p.inMini) marks.append(el('span', 'mark mini', 'Mini'));
-    if (p.slasks > 0) marks.append(el('span', 'mark', `Slask ${p.slasks}/${p.maxSlasks}`));
-    if (marks.children.length) seat.append(marks);
-
+    if (p.slasks > 0) marks.append(el('span', 'mark slask', `Slask ${p.slasks}/${p.maxSlasks}`));
+    let cards = null;
     if (p.id !== me && p.handCount > 0) {
       badge.append(el('span', 'sr-only', `${p.handCount} kort${p.visibleCards.length ? `, uppvänt: ${cardNames(p.visibleCards)}` : ''}`));
-      const cards = el('div', 'seat-cards');
+      cards = el('div', 'seat-cards');
       cards.setAttribute('aria-hidden', 'true');
       let shown = 0;
       for (const c of p.visibleCards) { cards.append(cardNode(c)); shown++; }
       for (let k = shown; k < p.handCount; k++) cards.append(backNode());
-      seat.append(cards);
+    }
+    if (strip && p.id !== me) {
+      // Smal skärm: under skylten en rad med det uppvända kortet och märkena (baksidorna döljs i CSS).
+      const under = el('div', 'seat-under');
+      if (cards) under.append(cards);
+      if (marks.children.length) under.append(marks);
+      seat.append(under);
+    } else {
+      if (marks.children.length) seat.append(marks);
+      if (cards) seat.append(cards);
     }
     // Smal skärm: den egna platsen ligger längst ned i bordets flöde, under sticket.
     (strip && p.id === me ? $('seat-me') : seats).append(seat);
@@ -560,7 +609,13 @@ const PHASE_TEXT = {
 };
 
 function renderCenter() {
-  $('phase-banner').textContent = PHASE_TEXT[S.phase] || S.phase;
+  // Fasen och sticknumret på en rad: "Stickspel · stick 2". Dealern och floppen visas på skyltarna,
+  // multipliern i toppraden.
+  const phase = [PHASE_TEXT[S.phase] || S.phase];
+  const playing = S.phase === 'TRICK' || S.phase === 'MINI_GURSCH';
+  if (S.mini && S.phase !== 'ROUND_RESULT') phase.push(`nivå ${S.mini.level}`);
+  if (S.trick && playing) phase.push(`stick ${S.trick.trickNumber}`);
+  $('phase-banner').textContent = phase.join(' · ');
   let sub = '';
   const turn = S.turnPlayerId;
   const yourTurn = turn === me;
@@ -602,18 +657,13 @@ function renderCenter() {
   }
   $('phase-sub').textContent = sub;
 
-  const foot = [];
-  if (S.dealerId) foot.push(`Dealer: ${nickOf(S.dealerId)}`);
-  if (S.flopWinnerId) foot.push(`Flop: ${nickOf(S.flopWinnerId)} (${RANK_LABELS[S.flopRank]})`);
-  if (S.mini) foot.push(`Mini-gursch nivå ${S.mini.level} · ×${S.mini.multiplier}`);
-  if (S.trick) foot.push(`Stick ${S.trick.trickNumber}`);
-  $('table-foot').textContent = foot.join('  ·  ');
-
   renderMultiplier();
   $('chip-code').textContent = code;
 
   renderPiles();
   renderTrickArea();
+  // Ordet GURSCH på gurktrycket syns bara när inga kort (lek, slänghög, stick) ligger i mitten.
+  $('felt').classList.toggle('center-empty', $('piles').hidden && !$('trick-area').children.length);
 }
 
 let shownMult = null;      // { round, value } som toppraden visar just nu
@@ -624,9 +674,10 @@ let multFrame = null;
  * talet upp på 0,6 s och chipen lyser i guld en stund - utan studs, bara talet och färgen.
  */
 function renderMultiplier() {
-  const chip = $('chip-round');
+  $('chip-round').textContent = `Runda ${S.roundNumber}`;
+  const chip = $('chip-mult');
   const value = S.mini?.multiplier ?? S.multiplier;
-  const text = (v) => `Runda ${S.roundNumber} · ×${v || '?'}`;
+  const text = (v) => `×${v || '?'}`;
   const from = shownMult?.round === S.roundNumber ? shownMult.value : null;
   if (shownMult?.round === S.roundNumber && shownMult.value === value) return;
   shownMult = { round: S.roundNumber, value };
@@ -710,7 +761,9 @@ function renderTrickArea() {
     if (isNew) enter(node, { opacity: 0, transform: 'translateY(26px) scale(.85)' }, { duration: 300 });
     const leads = !final && play.playerId === leaderId;
     const high = final && values[i] === highest;
-    node.classList.toggle('winner', leads);
+    // Guld (namn och ring runt korten) för den som vann ett avgjort stick. Den som leder ett
+    // pågående stick får bara "· leder" efter namnet.
+    node.classList.toggle('winner', leads && Boolean(showingLast));
     node.classList.toggle('highest', high);
     const tag = final
       ? (loserId === play.playerId ? ' · förlorar' : high && !loserId ? ' · högst' : '')
@@ -1003,7 +1056,11 @@ function leadDescription() {
 // Knapparna återanvänds mellan uppdateringar (en per typ av drag). Bottarna skickar nytt
 // state hela tiden - att bygga om knapparna skulle ta bort fokus och tangentbordsnavigering.
 const actionNodes = new Map();   // actiontyp -> knapp eller knappgrupp
-const ACTION_CLASS = { tiebreakPick: 'btn btn-primary', discard: 'btn btn-primary', play: 'btn btn-primary', stay: 'btn', slask: 'btn btn-danger', pass: 'btn' };
+// Huvudknapp (guld): släng, spela, pass, dra. Ramknapp: stay. Röd ram: slask. (DESIGN.md, Underlägget)
+const ACTION_CLASS = {
+  tiebreakPick: 'gk-btn gk-press-light', discard: 'gk-btn gk-press-light', play: 'gk-btn gk-press-light',
+  pass: 'gk-btn gk-press-light', stay: 'gk-btn gk-ghost-light', slask: 'gk-btn gk-ghost-warn',
+};
 
 /** Knappen säger vad den gör: "Spela 2 kort", "Släng 3 kort". */
 function actionLabel(a) {
@@ -1015,13 +1072,15 @@ function actionLabel(a) {
 
 function createActionNode(type) {
   if (type === 'propose') {
-    const group = el('div', 'propose-group');
+    // Sammansatt väljare (gk-seg): ditt val fyllt, en prick per annan spelare som vill samma.
+    const group = el('div', 'gk-seg gk-seg-siffror propose-group');
     group.setAttribute('role', 'group');
     group.setAttribute('aria-label', 'Föreslå antal kort att slänga');
     for (const count of [1, 2, 3, 4]) {
-      const b = el('button', 'btn propose-btn');
+      const b = el('button', 'gk-seg-val propose-btn');
+      b.type = 'button';
       b.dataset.count = count;
-      b.append(el('span', 'propose-num', String(count)), el('span', 'propose-votes'));
+      b.append(el('span', 'propose-num', String(count)), el('span', 'gk-prickar propose-votes'));
       b.onclick = () => emit('action', { type: 'propose', count });
       group.append(b);
     }
@@ -1055,9 +1114,9 @@ function renderActions() {
       for (const b of node.children) {
         const c = Number(b.dataset.count);
         const votes = Object.entries(proposals).filter(([id, v]) => id !== me && v === c).length;
-        b.classList.toggle('btn-primary', a.current === c);
         b.setAttribute('aria-pressed', String(a.current === c));
-        b.querySelector('.propose-votes').textContent = '•'.repeat(votes);
+        const dots = b.querySelector('.propose-votes');
+        if (dots.children.length !== votes) dots.replaceChildren(...Array.from({ length: votes }, () => el('span')));
         b.setAttribute('aria-label', `${c} kort${votes ? `, ${votes} ${votes === 1 ? 'annan vill' : 'andra vill'} samma` : ''}`);
       }
       return;
@@ -1083,6 +1142,7 @@ function renderSlask() {
   overlay.classList.add('open');
   overlay.dataset.key = String(ps.deadline);
   const isMine = ps.playerId === me;
+  if (isNew && !$('game-menu').hidden) setMenu(false);
   // Det man behöver för att bestämma sig: vem, vad det kostar (money.js) och hur lång tid som är kvar.
   $('slask-text').textContent = ps.callerId
     ? `${nickOf(ps.callerId)} synade ${isMine ? 'dig' : nickOf(ps.playerId)} först.`
@@ -1158,10 +1218,14 @@ function tickTurnTimer() {
     bar.classList.toggle('urgent', urgent);
   }
   const mine = cd.mine;
-  // Din egen nedräkning löper också längs handradens överkant.
-  handBar.style.width = mine ? `${frac * 100}%` : '0';
+  // Nedräkningen löper längs underläggets överkant - guld, röd när det är knappt.
+  handBar.style.width = `${frac * 100}%`;
   handBar.classList.toggle('urgent', urgent);
-  clock.textContent = `${cd.label} · ${secs} s`;
+  // "DIN TUR · 45 s": etiketten i versaler (CSS), sekunderna som de är.
+  let label = clock.firstElementChild;
+  if (!label) { label = el('span', 'clock-label'); clock.replaceChildren(label, document.createTextNode('')); }
+  label.textContent = cd.label;
+  clock.lastChild.textContent = ` · ${secs} s`;
   clock.classList.toggle('urgent', mine && urgent);
   // Varningspip varje sekund de sista fem sekunderna när det är din tur.
   if (mine && secs <= 5 && secs > 0 && secs !== lastWarnSecond) {
@@ -1180,12 +1244,37 @@ function togglePanel(panel, focusTarget) {
   for (const other of document.querySelectorAll('.side-panel.open')) closeDialog(other);
   openDialog(panel, focusTarget);
 }
+/** Oläst chatt: pricken på chattknappen - och på mobilen på menyknappen och menyns CHATT. */
+function setChatUnread(unread) {
+  for (const id of ['chat-unread', 'menu-unread', 'menu-chat-unread']) $(id).hidden = !unread;
+}
 $('btn-chat-toggle').onclick = () => {
-  $('chat-unread').hidden = true;
+  setChatUnread(false);
   togglePanel($('chat-panel'), $('chat-input'));
 };
 $('btn-history').onclick = () => togglePanel($('history-panel'), $('history-panel').querySelector('[data-close]'));
 for (const b of document.querySelectorAll('[data-close]')) b.onclick = () => closeDialog($(b.dataset.close));
+
+// ---- mobilmenyn (560 px och smalare): HISTORIK, CHATT, RAPPORTERA FEL, LÄMNA SPELET ----
+// Varje val trycker på samma knapp som i datorns topplist. Stängs med knappen, Escape eller ett tryck utanför.
+function setMenu(open, { focusButton = false } = {}) {
+  const menu = $('game-menu');
+  menu.hidden = !open;
+  $('btn-menu').setAttribute('aria-expanded', String(open));
+  if (open) menu.querySelector('button:not([hidden])')?.focus({ preventScroll: true });
+  else if (focusButton) $('btn-menu').focus({ preventScroll: true });
+}
+$('btn-menu').onclick = () => setMenu($('game-menu').hidden);
+for (const b of document.querySelectorAll('#game-menu [data-for]')) {
+  // Fokus tillbaka till menyknappen först - då hamnar fokus där när panelen eller dialogen stängs.
+  b.onclick = () => { setMenu(false, { focusButton: true }); $(b.dataset.for).click(); };
+}
+document.addEventListener('pointerdown', (e) => {
+  if ($('game-menu').hidden || e.target.closest('.game-menu-panel, #btn-menu')) return;
+  setMenu(false);
+});
+// Blir fönstret brett igen syns topplistens knappar - då ska menyn inte ligga kvar öppen.
+narrowMedia.addEventListener('change', (e) => { if (!e.matches) setMenu(false); });
 $('chat-form').onsubmit = (e) => {
   e.preventDefault();
   const text = $('chat-input').value.trim();
@@ -1196,15 +1285,17 @@ $('chat-form').onsubmit = (e) => {
 
 function renderChat() {
   $('btn-chat-toggle').style.display = S.settings.chatEnabled ? '' : 'none';
+  $('menu-chat').hidden = !S.settings.chatEnabled;
   if (!S.settings.chatEnabled) { $('chat-panel').classList.remove('open'); return; }
   const log = $('chat-log');
   const firstRender = chatNodes.size === 0;
   const byId = new Map(S.chat.map((m) => [m.id, m]));
   const entries = keyedNodes(chatNodes, S.chat.map((m) => m.id), (id) => {
     const m = byId.get(id);
-    const div = el('div', 'chat-msg');
-    div.append(el('span', 'who', m.nickname + ':'));
-    div.append(document.createTextNode(m.text));
+    // Andras meddelanden till vänster, dina egna till höger (mörk ram och guldskugga, se CSS).
+    const div = el('div', `chat-msg${m.playerId === me ? ' mine' : ''}`);
+    div.append(el('div', 'who', m.nickname + (m.playerId === me ? ' (du)' : '')));
+    div.append(el('div', 'text', m.text));
     return div;
   });
   let added = false;
@@ -1216,7 +1307,7 @@ function renderChat() {
   const lastId = S.chat.at(-1)?.id ?? null;
   if (lastId && seenChatId !== null && lastId !== seenChatId && !$('chat-panel').classList.contains('open')) {
     beep(700, 0.05, 'sine', 0.025);
-    $('chat-unread').hidden = false;
+    setChatUnread(true);
   }
   seenChatId = lastId;
 }
@@ -1232,10 +1323,10 @@ function renderHistory() {
       box.append(el('div', 'hist-round', `Runda ${h.round}`));
     }
     const row = el('div', 'hist-row');
-    row.append(el('div', '', `${h.nickname} · ${h.event}`));
-    const amt = el('div', 'amt', kr(h.amount));
-    amt.style.color = h.amount >= 0 ? 'var(--green)' : 'var(--red)';
-    row.append(amt);
+    const what = el('div', 'what', h.nickname);
+    what.append(el('span', 'event', ` · ${h.event}`));
+    row.append(what);
+    row.append(el('div', `amt ${h.amount >= 0 ? 'pos' : 'neg'}`, kr(h.amount)));
     row.append(el('div', 'sub', `${h.note || ''} → saldo ${kr(h.balanceAfter)}`));
     box.append(row);
   }
@@ -1287,9 +1378,13 @@ function renderPause() {
   const banner = $('pause-banner');
   banner.hidden = !S.paused;
   if (!S.paused) return;
-  banner.textContent = S.paused.playerId === me
-    ? '⏸ Spelet är pausat medan du skriver din felrapport'
-    : `⏸ ${nickOf(S.paused.playerId)} skriver en felrapport – spelet är pausat`;
+  // Krämfärgad ruta: rubrik och förklaring.
+  banner.replaceChildren(
+    el('div', 'pause-title', 'Spelet är pausat'),
+    el('div', 'pause-text', S.paused.playerId === me
+      ? 'Medan du skriver din felrapport'
+      : `${nickOf(S.paused.playerId)} skriver en felrapport`),
+  );
 }
 $('btn-to-lobby').onclick = () => emit('returnToLobby');
 
@@ -1322,9 +1417,7 @@ function renderResult() {
   }
   const opening = !overlay.classList.contains('open');
   overlay.classList.add('open');
-  const mine = r.players.find((p) => p.id === me);
-  $('result-title').textContent = r.loserId === me ? 'Du förlorade rundan'
-    : mine ? `Du vann ${kr(mine.change)}` : 'Rundan är slut';
+  // Titeln är alltid RUNDAN KLAR (i HTML). Spelets mening om utfallet står först i texten under.
   $('result-meta').textContent = `Runda ${r.round} · multiplier ×${r.multiplier}${r.miniLevel ? ` · mini-gursch nivå ${r.miniLevel}` : ''}`;
 
   // Resultatet ändras inte under rundan - bygg raderna en gång, inte vid varje uppdatering.
@@ -1336,7 +1429,7 @@ function renderResult() {
   $('btn-to-lobby').disabled = !isHost;
   // Fokus till resultatet när det kommer (Ny runda för hosten, annars rubriken) - inte om man skriver i chatten.
   if (opening && mayMoveFocus()) (isHost ? $('btn-play-again') : $('result-title')).focus({ preventScroll: true });
-  $('result-hint').textContent = isHost ? 'Dealern flyttas ett steg till nästa runda.' : `Väntar på att ${nickOf(S.hostId)} startar nästa runda.`;
+  $('result-hint').textContent = isHost ? '' : `Väntar på att ${nickOf(S.hostId)} startar nästa runda.`;
 }
 
 let renderedResultKey = null;
@@ -1377,17 +1470,19 @@ function resultExplanation(r) {
 }
 
 function buildResultRows(r) {
-  $('result-why').textContent = resultExplanation(r);
+  // "Du förlorade rundan." / "Du vann 130 kr." i fetare stil, sedan förklaringen.
+  const mine = r.players.find((p) => p.id === me);
+  const outcome = r.loserId === me ? 'Du förlorade rundan.' : mine ? `Du vann ${kr(mine.change)}.` : '';
+  $('result-why').replaceChildren(...(outcome ? [el('strong', '', outcome), ' '] : []), resultExplanation(r));
   const rows = $('result-rows');
   rows.innerHTML = '';
   const sorted = [...r.players].sort((a, b) => (b.finalValue ?? -1) - (a.finalValue ?? -1));
   sorted.forEach((p, i) => {
-    const row = el('div', `result-row ${p.id === r.loserId ? 'loser' : ''}`);
+    const row = el('div', `result-row${p.id === r.loserId ? ' loser' : ''}${p.id === me ? ' me' : ''}`);
     enter(row, { opacity: 0, transform: 'translateY(6px)' }, { delay: i * 70, duration: 250 });
     row.append(el('div', 'name', p.nickname + (p.id === r.quintExitPlayerId ? ' 🥒' : '')));
     row.append(el('div', 'val', p.finalValue === null ? '' : `slutvärde ${p.finalValue}`));
-    const chg = el('div', 'chg', kr(p.change));
-    chg.style.color = p.change >= 0 ? 'var(--green)' : 'var(--red)';
+    const chg = el('div', `chg ${p.change >= 0 ? 'pos' : 'neg'}`, kr(p.change));
     countUp(chg, p.change, 120 + i * 70);
     row.append(chg);
     row.append(el('div', 'bal', `Saldo: ${kr(p.balance)}${p.finalCards.length ? ` · gick ut på ${p.finalCards.map((c) => RANK_LABELS[c.rank]).join(',')}` : ''}`));
@@ -1694,7 +1789,7 @@ function flyMoney(playerId, amount) {
   const n = el('div', 'fx-money', kr(amount));
   n.style.left = `${pos.x}px`;
   n.style.top = `${pos.y}px`;
-  n.style.color = amount >= 0 ? 'var(--green)' : 'var(--red)';
+  n.classList.add(amount >= 0 ? 'pos' : 'neg');
   $('fx').append(n);
   setTimeout(() => n.remove(), 1600);
 }
@@ -1710,6 +1805,7 @@ function revealSlask(e, title) {
   const box = el('div', 'fx-reveal');
   box.setAttribute('aria-hidden', 'true');
   const row = el('div', 'reveal-cards');
+  // Klädda kort (J, Q, K, A) får guldringen.
   e.hand.forEach((label, i) => {
     const c = el('div', `card reveal-card${['J', 'Q', 'K', 'A'].includes(label) ? ' face' : ''}`);
     c.append(el('div', 'rank', label));
@@ -1727,9 +1823,9 @@ function revealSlask(e, title) {
     .finished.then(() => box.remove(), () => box.remove());
 }
 
-function banner(text) {
+function banner(text, kind = '') {
   if (!animationsOn()) { toast(text); return; }
-  const n = el('div', 'fx-banner', text);
+  const n = el('div', `fx-banner${kind ? ` ${kind}` : ''}`, text);
   $('fx').append(n);
   setTimeout(() => n.remove(), 2000);
 }
@@ -1758,7 +1854,7 @@ function handleEvents(events) {
       case 'agreementPending': beep(620, .07, 'triangle', .04); break;
       case 'negotiationAgreed': banner(`ALLA ÖVERENS: ${e.count} KORT`); beep(740, .12, 'sine', .05); break;
       case 'negotiationFailed': banner('INGEN ENIGHET – SPELET BÖRJAR'); break;
-      case 'slask': banner('SLASK!'); chime([392, 294], { gain: 0.04 }); break;
+      case 'slask': banner('SLASK!', 'slask'); chime([392, 294], { gain: 0.04 }); break;
       case 'slaskResolved': {
         if (flightsOn() && e.playerId !== me) animateOpponentDraw(e.playerId, 5);
         const mineSlask = e.playerId === me;
@@ -1880,7 +1976,12 @@ let leavingOnPurpose = false;   // "Lämna spelet" kopplar ned med flit - inget 
 socket.on('disconnect', () => { if (!leavingOnPurpose) toast('Tappade anslutningen – försöker återansluta…', true); });
 
 // Init
-$('player-nick').value = store.nickname;
+// Övergångarna slås på först när sidan har ritats (se .gk-laddar i gk.css).
+const transitionsOn = () => requestAnimationFrame(() => requestAnimationFrame(() => {
+  document.documentElement.classList.remove('gk-laddar');
+}));
+if (document.readyState === 'complete') transitionsOn(); else window.addEventListener('load', transitionsOn);
+for (const field of nickFields) field.value = store.nickname;
 for (const radio of document.querySelectorAll('input[name="practice-level"]')) radio.checked = radio.value === store.level;
 const urlCode = location.pathname.startsWith('/join/') ? location.pathname.split('/')[2]?.toUpperCase() : null;
 if (urlCode) showInvite(urlCode);

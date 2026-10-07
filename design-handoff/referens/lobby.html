@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>Gursch – lobby</title>
+<!-- Referens for den nya Gursch-designen. Statisk mockup: valt kort, vald botniva och all speldata ar harkodade exempel. Stilarna (farger, typsnitt, matt, skuggor) ar de som ska galla. -->
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#c9a55a}a:hover{color:#e2c684}
+input::placeholder,textarea::placeholder{color:#6d6b58}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #c9a55a;outline-offset:2px}
+.gk-wood{background-image:url(../assets/planktextur.svg);background-size:640px 256px;background-position:center top}
+.gk-btn,.gk-press-dark,.gk-press-light,.gk-card,.gk-input,.gk-seg{transition:transform .12s cubic-bezier(.2,.8,.2,1),box-shadow .12s cubic-bezier(.2,.8,.2,1),background-color .12s ease-out,border-color .12s ease-out,color .12s ease-out}
+@media (hover:hover){
+.gk-press-dark:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #10211b!important}
+.gk-press-light:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #f0e8cc!important}
+.gk-ghost-dark:hover{background-color:#10211b!important;border-color:#10211b!important;color:#f0e8cc!important}
+.gk-solid-dark:hover{background-color:#1f3d30!important}
+.gk-ghost-light:hover{background-color:rgba(240,232,204,.12)!important;border-color:#f0e8cc!important}
+.gk-ghost-warn:hover{background-color:#c05a48!important;color:#10211b!important}
+.gk-solid-warn:hover{background-color:#8e2a23!important}
+.gk-card:hover{transform:translateY(-4px)!important}
+.gk-card.is-sel:hover{transform:translateY(-11px)!important}
+.gk-card.is-off:hover{transform:none!important}
+.gk-input:hover{background-color:#fffdf4!important}
+.gk-seg[aria-pressed="false"]:hover{background-color:rgba(240,232,204,.14)!important}
+.gk-seg-light[aria-pressed="false"]:hover{background-color:#e4dab8!important}
+}
+.gk-press-dark:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #10211b!important}
+.gk-press-light:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #f0e8cc!important}
+.gk-btn:active{transform:translateY(2px)}
+.gk-card:active{transform:translateY(-1px)!important}
+.gk-card.is-sel:active{transform:translateY(-5px)!important}
+.gk-card.is-off,.gk-card.is-off:active{transform:none!important;cursor:not-allowed}
+.gk-btn:disabled,.gk-press-light:disabled,.gk-press-dark:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+.gk-input:focus{outline:2px solid #10211b;outline-offset:0;box-shadow:6px 6px 0 #c9a55a}
+.gk-select{appearance:none;-webkit-appearance:none}
+@media (prefers-reduced-motion:reduce){.gk-btn,.gk-press-dark,.gk-press-light,.gk-card,.gk-input,.gk-seg{transition:none}}
+</style>
+</head>
+<body>
+<div style="width: 1280px; height: 800px; box-sizing: border-box; padding: 34px 56px 40px; display: flex; flex-direction: column; gap: 26px; overflow: hidden; background: #10211b; color: #f0e8cc; font-family: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <header style="flex: 0 0 auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 40px">
+    <div style="display: flex; align-items: center; gap: 22px">
+      <img src="../assets/gursch-marke-sticker-tjock.png" alt="Gursch" style="height: 132px; width: auto">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 17px; font-weight: 700; line-height: 1; letter-spacing: 0.24em; color: #c9a55a">RUMSKOD</div>
+        <h1 style="margin: 0; font-family: 'Alfa Slab One', Rockwell, Georgia, serif; font-weight: 400; font-size: 92px; line-height: 0.95; letter-spacing: 0.12em; color: #f0e8cc; text-shadow: 5px 5px 0 #c9a55a">949S</h1>
+      </div>
+    </div>
+    <div style="width: 520px; display: flex; flex-direction: column; gap: 6px; padding-bottom: 6px">
+      <label for="lank" style="font-size: 14px; font-weight: 600; color: #9fb0a2">Inbjudningslänk</label>
+      <div style="display: flex; gap: 10px">
+        <input id="lank" class="gk-input" type="text" readonly="readonly" value="https://gursch-dqky.onrender.com/join/949S" style="min-height: 46px; padding: 10px 12px; font-family: inherit; font-size: 17px; color: #10211b; background: #fbf7e9; border: 2px solid #10211b; border-radius: 4px; box-sizing: border-box; flex: 1 1 auto; min-width: 0; font-size: 16px">
+        <button type="button" class="gk-btn gk-ghost-light" style="min-height: 48px; padding: 0 18px; border-radius: 4px; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.1em; cursor: pointer; border: 2px solid #9fb0a2; background: transparent; color: #f0e8cc">KOPIERA</button>
+      </div>
+    </div>
+  </header>
+
+  <div style="flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 30px">
+    <section style="display: flex; flex-direction: column; gap: 14px; padding: 22px 24px; box-sizing: border-box; background: #f0e8cc; color: #10211b; border: 2px solid #0a1612; border-radius: 6px; box-shadow: 8px 8px 0 #0a1612">
+      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: 0.08em; color: #10211b">SPELARE <span style="color: #4f5f55">4/5</span></h2>
+      <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
+        <li style="min-height: 56px; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 4px; background: #fbf7e9; border: 2px solid #0a1612; box-shadow: 4px 4px 0 #c9a55a">
+          <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 21px; font-weight: 700; line-height: 1.15; letter-spacing: 0.03em">Axel</span>
+          <span style="padding: 3px 7px; border-radius: 4px; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: 0.1em; border: 2px solid #10211b; background: #10211b; color: #f0e8cc">HOST</span><span style="padding: 3px 7px; border-radius: 4px; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: 0.1em; border: 2px solid #10211b; background: #c9a55a; color: #10211b">DU</span>
+          <span style="flex: 1 1 auto"></span>
+          <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; color: #4f5f55">0 kr</span>
+          
+        </li>
+        <li style="min-height: 56px; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 4px; background: #fbf7e9; border: 2px solid #d6cdaf">
+          <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 21px; font-weight: 700; line-height: 1.15; letter-spacing: 0.03em">Maja</span>
+          
+          <span style="flex: 1 1 auto"></span>
+          <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; color: #4f5f55">0 kr</span>
+          
+        </li>
+        <li style="min-height: 56px; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 4px; background: #fbf7e9; border: 2px solid #d6cdaf">
+          <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 21px; font-weight: 700; line-height: 1.15; letter-spacing: 0.03em">Bot Bengt</span>
+          <span style="padding: 3px 7px; border-radius: 4px; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: 0.1em; border: 2px solid #10211b; color: #10211b">BOT</span>
+          <span style="flex: 1 1 auto"></span>
+          <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; color: #4f5f55">0 kr</span>
+          <div role="group" aria-label="Botens nivå" style="display: flex; border: 2px solid #10211b; border-radius: 4px; overflow: hidden; background: #fbf7e9"><button type="button" class="gk-seg gk-seg-light" aria-pressed="false" style="min-height: 34px; padding: 0 10px; border: 0; border-left: 0; background: transparent; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.08em; cursor: pointer">Lätt</button><button type="button" class="gk-seg gk-seg-light" aria-pressed="true" style="min-height: 34px; padding: 0 10px; border: 0; border-left: 2px solid #10211b; background: #10211b; color: #f0e8cc; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.08em; cursor: pointer">Medel</button><button type="button" class="gk-seg gk-seg-light" aria-pressed="false" style="min-height: 34px; padding: 0 10px; border: 0; border-left: 2px solid #10211b; background: transparent; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.08em; cursor: pointer">Svår</button></div><button type="button" class="gk-btn gk-ghost-dark" aria-label="Ta bort Bot Bengt" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 2px solid #10211b; border-radius: 4px; background: transparent; color: #10211b; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg></button>
+        </li>
+        <li style="min-height: 56px; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-radius: 4px; background: #fbf7e9; border: 2px solid #d6cdaf">
+          <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 21px; font-weight: 700; line-height: 1.15; letter-spacing: 0.03em">Bot Sixten</span>
+          <span style="padding: 3px 7px; border-radius: 4px; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 13px; font-weight: 700; line-height: 1; letter-spacing: 0.1em; border: 2px solid #10211b; color: #10211b">BOT</span>
+          <span style="flex: 1 1 auto"></span>
+          <span style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; color: #4f5f55">0 kr</span>
+          <div role="group" aria-label="Botens nivå" style="display: flex; border: 2px solid #10211b; border-radius: 4px; overflow: hidden; background: #fbf7e9"><button type="button" class="gk-seg gk-seg-light" aria-pressed="false" style="min-height: 34px; padding: 0 10px; border: 0; border-left: 0; background: transparent; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.08em; cursor: pointer">Lätt</button><button type="button" class="gk-seg gk-seg-light" aria-pressed="false" style="min-height: 34px; padding: 0 10px; border: 0; border-left: 2px solid #10211b; background: transparent; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.08em; cursor: pointer">Medel</button><button type="button" class="gk-seg gk-seg-light" aria-pressed="true" style="min-height: 34px; padding: 0 10px; border: 0; border-left: 2px solid #10211b; background: #10211b; color: #f0e8cc; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.08em; cursor: pointer">Svår</button></div><button type="button" class="gk-btn gk-ghost-dark" aria-label="Ta bort Bot Sixten" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 2px solid #10211b; border-radius: 4px; background: transparent; color: #10211b; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg></button>
+        </li>
+      </ul>
+      <button type="button" class="gk-btn gk-ghost-dark" style="min-height: 48px; padding: 0 18px; border-radius: 4px; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.1em; cursor: pointer; min-height: 44px; border: 2px dashed #10211b; background: transparent; color: #10211b">+ LÄGG TILL BOT</button>
+      <p style="margin: 0; font-size: 15px; line-height: 1.45; color: #3c4d43; margin-top: auto">Du är host – starta när alla är på plats.</p>
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px">
+        <button type="button" class="gk-press-dark" style="min-height: 48px; padding: 0 18px; border-radius: 4px; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.1em; cursor: pointer; border: 2px solid #10211b; background: #c9a55a; color: #10211b; box-shadow: 4px 4px 0 #10211b">STARTA SPELET</button>
+        <button type="button" class="gk-btn gk-ghost-dark" style="min-height: 48px; padding: 0 18px; border-radius: 4px; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: 0.1em; cursor: pointer; border: 2px solid #10211b; background: transparent; color: #10211b">LÄMNA RUMMET</button>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 14px; padding: 22px 24px; box-sizing: border-box; background: #f0e8cc; color: #10211b; border: 2px solid #0a1612; border-radius: 6px; box-shadow: 8px 8px 0 #0a1612">
+      <h2 style="margin: 0; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: 0.08em; color: #10211b">INSTÄLLNINGAR</h2>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px">
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #3c4d43">Multiplier<span style="position: relative; display: block"><select class="gk-input gk-select" style="min-height: 46px; padding: 10px 12px; font-family: inherit; font-size: 17px; color: #10211b; background: #fbf7e9; border: 2px solid #10211b; border-radius: 4px; box-sizing: border-box; width: 100%; padding-right: 40px; cursor: pointer"><option>×1</option><option>×5</option><option selected="selected">×10</option><option>×25</option><option>×50</option><option>×100</option><option>flopmult</option><option>flopmult ×2</option><option>flopmult ×3</option><option>flopmult ×4</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10211b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 14px; top: 50%; margin-top: -8px; pointer-events: none"><polyline points="5 9 12 16 19 9"></polyline></svg></span></label>
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #3c4d43">Mini-gursch-gräns<span style="position: relative; display: block"><select class="gk-input gk-select" style="min-height: 46px; padding: 10px 12px; font-family: inherit; font-size: 17px; color: #10211b; background: #fbf7e9; border: 2px solid #10211b; border-radius: 4px; box-sizing: border-box; width: 100%; padding-right: 40px; cursor: pointer"><option selected="selected">Ingen begränsning</option><option>Endast mini-gursch</option><option>Mini-mini-gursch</option><option>3 nivåer</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10211b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 14px; top: 50%; margin-top: -8px; pointer-events: none"><polyline points="5 9 12 16 19 9"></polyline></svg></span></label>
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #3c4d43">Turtimer<span style="position: relative; display: block"><select class="gk-input gk-select" style="min-height: 46px; padding: 10px 12px; font-family: inherit; font-size: 17px; color: #10211b; background: #fbf7e9; border: 2px solid #10211b; border-radius: 4px; box-sizing: border-box; width: 100%; padding-right: 40px; cursor: pointer"><option>Av</option><option>20 s</option><option>30 s</option><option selected="selected">45 s</option><option>60 s</option><option>90 s</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10211b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 14px; top: 50%; margin-top: -8px; pointer-events: none"><polyline points="5 9 12 16 19 9"></polyline></svg></span></label>
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #3c4d43">Förhandlingstid<span style="position: relative; display: block"><select class="gk-input gk-select" style="min-height: 46px; padding: 10px 12px; font-family: inherit; font-size: 17px; color: #10211b; background: #fbf7e9; border: 2px solid #10211b; border-radius: 4px; box-sizing: border-box; width: 100%; padding-right: 40px; cursor: pointer"><option>10 s</option><option>15 s</option><option selected="selected">20 s</option><option>30 s</option><option>45 s</option><option>60 s</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10211b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 14px; top: 50%; margin-top: -8px; pointer-events: none"><polyline points="5 9 12 16 19 9"></polyline></svg></span></label>
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #3c4d43">Tid att syna slask<span style="position: relative; display: block"><select class="gk-input gk-select" style="min-height: 46px; padding: 10px 12px; font-family: inherit; font-size: 17px; color: #10211b; background: #fbf7e9; border: 2px solid #10211b; border-radius: 4px; box-sizing: border-box; width: 100%; padding-right: 40px; cursor: pointer"><option>5 s</option><option selected="selected">7 s</option><option>10 s</option><option>15 s</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10211b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 14px; top: 50%; margin-top: -8px; pointer-events: none"><polyline points="5 9 12 16 19 9"></polyline></svg></span></label>
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; color: #3c4d43">Max antal slask<span style="position: relative; display: block"><select class="gk-input gk-select" style="min-height: 46px; padding: 10px 12px; font-family: inherit; font-size: 17px; color: #10211b; background: #fbf7e9; border: 2px solid #10211b; border-radius: 4px; box-sizing: border-box; width: 100%; padding-right: 40px; cursor: pointer"><option>1</option><option>2</option><option selected="selected">3</option><option>5</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10211b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 14px; top: 50%; margin-top: -8px; pointer-events: none"><polyline points="5 9 12 16 19 9"></polyline></svg></span></label>
+      </div>
+      <div style="height: 2px; background: #d6cdaf"></div>
+      <div style="display: flex; gap: 26px">
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; color: #10211b; cursor: pointer"><input type="checkbox" checked="checked" style="width: 20px; height: 20px; margin: 0; accent-color: #10211b">Chatt</label>
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; color: #10211b; cursor: pointer"><input type="checkbox" checked="checked" style="width: 20px; height: 20px; margin: 0; accent-color: #10211b">Animationer</label>
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; color: #10211b; cursor: pointer"><input type="checkbox" checked="checked" style="width: 20px; height: 20px; margin: 0; accent-color: #10211b">Ljud</label>
+      </div>
+      <p style="margin: 0; font-size: 15px; line-height: 1.45; color: #3c4d43; margin-top: auto">Alla börjar på 0 kr.</p>
+    </section>
+  </div>
+</div>
+</body>
+</html>

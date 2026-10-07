@@ -1,0 +1,285 @@
+/* gk.css - den nya Gursch-designen (design-handoff/DESIGN.md).
+ *
+ * Variabler och gemensamma komponenter. Allt heter gk- så att det inte krockar med den gamla
+ * designen i styles.css medan skärmarna görs om en i taget. Värdena är tagna ur referensfilerna
+ * i design-handoff/referens/. Känsla: platta färgfält, mörka konturer, hårda skuggor utan oskärpa.
+ * Inga gradienter, inga glaseffekter, inga helt runda knappar.
+ */
+
+:root {
+  /* ---- färger ---- */
+  --gk-grund: #10211b;          /* bakgrund på Start, Lobby och Rundresultat, mörk text och ram på knappar */
+  --gk-black: #0a1612;          /* bläck: konturer, mörka skyltar */
+  --gk-filt: #1f3d30;           /* bordets filt, cirkeln bakom resultatpanelen */
+  --gk-filt-ljus: #28503e;      /* ljusovalen på golvet (Start) */
+  --gk-ljuskagla: #1a3329;      /* ljuskäglan från lampan (Start) */
+  --gk-underlagg: #101c18;      /* läderunderlägget under handen */
+  --gk-kram: #f0e8cc;           /* paneler, dialoger, bordets kant, ljus text på mörkt */
+  --gk-papper: #fbf7e9;         /* textfält, spelkort, rader i listor */
+  --gk-linje: #d6cdaf;          /* tunna ramar och avdelare på kräm */
+  --gk-guld: #c9a55a;           /* huvudknapp, markeringar, "det här är du", "aktiv just nu" */
+  --gk-mahogny: #3a2419;        /* golvet bakom bordet */
+  --gk-varning: #c05a48;        /* ram på rapportera-knappar och SLASK, timern när tiden är knapp */
+  --gk-rod-fylld: #a8322a;      /* negativa belopp på ljus botten, LÄMNA-knappen, ordet SLASK! */
+  --gk-minus-morkt: #e58a7a;    /* negativa belopp och SLASK-status på mörk skylt */
+  --gk-plus: #1f6b45;           /* positiva belopp på ljus botten */
+  --gk-plus-morkt: #7fcf9c;     /* positiva belopp på mörk skylt */
+  --gk-kortrod: #b3362c;        /* röda valörer på spelkort */
+  --gk-dampad-morkt: #9fb0a2;   /* sekundär text på mörkt */
+  --gk-dampad-ljust: #4f5f55;   /* sekundär text på ljust */
+
+  /* detaljfärger ur referensfilerna */
+  --gk-etikett: #3c4d43;        /* fältetiketter på krämfärgad panel */
+  --gk-platshallare: #6d6b58;   /* exempeltext i textfält */
+  --gk-papper-hover: #fffdf4;   /* textfält under muspekaren */
+  --gk-seg-hover: #e4dab8;      /* ovalt alternativ i ljus väljare under muspekaren */
+  --gk-rod-hover: #8e2a23;      /* röd fylld knapp under muspekaren */
+  --gk-ram-morkt: rgba(240,232,204,.32);   /* ramknappar och taggar på mörk botten */
+  --gk-ram-morkt-stark: rgba(240,232,204,.5);  /* väljaren 1–4 och STAY på underlägget */
+  --gk-fokus-ljust: #2f7a56;    /* fokusring på ljusa ytor (kräm och papper) */
+  --gk-fokus-morkt: #c9a55a;    /* fokusring på mörka ytor */
+  --gk-fokusring: var(--gk-fokus-morkt);   /* gäller just nu - byts till grönt inne i ljusa ytor, se "fokus" nedan */
+
+  /* ---- typsnitt ---- */
+  --gk-font-titel: 'Alfa Slab One', Rockwell, Georgia, serif;                   /* GURSCH, RUNDAN KLAR, rumskoden, SLASK! */
+  --gk-font-rubrik: 'Barlow Condensed', 'Arial Narrow', sans-serif;             /* knappar, rubriker, etiketter, namn */
+  --gk-font-text: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;   /* löptext, fält, uppmaningar */
+
+  /* ---- form ---- */
+  --gk-radie: 4px;              /* knappar, fält, skyltar */
+  --gk-radie-panel: 6px;        /* paneler och dialoger */
+  --gk-ram: 2px;
+
+  /* ---- skuggor: hårda och förskjutna, aldrig oskärpa ---- */
+  --gk-skugga-panel: 8px 8px 0 var(--gk-black);   /* paneler och dialoger */
+  --gk-skugga-knapp: 4px 4px 0 var(--gk-grund);
+  --gk-skugga-du: 4px 4px 0 var(--gk-guld);       /* "det här är du": din skylt, din rad, dina chattmeddelanden */
+  --gk-skugga-fokus: 6px 6px 0 var(--gk-guld);    /* textfält med fokus */
+
+  /* ---- ringar: 3 px runt om. Läggs först i box-shadow, före ev. vanlig skugga ---- */
+  --gk-ring: 0 0 0 3px var(--gk-guld);            /* "aktiv just nu": valt kort, skylten på tur, vinnande kort */
+  --gk-ring-rod: 0 0 0 3px var(--gk-varning);     /* den som förlorar sista sticket */
+
+  /* ---- rörelse ---- */
+  --gk-tid: .12s;
+  --gk-kurva: cubic-bezier(.2,.8,.2,1);
+}
+
+/* ================================================================ fokus
+ * En 3 px ring med 2 px luft. Grön på ljusa ytor (kräm och papper), guld på mörka.
+ * Ringen ritas på ytan runt elementet, så det är ytan som avgör färgen: allt inne i en
+ * .gk-panel (eller annan yta med .gk-ljus) får grönt, allt annat guld. En mörk yta inne i
+ * en ljus (t.ex. en mörk skylt på en panel) markeras med .gk-mork och får guld igen.
+ * Textfälten har egen fokusstil (se .gk-input:focus). Väljarens alternativ får ringen
+ * innanför rutan (se .gk-seg).
+ */
+.gk-panel, .gk-ljus { --gk-fokusring: var(--gk-fokus-ljust); }
+.gk-mork { --gk-fokusring: var(--gk-fokus-morkt); }
+.gk-btn:focus-visible,
+.gk-check:focus-visible { outline: 3px solid var(--gk-fokusring); outline-offset: 2px; }
+
+/* ================================================================ knappar
+ * Grund: .gk-btn + en variant. Bara en huvudknapp per skärm eller dialog.
+ *   1 Huvudknapp        .gk-press-dark   (på ljus botten, mörk skugga)
+ *                       .gk-press-light  (på mörk botten, krämfärgad skugga)
+ *   2 Mörk knapp        .gk-solid-dark   GÅ MED, SKICKA
+ *   3 Ramknapp          .gk-ghost-dark   (på ljus botten)
+ *                       .gk-ghost-light  (på mörk botten)
+ *   4 Röd ram           .gk-ghost-warn   RAPPORTERA FEL, SLASK (ärver textfärg från ytan)
+ *   5 Röd fylld         .gk-solid-warn   bara LÄMNA i bekräftelsen
+ * Storlek: standard 48 px, .gk-btn-sm 36 px. .gk-btn-block fyller bredden.
+ * .gk-btn-streckad: streckad ram (LÄGG TILL BOT).
+ * Går inte att trycka på (disabled): 45 % opacitet och ingen rörelse.
+ */
+.gk-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; margin: 0; padding: 0 18px;
+  border: var(--gk-ram) solid var(--gk-grund); border-radius: var(--gk-radie);
+  background: transparent; color: var(--gk-grund);
+  font-family: var(--gk-font-rubrik); font-weight: 700; font-size: 19px; line-height: 1.1;
+  letter-spacing: .1em; text-transform: uppercase; text-align: center;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform var(--gk-tid) var(--gk-kurva), box-shadow var(--gk-tid) var(--gk-kurva),
+    background-color var(--gk-tid) ease-out, border-color var(--gk-tid) ease-out, color var(--gk-tid) ease-out;
+}
+.gk-btn:disabled { opacity: .45; cursor: not-allowed; }
+.gk-btn-sm { min-height: 36px; padding: 0 12px; font-size: 15px; }
+.gk-btn-block { display: flex; width: 100%; }
+.gk-btn-streckad { border-style: dashed; }
+
+/* 1 Huvudknapp: lyfter 2 px upp åt vänster vid hover, sjunker 3 px ner i skuggan vid tryck */
+.gk-press-dark, .gk-press-light { background: var(--gk-guld); color: var(--gk-grund); }
+.gk-press-dark { box-shadow: 4px 4px 0 var(--gk-grund); }
+.gk-press-light { border-color: var(--gk-black); box-shadow: 4px 4px 0 var(--gk-kram); }
+.gk-press-dark:active:not(:disabled) { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--gk-grund); }
+.gk-press-light:active:not(:disabled) { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--gk-kram); }
+
+/* 2 Mörk knapp */
+.gk-solid-dark { background: var(--gk-grund); color: var(--gk-kram); }
+
+/* 3–4 Ramknappar */
+.gk-ghost-light {
+  /* Ramfärgen kan ändras per plats med --gk-ghost-ram: Start har #9fb0a2, underlägget --gk-ram-morkt-stark */
+  border-color: var(--gk-ghost-ram, var(--gk-ram-morkt)); color: var(--gk-kram);
+}
+.gk-ghost-warn { border-color: var(--gk-varning); color: inherit; }
+
+/* 5 Röd fylld */
+.gk-solid-warn { border-color: var(--gk-grund); background: var(--gk-rod-fylld); color: var(--gk-papper); }
+
+/* Ramknappar, mörk och röd fylld knapp sjunker 2 px vid tryck */
+.gk-solid-dark:active:not(:disabled),
+.gk-solid-warn:active:not(:disabled),
+.gk-ghost-dark:active:not(:disabled),
+.gk-ghost-light:active:not(:disabled),
+.gk-ghost-warn:active:not(:disabled) { transform: translateY(2px); }
+
+@media (hover: hover) {
+  .gk-press-dark:hover:not(:disabled):not(:active) { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--gk-grund); }
+  .gk-press-light:hover:not(:disabled):not(:active) { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--gk-kram); }
+  .gk-solid-dark:hover:not(:disabled) { background-color: var(--gk-filt); }
+  .gk-solid-warn:hover:not(:disabled) { background-color: var(--gk-rod-hover); }
+  .gk-ghost-dark:hover:not(:disabled) { background-color: var(--gk-grund); border-color: var(--gk-grund); color: var(--gk-kram); }
+  .gk-ghost-light:hover:not(:disabled) { background-color: rgba(240,232,204,.12); border-color: var(--gk-kram); }
+  .gk-ghost-warn:hover:not(:disabled) { background-color: var(--gk-varning); color: var(--gk-grund); }
+}
+
+/* ================================================================ panel (även dialoger) */
+.gk-panel {
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 24px;
+  background: var(--gk-kram); color: var(--gk-grund);
+  border: var(--gk-ram) solid var(--gk-black); border-radius: var(--gk-radie-panel);
+  box-shadow: var(--gk-skugga-panel);
+  font-family: var(--gk-font-text);
+}
+.gk-panel-titel {
+  margin: 0;
+  font-family: var(--gk-font-rubrik); font-weight: 700; font-size: 26px; line-height: 1;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--gk-grund);
+}
+.gk-avdelare { height: var(--gk-ram); background: var(--gk-linje); border: 0; margin: 0; }
+
+/* ================================================================ aktiv just nu
+ * Guldring 3 px runt om. Element som redan har en skugga lägger ringen först själva:
+ *   box-shadow: var(--gk-ring), 5px 9px 0 rgba(0,0,0,.42);
+ */
+.gk-aktiv { box-shadow: var(--gk-ring); }
+.gk-aktiv-rod { box-shadow: var(--gk-ring-rod); }
+
+/* ================================================================ textfält, textruta, rullista
+ * <label class="gk-field">Smeknamn<input class="gk-input" …></label>
+ * Samma klass på <textarea>. Rullista: <select class="gk-input gk-select">.
+ * Fokus: mörk ram och guldskugga 6px 6px 0.
+ */
+.gk-field, .gk-etikett {
+  font-family: var(--gk-font-text); font-size: 14px; font-weight: 600; color: var(--gk-etikett);
+}
+.gk-field { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+.gk-input {
+  display: block; width: 100%; min-height: 46px; margin: 0; padding: 10px 12px;
+  font-family: var(--gk-font-text); font-size: 17px; font-weight: 400;   /* minst 16 px: annars zoomar iOS in */
+  color: var(--gk-grund); background-color: var(--gk-papper);
+  border: var(--gk-ram) solid var(--gk-grund); border-radius: var(--gk-radie);
+  transition: box-shadow var(--gk-tid) var(--gk-kurva), background-color var(--gk-tid) ease-out, border-color var(--gk-tid) ease-out;
+}
+.gk-input::placeholder { color: var(--gk-platshallare); opacity: 1; }
+.gk-input:focus { border-color: var(--gk-grund); outline: 2px solid var(--gk-grund); outline-offset: 0; box-shadow: var(--gk-skugga-fokus); }
+textarea.gk-input { min-height: 92px; line-height: 1.4; resize: vertical; }
+/* Rumskoden: versaler med luft mellan tecknen */
+.gk-input-kod { font-weight: 600; letter-spacing: .3em; text-transform: uppercase; }
+/* Rullista: pappersfält med en mörk pil till höger */
+.gk-select {
+  appearance: none; -webkit-appearance: none;
+  padding-right: 40px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310211b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='5 9 12 16 19 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center; background-size: 16px 16px;
+}
+/* Kryssrutor: vanliga kryssrutor i Bläck */
+.gk-check { width: 20px; height: 20px; margin: 0; accent-color: var(--gk-grund); }
+@media (hover: hover) {
+  .gk-input:hover:not(:focus) { background-color: var(--gk-papper-hover); }
+}
+
+/* ================================================================ sammansatt väljare
+ * En ram runt alla alternativ, det valda fyllt. Används för botnivå (Lätt/Medel/Svår) och 1–4 i förhandlingen.
+ *   .gk-seg              på mörk botten (underlägget): ljus ram, valt = krämfyllt
+ *   .gk-seg.gk-seg-light på ljus botten (paneler):     mörk ram på papper, valt = mörkt fyllt
+ *   .gk-seg-sm           liten (botens nivå i lobbyn)
+ *   .gk-seg-siffror      siffror 1–4 i förhandlingen (52 px breda, plats för prickar under)
+ *
+ * Varje alternativ har klassen .gk-seg-val och är antingen en radioknapp (botnivå: piltangenter
+ * och skärmläsare fungerar) eller en knapp med aria-pressed (förhandlingen):
+ *   <div class="gk-seg gk-seg-light" role="radiogroup" aria-labelledby="…">
+ *     <label><input type="radio" name="…" value="easy"><span class="gk-seg-val">Lätt</span></label> …
+ *   </div>
+ *   <div class="gk-seg gk-seg-siffror" role="group" aria-label="Antal kort att slänga">
+ *     <button type="button" class="gk-seg-val" aria-pressed="true">2<span class="gk-prickar"><span></span></span></button> …
+ *   </div>
+ * Prickarna (.gk-prickar) visar hur många andra som vill samma.
+ */
+.gk-seg {
+  display: inline-grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+  border: var(--gk-ram) solid var(--gk-ram-morkt-stark); border-radius: var(--gk-radie);
+  overflow: hidden; background: transparent; color: var(--gk-kram);
+}
+.gk-seg-light { display: grid; border-color: var(--gk-grund); background: var(--gk-papper); color: var(--gk-grund); }
+.gk-seg > * + * { border-left: var(--gk-ram) solid var(--gk-ram-morkt-stark); }
+.gk-seg-light > * + * { border-left-color: var(--gk-grund); }
+.gk-seg label { position: relative; display: block; margin: 0; color: inherit; }   /* inte styles.css grå labelfärg */
+.gk-seg input {
+  /* Osynlig men överst, så att klick och hover träffar själva radioknappen */
+  position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; min-height: 0; margin: 0;
+  opacity: 0; cursor: pointer;
+}
+.gk-seg-val {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  width: 100%; min-height: 44px; margin: 0; padding: 0 6px; border: 0; border-radius: 0;
+  font-family: var(--gk-font-rubrik); font-weight: 700; font-size: 17px; letter-spacing: .08em; line-height: 1;
+  color: inherit; background: transparent; cursor: pointer;
+  transition: background-color var(--gk-tid) ease-out, color var(--gk-tid) ease-out;
+}
+/* Valt */
+.gk-seg input:checked + .gk-seg-val,
+.gk-seg .gk-seg-val[aria-pressed="true"] { background: var(--gk-kram); color: var(--gk-grund); }
+.gk-seg-light input:checked + .gk-seg-val,
+.gk-seg-light .gk-seg-val[aria-pressed="true"] { background: var(--gk-grund); color: var(--gk-kram); }
+/* Fokus ligger innanför rutan, så att ramen runt väljaren inte skär av den. Där är det
+ * alternativets egen färg som är ytan: guld på mörkt (ovalda i mörk väljare, valt i ljus väljare),
+ * grönt på ljust (valt i mörk väljare är krämfyllt, ovalda i ljus väljare ligger på papper). */
+.gk-seg input:focus-visible + .gk-seg-val,
+.gk-seg .gk-seg-val:focus-visible { outline: 3px solid var(--gk-fokus-morkt); outline-offset: -5px; }
+.gk-seg input:checked:focus-visible + .gk-seg-val,
+.gk-seg .gk-seg-val[aria-pressed="true"]:focus-visible,
+.gk-seg-light input:not(:checked):focus-visible + .gk-seg-val,
+.gk-seg-light .gk-seg-val[aria-pressed="false"]:focus-visible { outline-color: var(--gk-fokus-ljust); }
+.gk-seg-light input:checked:focus-visible + .gk-seg-val,
+.gk-seg-light .gk-seg-val[aria-pressed="true"]:focus-visible { outline-color: var(--gk-fokus-morkt); }
+.gk-seg :disabled + .gk-seg-val, .gk-seg .gk-seg-val:disabled { opacity: .45; cursor: not-allowed; }
+
+.gk-seg-sm .gk-seg-val { min-height: 34px; padding: 0 10px; font-size: 15px; }
+.gk-seg-siffror .gk-seg-val { width: 52px; min-height: 40px; padding: 0 0 6px; font-size: 21px; letter-spacing: 0; }
+
+.gk-prickar {
+  position: absolute; left: 0; right: 0; bottom: 4px;
+  display: flex; gap: 3px; justify-content: center; pointer-events: none;
+}
+.gk-prickar > span { width: 6px; height: 6px; border-radius: 50%; background: var(--gk-guld); }
+.gk-seg .gk-seg-val[aria-pressed="true"] .gk-prickar > span { background: var(--gk-grund); }
+
+@media (hover: hover) {
+  .gk-seg input:not(:checked):not(:disabled):hover + .gk-seg-val,
+  .gk-seg .gk-seg-val[aria-pressed="false"]:not(:disabled):hover { background-color: rgba(240,232,204,.14); }
+  .gk-seg-light input:not(:checked):not(:disabled):hover + .gk-seg-val,
+  .gk-seg-light .gk-seg-val[aria-pressed="false"]:not(:disabled):hover { background-color: var(--gk-seg-hover); }
+}
+
+/* ================================================================ sidan laddas
+ * Inga övergångar förrän sidan ritats en gång (app.js tar bort klassen) - annars kan knappar och
+ * väljare ibland tona från fel färg i 120 ms precis när sidan öppnas. */
+.gk-laddar *, .gk-laddar *::before, .gk-laddar *::after { transition: none !important; }
+
+/* ================================================================ rörelse av */
+@media (prefers-reduced-motion: reduce) {
+  .gk-btn, .gk-input, .gk-seg-val { transition: none; }
+}

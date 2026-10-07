@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gursch – komponenter</title>
+<!-- Tillfällig testsida för den nya designens grund (gk.css). Tas bort när skärmarna är klara. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" />
+<link rel="stylesheet" href="/gk.css" />
+<!-- styles.css laddas också, så att det syns om den gamla designen krockar med gk-klasserna -->
+<link rel="stylesheet" href="/styles.css" />
+<style>
+  body { overflow: auto; background: var(--gk-grund); color: var(--gk-kram); font-family: var(--gk-font-text); }
+  main { max-width: 1040px; margin: 0 auto; padding: 40px 16px 80px; display: flex; flex-direction: column; gap: 40px; }
+  h1 { margin: 0; font-family: var(--gk-font-titel); font-weight: 400; font-size: clamp(56px, 12vw, 104px); line-height: .95;
+    letter-spacing: .03em; text-shadow: 6px 6px 0 var(--gk-guld); }
+  h2.sektion { margin: 0 0 14px; font-family: var(--gk-font-rubrik); font-size: 17px; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--gk-dampad-morkt); }
+  .rad { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 26px; }
+  .farger { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+  .farg { border: 2px solid var(--gk-black); border-radius: var(--gk-radie); overflow: hidden; background: var(--gk-papper);
+    color: var(--gk-grund); font-size: 13px; }
+  .farg div:first-child { height: 52px; }
+  .farg div:last-child { padding: 6px 8px; }
+  .visa-fokus { outline: 3px solid var(--gk-fokusring); outline-offset: 2px; }
+  .visa-fokus-falt { outline: 2px solid var(--gk-grund); outline-offset: 0; box-shadow: var(--gk-skugga-fokus); }
+  .bord { padding: 24px; border-radius: var(--gk-radie-panel); background: var(--gk-filt); }
+  .underlagg { justify-content: center; padding: 18px 24px; border-radius: 14px; border: 2px solid #0a0705; background: var(--gk-underlagg);
+    outline: 2px dashed rgba(201,165,90,.42); outline-offset: -8px; }
+  /* Bara exempel för guldringen - riktiga skyltar och kort byggs med bordet */
+  .skylt { min-width: 118px; padding: 9px 16px; border-radius: var(--gk-radie); background: var(--gk-black); text-align: center;
+    font-family: var(--gk-font-rubrik); font-size: 19px; font-weight: 700; letter-spacing: .04em; }
+  .skylt small { display: block; font-family: var(--gk-font-text); font-size: 14px; font-weight: 600; letter-spacing: 0; color: var(--gk-dampad-morkt); }
+  .kort { display: flex; align-items: center; justify-content: center; width: 66px; height: 94px; border-radius: 5px;
+    border: 2px solid var(--gk-black); background: var(--gk-papper); color: var(--gk-grund);
+    font-family: var(--gk-font-rubrik); font-size: 26px; font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+  <h1>GURSCH</h1>
+
+  <section>
+    <h2 class="sektion">Färger</h2>
+    <div class="farger" id="farger"></div>
+  </section>
+
+  <section>
+    <h2 class="sektion">Knappar på mörk botten</h2>
+    <div class="rad">
+      <button type="button" class="gk-btn gk-press-light">Släng 2 kort</button>
+      <button type="button" class="gk-btn gk-ghost-light" style="--gk-ghost-ram: var(--gk-dampad-morkt)">Lär dig Gursch</button>
+      <button type="button" class="gk-btn gk-ghost-light" style="--gk-ghost-ram: var(--gk-ram-morkt-stark)">Stay</button>
+      <button type="button" class="gk-btn gk-ghost-warn">Slask</button>
+      <button type="button" class="gk-btn gk-btn-sm gk-ghost-light">Historik</button>
+      <button type="button" class="gk-btn gk-btn-sm gk-ghost-warn">Rapportera fel</button>
+      <button type="button" class="gk-btn gk-press-light" disabled>Spela 0 kort</button>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sektion">Underlägget: väljaren 1–4 i förhandlingen</h2>
+    <div class="underlagg rad">
+      <!-- Prickarna visar hur många andra som vill samma antal -->
+      <div class="gk-seg gk-seg-siffror" role="group" aria-label="Antal kort att slänga" id="forhandling">
+        <button type="button" class="gk-seg-val" aria-pressed="false" aria-label="1 kort, 1 annan vill samma">1<span class="gk-prickar"><span></span></span></button>
+        <button type="button" class="gk-seg-val" aria-pressed="true" aria-label="2 kort, 2 andra vill samma">2<span class="gk-prickar"><span></span><span></span></span></button>
+        <button type="button" class="gk-seg-val" aria-pressed="false" aria-label="3 kort">3<span class="gk-prickar"></span></button>
+        <button type="button" class="gk-seg-val" aria-pressed="false" aria-label="4 kort">4<span class="gk-prickar"></span></button>
+      </div>
+      <button type="button" class="gk-btn gk-ghost-light" style="--gk-ghost-ram: var(--gk-ram-morkt-stark)">Stay</button>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sektion">Fokusmarkering: guld på mörkt, grönt på ljust</h2>
+    <!-- .visa-fokus ritar fokusringen hela tiden, med samma färgregel som gk.css (--gk-fokusring).
+         Tryck Tab på sidan för att se de riktiga ringarna. -->
+    <div class="grid">
+      <div class="rad" style="align-content: flex-start; gap: 18px">
+        <button type="button" class="gk-btn gk-press-light visa-fokus">Spela</button>
+        <button type="button" class="gk-btn gk-ghost-light visa-fokus">Historik</button>
+      </div>
+      <div class="gk-panel">
+        <div class="rad" style="gap: 18px">
+          <button type="button" class="gk-btn gk-press-dark visa-fokus">Spela igen</button>
+          <button type="button" class="gk-btn gk-ghost-dark visa-fokus">Avbryt</button>
+        </div>
+        <label class="gk-field">Textfält: tjockare ram och guldskugga i stället för ring
+          <input class="gk-input visa-fokus-falt" type="text" value="Axel" />
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sektion">Guldring: aktiv just nu</h2>
+    <div class="bord rad" style="gap: 24px">
+      <div class="skylt gk-aktiv">Bot Greta<small>0 kr · <span style="color: var(--gk-guld)">TÄNKER …</span></small></div>
+      <div class="skylt">Bot Bengt<small>0 kr</small></div>
+      <div class="kort gk-aktiv">3♦</div>
+      <div class="kort">9♣</div>
+      <div class="kort gk-aktiv-rod">K♠</div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sektion">Paneler, fält och väljare</h2>
+    <div class="grid">
+      <div class="gk-panel">
+        <h2 class="gk-panel-titel">Skapa spel</h2>
+        <label class="gk-field">Smeknamn<input class="gk-input" type="text" placeholder="Ditt smeknamn" /></label>
+        <button type="button" class="gk-btn gk-press-dark">Skapa spel</button>
+        <hr class="gk-avdelare" />
+        <div class="gk-field">
+          <div id="botniva">Botnivå</div>
+          <div class="gk-seg gk-seg-light" role="radiogroup" aria-labelledby="botniva">
+            <label><input type="radio" name="niva" value="easy" /><span class="gk-seg-val">Lätt</span></label>
+            <label><input type="radio" name="niva" value="medium" checked /><span class="gk-seg-val">Medel</span></label>
+            <label><input type="radio" name="niva" value="hard" /><span class="gk-seg-val">Svår</span></label>
+          </div>
+        </div>
+        <button type="button" class="gk-btn gk-ghost-dark">Spela mot bottar</button>
+      </div>
+
+      <div class="gk-panel">
+        <h2 class="gk-panel-titel">Gå med i spel</h2>
+        <label class="gk-field">Smeknamn<input class="gk-input" type="text" placeholder="Ditt smeknamn" /></label>
+        <label class="gk-field">Rumskod<input class="gk-input gk-input-kod" type="text" placeholder="ABCD" maxlength="6" /></label>
+        <button type="button" class="gk-btn gk-solid-dark" style="margin-top: auto">Gå med</button>
+      </div>
+
+      <div class="gk-panel">
+        <h2 class="gk-panel-titel">Knappar på ljus botten</h2>
+        <button type="button" class="gk-btn gk-press-dark">Spela igen</button>
+        <button type="button" class="gk-btn gk-ghost-dark">Till lobbyn</button>
+        <div class="rad" style="gap: 10px">
+          <button type="button" class="gk-btn gk-btn-sm gk-ghost-dark">Tidigare händer</button>
+          <button type="button" class="gk-btn gk-btn-sm gk-ghost-warn">Rapportera regelfel</button>
+        </div>
+        <button type="button" class="gk-btn gk-ghost-dark gk-btn-streckad" style="min-height: 44px">+ Lägg till bot</button>
+        <button type="button" class="gk-btn gk-press-dark" disabled>Avstängd</button>
+      </div>
+
+      <div class="gk-panel">
+        <h2 class="gk-panel-titel">Lobby: bot och inställningar</h2>
+        <div class="rad" style="gap: 10px">
+          <span style="flex: 1; font-family: var(--gk-font-rubrik); font-weight: 700; font-size: 19px">Bot Greta</span>
+          <div class="gk-seg gk-seg-light gk-seg-sm" role="radiogroup" aria-label="Botens nivå">
+            <label><input type="radio" name="greta" value="easy" /><span class="gk-seg-val">Lätt</span></label>
+            <label><input type="radio" name="greta" value="medium" checked /><span class="gk-seg-val">Medel</span></label>
+            <label><input type="radio" name="greta" value="hard" /><span class="gk-seg-val">Svår</span></label>
+          </div>
+        </div>
+        <label class="gk-field">Turtimer
+          <select class="gk-input gk-select">
+            <option value="0">Av</option><option value="30">30 s</option><option value="45" selected>45 s</option>
+          </select>
+        </label>
+        <label class="gk-field" style="flex-direction: row; align-items: center; gap: 10px; color: var(--gk-grund); font-size: 17px; font-weight: 400">
+          <input type="checkbox" class="gk-check" checked /> Chatt
+        </label>
+      </div>
+
+      <div class="gk-panel">
+        <h2 class="gk-panel-titel">Lämna spelet?</h2>
+        <p style="margin: 0">Dialog med röd fylld knapp. Bara LÄMNA i bekräftelsen är röd fylld.</p>
+        <div class="rad" style="gap: 14px">
+          <button type="button" class="gk-btn gk-ghost-dark" style="flex: 1">Stanna</button>
+          <button type="button" class="gk-btn gk-solid-warn" style="flex: 1">Lämna</button>
+        </div>
+      </div>
+
+      <div class="gk-panel">
+        <h2 class="gk-panel-titel">Rapportera fel</h2>
+        <label class="gk-field">Vad blev fel?
+          <textarea class="gk-input" rows="3" placeholder="T.ex. Leo fick lägga en 9:a på en ensam 7:a"></textarea>
+        </label>
+        <div class="rad" style="gap: 14px">
+          <button type="button" class="gk-btn gk-press-dark" style="flex: 1">Spara rapport</button>
+          <button type="button" class="gk-btn gk-ghost-dark" style="flex: 1">Avbryt</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sektion">Bilder i /assets</h2>
+    <div class="bord rad">
+      <img src="/assets/gursch-marke-sticker-tjock.png" alt="Huvudmärket" style="height: 114px" />
+      <img src="/assets/fatolj.png" alt="Fåtölj" style="height: 114px" />
+      <img src="/assets/golvlampa.png" alt="Golvlampa" style="height: 114px" />
+      <img src="/assets/gursch-maskot-med-skugga.png" alt="Gurkan" style="height: 114px" />
+      <img src="/assets/gurktryck-filt.png" alt="Gurktrycket" style="height: 80px" />
+      <div style="width: 160px; height: 80px; border-radius: 4px; background: var(--gk-mahogny) url(/assets/planktextur.svg) center top / 640px 256px"></div>
+    </div>
+  </section>
+</main>
+<script>
+  // Färgrutorna läses direkt från variablerna i gk.css, så att de alltid visar de riktiga värdena.
+  const namn = ['grund', 'black', 'filt', 'filt-ljus', 'ljuskagla', 'underlagg', 'kram', 'papper', 'linje', 'guld',
+    'mahogny', 'varning', 'rod-fylld', 'minus-morkt', 'plus', 'plus-morkt', 'kortrod', 'dampad-morkt', 'dampad-ljust'];
+  const stil = getComputedStyle(document.documentElement);
+  for (const n of namn) {
+    const ruta = document.createElement('div');
+    ruta.className = 'farg';
+    const prov = document.createElement('div');
+    prov.style.background = `var(--gk-${n})`;
+    const text = document.createElement('div');
+    text.textContent = `--gk-${n} ${stil.getPropertyValue(`--gk-${n}`).trim()}`;
+    ruta.append(prov, text);
+    document.getElementById('farger').append(ruta);
+  }
+  // Bara för att prova väljaren 1–4: klick väljer siffran (i spelet sköts det av app.js)
+  for (const b of document.querySelectorAll('#forhandling .gk-seg-val')) {
+    b.onclick = () => { for (const o of document.querySelectorAll('#forhandling .gk-seg-val')) o.setAttribute('aria-pressed', String(o === b)); };
+  }
+</script>
+</body>
+</html>

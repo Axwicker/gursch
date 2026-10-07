@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>Gursch – bord, mobil</title>
+<!-- Referens for den nya Gursch-designen. Statisk mockup: valt kort, vald botniva och all speldata ar harkodade exempel. Stilarna (farger, typsnitt, matt, skuggor) ar de som ska galla. -->
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&amp;family=Barlow:wght@400;500;600&amp;family=Barlow+Condensed:wght@600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#c9a55a}a:hover{color:#e2c684}
+button:focus-visible{outline:3px solid #c9a55a;outline-offset:2px}
+.gk-btn,.gk-press-dark,.gk-press-light,.gk-card,.gk-input{transition:transform .12s cubic-bezier(.2,.8,.2,1),box-shadow .12s cubic-bezier(.2,.8,.2,1),background-color .12s ease-out,border-color .12s ease-out,color .12s ease-out}
+@media (hover:hover){
+.gk-press-dark:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #10211b!important}
+.gk-press-light:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #f0e8cc!important}
+.gk-ghost-dark:hover{background-color:#10211b!important;border-color:#10211b!important;color:#f0e8cc!important}
+.gk-solid-dark:hover{background-color:#1f3d30!important}
+.gk-ghost-light:hover{background-color:rgba(240,232,204,.12)!important;border-color:#f0e8cc!important}
+.gk-ghost-warn:hover{background-color:#c05a48!important;color:#10211b!important}
+.gk-card:hover{transform:translateY(-4px)!important}
+.gk-card.is-sel:hover{transform:translateY(-11px)!important}
+.gk-input:hover{background-color:#fffdf4!important}
+}
+.gk-press-dark:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #10211b!important}
+.gk-press-light:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #f0e8cc!important}
+.gk-btn:active{transform:translateY(2px)}
+.gk-card:active{transform:translateY(-1px)!important}
+.gk-card.is-sel:active{transform:translateY(-5px)!important}
+.gk-input:focus{outline:2px solid #10211b;outline-offset:0;box-shadow:6px 6px 0 #c9a55a}
+@media (prefers-reduced-motion:reduce){.gk-btn,.gk-press-dark,.gk-press-light,.gk-card,.gk-input{transition:none}}
+</style>
+</head>
+<body>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #10211b; color: #f0e8cc; font-family: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <header style="flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: #0a1612">
+    <img src="../assets/gursch-marke-sticker-tjock.png" alt="Gursch" style="height: 48px; width: auto; margin-right: 2px">
+    <span style="padding: 5px 9px; border: 2px solid #3b5347; border-radius: 4px; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: 0.1em">RUNDA 1</span>
+    <span style="padding: 5px 9px; border: 2px solid #c9a55a; border-radius: 4px; background: #c9a55a; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: 0.1em">×10</span>
+    <span style="padding: 5px 9px; border: 2px solid #3b5347; border-radius: 4px; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: 0.1em">CDC5</span>
+    <button type="button" class="gk-btn gk-ghost-light" aria-label="Meny" style="margin-left: auto; width: 44px; height: 44px; border: 2px solid #3b5347; border-radius: 4px; background: transparent; color: #f0e8cc; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg></button>
+  </header>
+
+  <div style="flex: 1 1 auto; padding: 8px 8px 12px; display: flex; min-height: 0">
+    <div style="flex: 1 1 auto; border-radius: 28px; padding: 6px; background: #f0e8cc; box-shadow: 0 6px 0 #07100c">
+      <div style="height: 100%; box-sizing: border-box; padding: 12px 10px 14px; display: flex; flex-direction: column; border-radius: 22px; border: 2px solid #0a1612; background: #1f3d30">
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+            <div style="width: 100%; box-sizing: border-box; padding: 7px 4px; border-radius: 4px; background: #0a1612; text-align: center"><div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 0.04em">Bot Bengt</div><div style="font-size: 13px; font-weight: 600; color: #9fb0a2">0 kr</div></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+            <div style="width: 100%; box-sizing: border-box; padding: 7px 4px; border-radius: 4px; background: #0a1612; text-align: center"><div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 0.04em">Bot Greta</div><div style="font-size: 13px; font-weight: 600; color: #7fcf9c">+10 kr</div></div>
+            <div style="width: 24px; height: 34px; box-sizing: border-box; border-radius: 3px; border: 2px solid #0a1612; background: #fbf7e9; color: #b3362c; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center">2</div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+            <div style="width: 100%; box-sizing: border-box; padding: 7px 4px; border-radius: 4px; background: #0a1612; text-align: center"><div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 0.04em">Bot Sixten</div><div style="font-size: 13px; font-weight: 600; color: #9fb0a2">0 kr</div></div>
+            <div style="width: 24px; height: 34px; box-sizing: border-box; border-radius: 3px; border: 2px solid #0a1612; background: #fbf7e9; color: #b3362c; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center">8</div>
+          </div>
+        </div>
+        <div style="flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center">
+          <div style="position: relative; width: 324px; height: 128px; box-sizing: border-box; padding: 32px 8px 0 0; display: flex; align-items: center; justify-content: center">
+            <img src="../assets/gurktryck-filt.png" alt="" style="position: absolute; left: 0; top: 0; width: 324px; height: 128px">
+            <div style="position: relative; font-family: 'Alfa Slab One', Rockwell, Georgia, serif; font-size: 36px; line-height: 1; letter-spacing: 0.05em; color: rgba(8,18,14,.55); height: 60px">GURSCH</div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+            <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; line-height: 1; letter-spacing: 0.24em; color: #c9a55a">STICKSPEL · STICK 1</div>
+            <div style="font-size: 17px; font-weight: 500; color: #f0e8cc">Du leder sticket</div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px">
+          <div style="min-width: 110px; padding: 8px 16px; border-radius: 4px; background: #f0e8cc; color: #10211b; border: 2px solid #0a1612; box-shadow: 4px 4px 0 #c9a55a; text-align: center">
+            <div style="font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 0.04em">Axel (du)</div>
+            <div style="font-size: 14px; font-weight: 600; color: #a8322a">−10 kr</div>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center">
+            <span style="padding: 4px 8px; border: 2px solid #0a1612; border-radius: 999px; background: #f0e8cc; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 14px; font-weight: 700; line-height: 1">D</span>
+            <span style="padding: 4px 8px; border: 2px solid #0a1612; border-radius: 4px; background: #c9a55a; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: 0.08em">FLOP</span>
+            <span style="padding: 4px 8px; border: 2px solid #0a1612; border-radius: 4px; background: #0a1612; color: #f0e8cc; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: 0.08em">SLASK 1/3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer style="position: relative; flex: 0 0 auto; padding: 14px 12px 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; background: #0a1612">
+    <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 5px; background: rgba(240,232,204,.14)"><div style="width: 100%; height: 100%; background: #c9a55a"></div></div>
+    <div style="font-size: 15px; font-weight: 500; line-height: 1.3; color: #f0e8cc; text-align: center">clean 1×3</div>
+    <div style="width: 100%; display: flex; justify-content: space-between; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 14px; font-weight: 700; line-height: 1.2; letter-spacing: 0.1em; color: #9fb0a2">
+      <span style="color: #c9a55a">1 AV 1–5 VALDA</span>
+      <span>DIN TUR · 45 s</span>
+    </div>
+    <div style="display: flex; gap: 6px; align-items: flex-end; height: 84px">
+      
+        <button type="button" class="gk-card is-sel" aria-label="3♦" style="width: 56px; height: 76px; box-sizing: border-box; padding: 4px 5px; display: flex; flex-direction: column; align-items: flex-start; border-radius: 5px; border: 2px solid #0a1612; background: #fbf7e9; color: #b3362c; box-shadow: 0 0 0 3px #c9a55a; cursor: pointer; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; transform: translateY(-6px)">
+          <span style="font-size: 14px; font-weight: 700; line-height: 1">3♦</span>
+          <span style="flex: 1 1 auto; align-self: stretch; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; line-height: 1">3</span>
+        </button>
+      
+        <button type="button" class="gk-card" aria-label="9♣" style="width: 56px; height: 76px; box-sizing: border-box; padding: 4px 5px; display: flex; flex-direction: column; align-items: flex-start; border-radius: 5px; border: 2px solid #0a1612; background: #fbf7e9; color: #10211b; box-shadow: none; cursor: pointer; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; transform: translateY(0)">
+          <span style="font-size: 14px; font-weight: 700; line-height: 1">9♣</span>
+          <span style="flex: 1 1 auto; align-self: stretch; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; line-height: 1">9</span>
+        </button>
+      
+        <button type="button" class="gk-card" aria-label="J♥" style="width: 56px; height: 76px; box-sizing: border-box; padding: 4px 5px; display: flex; flex-direction: column; align-items: flex-start; border-radius: 5px; border: 2px solid #0a1612; background: #fbf7e9; color: #b3362c; box-shadow: none; cursor: pointer; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; transform: translateY(0)">
+          <span style="font-size: 14px; font-weight: 700; line-height: 1">J♥</span>
+          <span style="flex: 1 1 auto; align-self: stretch; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; line-height: 1">J</span>
+        </button>
+      
+        <button type="button" class="gk-card" aria-label="Q♦" style="width: 56px; height: 76px; box-sizing: border-box; padding: 4px 5px; display: flex; flex-direction: column; align-items: flex-start; border-radius: 5px; border: 2px solid #0a1612; background: #fbf7e9; color: #b3362c; box-shadow: none; cursor: pointer; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; transform: translateY(0)">
+          <span style="font-size: 14px; font-weight: 700; line-height: 1">Q♦</span>
+          <span style="flex: 1 1 auto; align-self: stretch; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; line-height: 1">Q</span>
+        </button>
+      
+        <button type="button" class="gk-card" aria-label="K♠" style="width: 56px; height: 76px; box-sizing: border-box; padding: 4px 5px; display: flex; flex-direction: column; align-items: flex-start; border-radius: 5px; border: 2px solid #0a1612; background: #fbf7e9; color: #10211b; box-shadow: none; cursor: pointer; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; transform: translateY(0)">
+          <span style="font-size: 14px; font-weight: 700; line-height: 1">K♠</span>
+          <span style="flex: 1 1 auto; align-self: stretch; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; line-height: 1">K</span>
+        </button>
+      
+    </div>
+    <button type="button" class="gk-press-light" style="width: 100%; min-height: 48px; border: 2px solid #0a1612; border-radius: 4px; background: #c9a55a; color: #10211b; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 0.12em; box-shadow: 4px 4px 0 #f0e8cc; cursor: pointer; opacity: 1">SPELA 1 KORT</button>
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="256" viewBox="0 0 640 256">
+<rect x="210" y="0" width="430" height="64" fill="rgba(0,0,0,0.13)"/>
+<rect x="0" y="0" width="210" height="64" fill="rgba(0,0,0,0.13)"/>
+<path d="M227 9 Q279 5 330 9 Q382 5 434 9 Q485 5 537 9 Q588 12 640 9" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 9 Q38 5 76 9 Q114 6 152 9" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M245 20 Q294 16 344 20 Q393 17 442 20 Q492 16 541 20 Q591 24 640 20" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 20 Q37 16 74 20 Q112 17 149 20" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M255 38 Q303 42 351 38 Q399 34 448 38 Q496 35 544 38 Q592 34 640 38" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 38 Q49 35 98 38 Q146 41 195 38" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M252 47 Q300 50 349 47 Q398 44 446 47 Q494 43 543 47 Q592 44 640 47" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 47 Q47 43 94 47 Q140 43 187 47" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="209" y="0" width="2" height="64" fill="rgba(0,0,0,0.45)"/>
+<rect x="211" y="0" width="1" height="64" fill="rgba(255,225,180,0.07)"/>
+<circle cx="201" cy="14" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="201" cy="50" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="219" cy="14" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="219" cy="50" r="2" fill="rgba(0,0,0,0.5)"/>
+<rect x="0" y="61" width="640" height="3" fill="rgba(0,0,0,0.45)"/>
+<rect x="0" y="0" width="640" height="1" fill="rgba(255,225,180,0.07)"/>
+<rect x="90" y="64" width="340" height="64" fill="rgba(255,214,160,0.05)"/>
+<path d="M137 71 Q202 75 266 71 Q331 75 396 71" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M135 87 Q192 90 250 87 Q307 90 364 87" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M109 103 Q156 99 203 103 Q250 106 297 103 Q344 107 391 103" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M126 115 Q191 111 256 115 Q321 111 386 115" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="430" y="64" width="210" height="64" fill="rgba(0,0,0,0.06)"/>
+<rect x="0" y="64" width="90" height="64" fill="rgba(0,0,0,0.06)"/>
+<path d="M448 74 Q496 71 544 74 Q592 78 640 74" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 74 Q10 70 20 74 Q29 70 39 74" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M488 88 Q526 91 564 88 Q602 91 640 88" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 88 Q10 92 21 88 Q32 92 42 88" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M443 103 Q492 107 542 103 Q591 99 640 103" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 103 Q12 106 24 103 Q36 107 48 103" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M462 115 Q506 111 551 115 Q596 119 640 115" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 115 Q10 112 19 115 Q28 111 38 115" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="89" y="64" width="2" height="64" fill="rgba(0,0,0,0.45)"/>
+<rect x="91" y="64" width="1" height="64" fill="rgba(255,225,180,0.07)"/>
+<circle cx="81" cy="78" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="81" cy="114" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="99" cy="78" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="99" cy="114" r="2" fill="rgba(0,0,0,0.5)"/>
+<rect x="429" y="64" width="2" height="64" fill="rgba(0,0,0,0.45)"/>
+<rect x="431" y="64" width="1" height="64" fill="rgba(255,225,180,0.07)"/>
+<circle cx="421" cy="78" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="421" cy="114" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="439" cy="78" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="439" cy="114" r="2" fill="rgba(0,0,0,0.5)"/>
+<rect x="0" y="125" width="640" height="3" fill="rgba(0,0,0,0.45)"/>
+<rect x="0" y="64" width="640" height="1" fill="rgba(255,225,180,0.07)"/>
+<rect x="330" y="128" width="310" height="64" fill="rgba(255,214,160,0.03)"/>
+<rect x="0" y="128" width="330" height="64" fill="rgba(255,214,160,0.03)"/>
+<path d="M351 135 Q399 132 447 135 Q496 132 544 135 Q592 139 640 135" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 135 Q48 139 95 135 Q143 131 191 135 Q238 132 286 135" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M373 151 Q440 148 506 151 Q573 155 640 151" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 151 Q48 154 96 151 Q144 155 191 151 Q239 154 287 151" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M352 164 Q400 160 448 164 Q496 161 544 164 Q592 161 640 164" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 164 Q50 161 101 164 Q152 160 202 164 Q252 168 303 164" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M354 175 Q402 171 449 175 Q497 172 545 175 Q592 179 640 175" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M0 175 Q48 178 95 175 Q143 178 191 175 Q238 172 286 175" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="329" y="128" width="2" height="64" fill="rgba(0,0,0,0.45)"/>
+<rect x="331" y="128" width="1" height="64" fill="rgba(255,225,180,0.07)"/>
+<circle cx="321" cy="142" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="321" cy="178" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="339" cy="142" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="339" cy="178" r="2" fill="rgba(0,0,0,0.5)"/>
+<rect x="0" y="189" width="640" height="3" fill="rgba(0,0,0,0.45)"/>
+<rect x="0" y="128" width="640" height="1" fill="rgba(255,225,180,0.07)"/>
+<rect x="40" y="192" width="460" height="64" fill="rgba(0,0,0,0.10)"/>
+<path d="M80 205 Q131 209 182 205 Q232 209 283 205 Q334 209 384 205 Q435 209 486 205" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M78 212 Q123 208 169 212 Q214 209 260 212 Q305 208 350 212 Q396 209 441 212" fill="none" stroke="rgba(0,0,0,0.20)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M55 226 Q104 222 154 226 Q203 222 252 226 Q301 222 350 226 Q400 223 449 226" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M71 238 Q123 234 176 238 Q228 235 280 238 Q332 242 384 238 Q437 235 489 238" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M530 201 Q554 205 578 201 Q602 197 626 201" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M538 228 Q562 224 586 228 Q609 225 633 228" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M529 243 Q556 247 584 243 Q612 240 639 243" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="39" y="192" width="2" height="64" fill="rgba(0,0,0,0.45)"/>
+<rect x="41" y="192" width="1" height="64" fill="rgba(255,225,180,0.07)"/>
+<circle cx="31" cy="206" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="31" cy="242" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="49" cy="206" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="49" cy="242" r="2" fill="rgba(0,0,0,0.5)"/>
+<rect x="499" y="192" width="2" height="64" fill="rgba(0,0,0,0.45)"/>
+<rect x="501" y="192" width="1" height="64" fill="rgba(255,225,180,0.07)"/>
+<circle cx="491" cy="206" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="491" cy="242" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="509" cy="206" r="2" fill="rgba(0,0,0,0.5)"/>
+<circle cx="509" cy="242" r="2" fill="rgba(0,0,0,0.5)"/>
+<rect x="0" y="253" width="640" height="3" fill="rgba(0,0,0,0.45)"/>
+<rect x="0" y="192" width="640" height="1" fill="rgba(255,225,180,0.07)"/>
+<ellipse cx="300" cy="30" rx="11" ry="6" fill="rgba(0,0,0,0.22)"/><ellipse cx="300" cy="30" rx="18" ry="10" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1.5"/>
+<ellipse cx="560" cy="164" rx="11" ry="6" fill="rgba(0,0,0,0.22)"/><ellipse cx="560" cy="164" rx="18" ry="10" fill="none" stroke="rgba(0,0,0,0.16)" stroke-width="1.5"/>
+</svg>
