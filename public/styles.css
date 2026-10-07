@@ -3,38 +3,20 @@
 
   /* ---- färger ---- */
   --bg: #0d1412;
-  --bg-2: #121b18;
-  --panel: rgba(255,255,255,.045);
   --panel-line: rgba(255,255,255,.1);      /* separator */
-  --felt: #1a5636;
   --gold: #e8c877;
   --gold-dim: #a98d47;
   --text: #edf3ef;                          /* label */
   --muted: #8ca096;                         /* sekundär text på mörk bakgrund, 6,7:1 */
-  --green: #3ea55f;
-  --red: #e2564a;
-  /* Text direkt på filten: minst 4,5:1 även på filtens ljusaste del */
-  --on-felt: rgba(255,255,255,.92);
-  --on-felt-secondary: rgba(255,255,255,.82);
 
   /* ---- typografi: iOS textstilar i rem (följer webbläsarens textstorlek) ---- */
   --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --text-title1: 1.75rem;      /* 28 */
-  --text-title2: 1.375rem;     /* 22 */
-  --text-title3: 1.25rem;      /* 20 */
-  --text-body: 1.0625rem;      /* 17 */
   --text-callout: 1rem;        /* 16 */
-  --text-subhead: .9375rem;    /* 15 */
   --text-footnote: .8125rem;   /* 13 */
-  --text-caption1: .75rem;     /* 12 */
-  --text-caption2: .6875rem;   /* 11 - absolut golv */
-  --eyebrow-spacing: .08em;    /* spärrning för små etiketter i versaler */
 
   /* ---- form ---- */
-  --radius: 14px;
   --radius-control: 10px;
   --tap: 44px;                 /* minsta träffyta */
-  --shadow: 0 12px 40px rgba(0,0,0,.45);
   --card-w: 66px;
   --card-h: 94px;
 
@@ -61,50 +43,11 @@ body {
 }
 input, select, button, textarea { font: inherit; color: inherit; }
 h1, h2, h3 { margin: 0; letter-spacing: 0; }
-.muted { color: var(--muted); font-weight: 500; }
+
 .hint { color: var(--muted); font-size: var(--text-footnote); margin: 8px 0 0; line-height: 1.45; }
-.eyebrow {
-  font-size: var(--text-caption1); font-weight: 600; letter-spacing: var(--eyebrow-spacing);
-  text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
-}
 
 .screen { display: none; height: 100dvh; overflow: auto; }
 .screen.active { display: block; }
-
-/* ---------------------------------------------------------- buttons */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  min-height: var(--tap);
-  border: 1px solid var(--panel-line);
-  background: rgba(255,255,255,.06);
-  color: var(--text);
-  border-radius: var(--radius-control);
-  padding: 10px 16px;
-  font-weight: 600;
-  font-size: var(--text-subhead);
-  line-height: 1.2;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: background .16s, border-color .16s, opacity .16s, scale .1s ease-out;
-}
-/* Tryck: direkt respons på pointer-down. `scale` (inte transform) så att inget annat skrivs över. */
-.btn:active:not(:disabled) { scale: .97; }
-.btn:disabled { opacity: .38; cursor: not-allowed; }
-.btn-primary {
-  background: linear-gradient(180deg, #f0d795, var(--gold-dim));
-  border-color: #f4e3b4; color: #22190a;
-}
-.btn-danger { background: linear-gradient(180deg,#e2695c,#a83b31); border-color:#f0897d; color:#2b0d09; }
-.btn-lg { padding: 12px 22px; font-size: var(--text-callout); width: 100%; min-height: 50px; }
-.btn-sm { padding: 8px 14px; font-size: var(--text-footnote); }
-.btn-ghost { background: transparent; }
-.btn-icon { min-width: var(--tap); padding: 0; background: transparent; border-color: transparent; font-size: var(--text-body); }
-/* Hover bara där det finns en muspekare - på pekskärm fastnar hover efter ett tryck. */
-@media (hover: hover) {
-  .btn:hover:not(:disabled) { background: rgba(255,255,255,.11); }
-  .btn-primary:hover:not(:disabled) { background: linear-gradient(180deg, #f7e3ad, #bb9c52); }
-  .btn-danger:hover:not(:disabled) { background: linear-gradient(180deg,#ea7a6e,#b44438); }
-}
 
 label { display: block; font-size: var(--text-footnote); color: var(--muted); margin-bottom: 14px; }
 input, select, textarea {
@@ -116,15 +59,6 @@ input, select, textarea {
 input:focus, select:focus, textarea:focus { border-color: var(--gold-dim); }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
-.code-input { text-transform: uppercase; letter-spacing: .3em; font-weight: 700; }
-
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--panel-line);
-  border-radius: var(--radius);
-  padding: 22px;
-}
-.panel h2 { font-size: var(--text-body); font-weight: 600; color: var(--text); margin-bottom: 16px; }
 
 /* ---------------------------------------------------------- home
  * Ny design: design-handoff/referens/start.html (ritad i 1280 × 800) och gk.css.
@@ -194,7 +128,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
   .home-foot { font-size: 15px; }
 }
 
-.chip-beta { color: var(--gold); border-color: rgba(232,200,119,.35); letter-spacing: .06em; font-weight: 700; }
 @media (max-width: 420px) { .chip-beta { display: none; } }   /* toppraden är full på mobil; versionen står på startsidan */
 
 /* ---------------------------------------------------------- lobby
@@ -1028,7 +961,6 @@ textarea { resize: vertical; line-height: 1.4; }
   .toast, .toast.show { transform: translate(-50%, 0); }
   .side-panel { transform: none; opacity: 0; transition: opacity .2s ease, visibility 0s linear .2s; }
   .side-panel.open { opacity: 1; transition: opacity .2s ease; }
-  .btn:active:not(:disabled) { scale: none; }
   .hand .card { transition: none; }
 }
 @keyframes fadeIn { from { opacity: 0; } }
