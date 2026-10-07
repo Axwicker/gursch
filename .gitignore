@@ -5,3 +5,7 @@ screenshots/current/
 
 # Nycklar till betaserverns Supabase (för npm run reports:pull) - aldrig i git
 .env
+
+# Felrapporter som sparats lokalt (servern skriver dem hit) - inte i git.
+# (De äldre rapporterna i reports/klara/ var redan versionshanterade och ligger kvar.)
+reports/
