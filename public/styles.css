@@ -29,7 +29,10 @@
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  /* Inget dubbeltryck-zoom: två snabba tryck på korten zoomade in sidan på iPhone, och då hamnade
+     knapparna utanför skärmen (rapporterna 2026-10-07). Nyp-zoom fungerar som vanligt. */
+  touch-action: manipulation; }
 body {
   margin: 0;
   font-family: var(--font);
@@ -46,7 +49,7 @@ h1, h2, h3 { margin: 0; letter-spacing: 0; }
 
 .hint { color: var(--muted); font-size: var(--text-footnote); margin: 8px 0 0; line-height: 1.45; }
 
-.screen { display: none; height: 100dvh; overflow: auto; }
+.screen { display: none; height: 100vh; height: 100dvh; overflow: auto; }   /* vh för äldre webbläsare */
 .screen.active { display: block; }
 
 label { display: block; font-size: var(--text-footnote); color: var(--muted); margin-bottom: 14px; }
@@ -102,6 +105,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .home-invite[hidden] { display: none; }
 /* Inbjuden via länk: Gå med-panelen först (Gå med är då huvudknappen, se setInvitedLayout i app.js) */
 .home-panels.invited .home-join { order: -1; }
+
+/* Lär dig Gursch: bred ramknapp under panelerna. Guldram tills man har öppnat guiden en gång. */
+.home-learn { --gk-ghost-ram: #9fb0a2; width: 100%; }
+.home-learn.ny { border-color: var(--gk-guld); color: var(--gk-guld); animation: learnPuls 2.4s ease-in-out infinite; }
+@keyframes learnPuls { 50% { box-shadow: 0 0 0 4px rgba(201,165,90,.25); } }
+@media (prefers-reduced-motion: reduce) { .home-learn.ny { animation: none; } }
 
 .home-error { margin: 0; color: var(--gk-minus-morkt); font-size: 15px; font-weight: 600; line-height: 1.4; }
 .home-error:empty { display: none; }
@@ -213,7 +222,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
  */
 #screen-game { font-family: var(--gk-font-text); color: var(--gk-kram); }
 .game-layout {
-  display: flex; flex-direction: column; height: 100dvh;
+  /* Fyller skärmen, men krymper aldrig så mycket att bordet och handen går in i varandra.
+     I ett lägre fönster (liggande mobil, inzoomad dator) går bordet att scrolla och
+     handen med knapparna står kvar längst ned (position: sticky på .handbar). */
+  display: flex; flex-direction: column; height: 100%; min-height: 660px;
   /* Plankgolv: Mahogny med plankmönstret över, mörkare ut mot kanterna */
   background: var(--gk-mahogny) url(/assets/planktextur.svg) center top / 640px 256px;
   box-shadow: inset 0 0 180px rgba(0,0,0,.55);
@@ -451,13 +463,15 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
  * handen kräver. Uppifrån: turtimern, uppmaningen, handen, knappraden (räknare · knappar · tid).
  */
 .handbar {
-  position: relative; flex: none; display: flex; justify-content: center;
+  /* Ovanpå bordet och alltid i bild: knapparna får aldrig hamna under något eller utanför skärmen */
+  position: sticky; bottom: 0; z-index: 15; flex: none; display: flex; justify-content: center;
   padding: 0 max(16px, var(--safe-right)) calc(10px + var(--safe-bottom)) max(16px, var(--safe-left));
   background: linear-gradient(180deg, rgba(9,6,4,0) 0%, rgba(9,6,4,.62) 100%);
 }
 .hand-pad {
   position: relative; min-width: min(620px, 100%); max-width: 100%;
-  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  /* Räknaren och tiden radbryts hellre än att de skär in i knapparna (min-content = längsta ordet) */
+  display: grid; grid-template-columns: minmax(min-content, 1fr) auto minmax(min-content, 1fr);
   grid-template-areas: "timer timer timer" "hint hint hint" "hand hand hand" "count actions clock";
   /* Knappraden är alltid 44 px hög - annars hoppar bordet när turen går över till någon annan */
   grid-template-rows: auto auto auto minmax(44px, auto);
@@ -475,14 +489,16 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .hand-timer-bar.urgent { background: var(--gk-varning); }
 .hand-hint { grid-area: hint; min-height: 1.2em; text-align: center; font-size: 15px; font-weight: 500; line-height: 1.2; color: var(--gk-kram); text-wrap: balance; }
 .sel-count { grid-area: count; font-family: var(--gk-font-rubrik); font-size: 15px; font-weight: 700; line-height: 1.2; letter-spacing: .1em;
-  text-transform: uppercase; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--gk-guld); }
+  text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--gk-guld); }
 .actions { grid-area: actions; display: flex; gap: 10px; justify-content: center; align-items: center; min-height: 44px; }
 .actions .gk-btn { min-height: 44px; min-width: 84px; padding: 0 18px; letter-spacing: .12em; }
 .actions .gk-press-light { min-width: 132px; padding: 0 22px; }
 .actions .gk-ghost-light { --gk-ghost-ram: var(--gk-ram-morkt-stark); }
-/* Inte din tur: inga knappar - bara vem som är på tur och tiden, i mitten */
-.hand-pad:has(> .actions:empty) .actions { display: none; }
-.hand-pad:has(> .actions:empty) .turn-clock { grid-area: actions; text-align: center; }
+/* Inte din tur: inga knappar - bara vem som är på tur och tiden, i mitten.
+   Klassen sätts av renderActions(). (Inte :has(.actions:empty): Safari uppdaterade inte den regeln
+   när knapparna kom tillbaka, så knapparna förblev dolda och tiden låg över dem - rapporterna 2026-10-07.) */
+.hand-pad.no-actions .actions { display: none; }
+.hand-pad.no-actions .turn-clock { grid-area: actions; text-align: center; }
 
 /* Handen: lyfter 4 px vid hover, valt kort ligger 8 px upp med guldring. Gråa kort rör sig inte. */
 .hand { grid-area: hand; display: flex; gap: 8px; align-items: flex-end; justify-content: center; flex-wrap: wrap;
@@ -511,7 +527,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
  */
 .side-panel {
   --gk-fokusring: var(--gk-fokus-ljust);
-  position: fixed; top: 0; right: 0; height: 100dvh; width: min(400px, 100vw);
+  position: fixed; top: 0; right: 0; height: 100vh; height: 100dvh; width: min(400px, 100vw);
   padding-top: var(--safe-top); padding-right: var(--safe-right);
   display: flex; flex-direction: column; z-index: 65;   /* över resultat- och slaskrutan (60), under rapporten (70) */
   background: var(--gk-kram); color: var(--gk-grund); font-family: var(--gk-font-text);
@@ -590,6 +606,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .result-extra { display: flex; flex-direction: column; gap: 2px; margin: 4px 0 2px; font-size: 14px; line-height: 1.45; color: var(--gk-etikett); }
 .result-extra:empty { display: none; }
 .result-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.result-actions .gk-btn[hidden] { display: none; }
+.result-actions:has(> [hidden]) { grid-template-columns: minmax(0, 1fr); }   /* övningsrundan: bara Spela igen */
 .result-hint { margin: 0; font-size: 14px; text-align: center; color: var(--gk-etikett); }
 .result-hint:empty { display: none; }
 .result-more { display: flex; justify-content: center; gap: 10px; margin-top: 4px; }
@@ -621,9 +639,89 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .report-overlay { z-index: 70; }
 .report-box { width: 500px; }
 .confirm-overlay { z-index: 75; }
+
+/* Lär dig Gursch (public/learn.js). Gurkmannen i hörnet, text, exempel på en filtruta, prickar, knappar. */
+.learn-box { width: 580px; }
+.learn-head { display: flex; align-items: flex-end; gap: 14px; }
+.learn-mascot { height: 76px; width: auto; margin: -14px 0 -6px -6px; flex: none; }
+.learn-head-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.learn-step { font-family: var(--gk-font-rubrik); font-weight: 700; font-size: 14px; letter-spacing: .14em; color: var(--gk-dampad-ljust); }
+.learn-close { align-self: flex-start; width: 44px; min-height: 44px; padding: 0; }
+.learn-close .icon { width: 18px; height: 18px; }
+.learn-stage { display: flex; flex-direction: column; gap: 12px; touch-action: pan-y; }
+.learn-text { font-size: 16px; min-height: 4.4em; }
+.learn-examples {
+  display: flex; flex-direction: column; gap: 10px; padding: 14px 16px;
+  background: var(--gk-filt); color: var(--gk-kram);
+  border: var(--gk-ram) solid var(--gk-black); border-radius: var(--gk-radie);
+}
+.learn-row { display: flex; align-items: center; gap: 14px; min-height: 58px; }
+.learn-cards { display: flex; gap: 5px; flex: none; }
+.learn-cards .card {
+  --seven-corner: 9px; width: 40px; height: 56px; border-radius: 3px; padding-left: 5px;
+  flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; box-shadow: 2px 3px 0 rgba(0,0,0,.42);
+}
+.learn-cards .card .rank { font-size: 21px; }
+.learn-cards .card .suit { display: block; font-size: 13px; line-height: 1; }
+.learn-cards .card .corner { display: none; }
+.learn-win .card { box-shadow: var(--gk-ring), 2px 3px 0 rgba(0,0,0,.42); }
+.learn-lose .card { box-shadow: var(--gk-ring-rod), 2px 3px 0 rgba(0,0,0,.42); }
+.learn-seg { flex: none; }
+.learn-seg .gk-seg-val { cursor: default; }
+.learn-row-text { margin: 0; font-size: 15px; font-weight: 500; line-height: 1.35; }
+.learn-win .learn-row-text { color: var(--gk-plus-morkt); }
+.learn-lose .learn-row-text { color: var(--gk-minus-morkt); }
+.learn-rules { margin: 0; font-family: var(--gk-font-rubrik); font-weight: 600; font-size: 14px; letter-spacing: .1em; color: var(--gk-dampad-ljust); }
+.learn-dots { display: flex; justify-content: center; gap: 2px; }
+.learn-dot {
+  width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer;
+  display: grid; place-items: center;
+}
+.learn-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--gk-linje); transition: background-color var(--gk-tid) ease-out, transform var(--gk-tid) var(--gk-kurva); }
+.learn-dot[aria-current="true"]::before { background: var(--gk-grund); transform: scale(1.3); }
+.learn-dot:focus-visible { outline: 3px solid var(--gk-fokusring); outline-offset: -2px; border-radius: 50%; }
+.learn-box .gk-dialog-actions .gk-btn[hidden] { display: none; }
 /* Slask: SLASK! i rött, en mening, nedräkningen som list och sekunder, SYNA SLASK.
    Under topplisten (60 < 61), så att historik och chatt går att nå medan slasken pågår. */
 .slask-overlay { z-index: 60; }
+
+/* ---- guiden i övningsrundan (public/tutorial.js) ----
+ * Gurkmannen till vänster om en krämfärgad pratbubbla, överst på bordet. Över slask- och
+ * resultatrutan (60) och mobilmenyn (62), under sidopanelerna (65) och dialogerna (70).
+ * Det han pratar om får en pulserande guldram (.coach-mark).
+ */
+.coach {
+  position: fixed; z-index: 64; left: 50%; top: calc(72px + var(--safe-top)); translate: -50% 0;
+  width: min(560px, calc(100vw - 32px)); display: flex; align-items: flex-end; gap: 6px;
+  pointer-events: none;
+}
+.coach[hidden] { display: none; }
+/* Nere ovanför handen (tutorial.js räknar ut --coach-bottom från underläggets höjd) */
+.coach.coach-low { top: auto; bottom: calc(var(--coach-bottom, 200px) + var(--safe-bottom)); }
+.coach-in { animation: coachIn .22s cubic-bezier(.2,.8,.2,1); }
+@keyframes coachIn { from { opacity: 0; transform: translateY(-8px); } }
+.coach-mascot { flex: none; height: 104px; width: auto; margin-bottom: -10px; filter: drop-shadow(3px 3px 0 rgba(0,0,0,.35)); }
+.coach-bubble { position: relative; flex: 1; min-width: 0; gap: 10px; padding: 14px 16px 12px; pointer-events: auto; }
+/* Pilen mot gurkmannen */
+.coach-bubble::before {
+  content: ''; position: absolute; left: -11px; bottom: 22px; width: 18px; height: 18px;
+  background: var(--gk-kram); border-left: var(--gk-ram) solid var(--gk-black); border-bottom: var(--gk-ram) solid var(--gk-black);
+  transform: rotate(45deg);
+}
+.coach-text { margin: 0; font-size: 16px; line-height: 1.42; color: var(--gk-grund); }
+.coach-actions { display: flex; align-items: center; gap: 10px; }
+.coach-step { margin-right: auto; font-family: var(--gk-font-rubrik); font-weight: 700; font-size: 14px; letter-spacing: .14em; color: var(--gk-dampad-ljust); }
+.coach-mark { outline: 3px solid var(--gk-guld); outline-offset: 4px; border-radius: var(--gk-radie); animation: coachMark 1.6s ease-in-out infinite; }
+@keyframes coachMark { 50% { outline-color: rgba(201,165,90,.45); outline-offset: 8px; } }
+@media (max-width: 560px) {
+  .coach { top: calc(64px + var(--safe-top)); width: calc(100vw - 20px); }
+  .coach-mascot { height: 72px; }
+  .coach-text { font-size: 15px; }
+  .coach-actions .gk-btn { padding: 0 10px; font-size: 14px; letter-spacing: .06em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .coach-in, .coach-mark { animation: none; }
+}
 .slask-box { width: 400px; padding: 24px 28px; }
 .slask-title { text-align: center; font-family: var(--gk-font-titel); font-size: 44px; line-height: 1; letter-spacing: .05em;
   color: var(--gk-rod-fylld); text-shadow: 3px 3px 0 var(--gk-grund); }
@@ -743,6 +841,14 @@ body.no-anim * { animation: none !important; transition: none !important; }
   /* Dialoger i full bredd med 12 px marginal, sidopanelerna i full bredd */
   .gk-overlay { padding-left: max(12px, var(--safe-left)); padding-right: max(12px, var(--safe-right)); }
   .gk-dialog { width: 100%; padding: 22px 20px 20px; }
+  .learn-mascot { height: 60px; }
+  .learn-text { font-size: 15px; min-height: 0; }
+  .learn-examples { padding: 12px; }
+  .learn-row { gap: 10px; }
+  .learn-cards { gap: 3px; }
+  .learn-cards .card { width: 34px; height: 48px; padding-left: 4px; }
+  .learn-cards .card .rank { font-size: 18px; }
+  .learn-seg .gk-seg-val { width: 40px; }
   .gk-dialog-actions { gap: 10px; }
   .gk-dialog-actions .gk-btn { padding: 0 8px; font-size: 17px; letter-spacing: .08em; white-space: nowrap; }
   .slask-title { font-size: 40px; }
@@ -783,7 +889,7 @@ body.no-anim * { animation: none !important; transition: none !important; }
   .table-area { display: flex; padding: 8px max(8px, var(--safe-right)) 12px max(8px, var(--safe-left)); container-type: normal; }
   .table { max-width: none; width: auto; height: auto; flex: 1; align-self: stretch; }
   .table-rim { border-radius: 28px; padding: 6px; box-shadow: 0 6px 0 #07100c; }
-  .felt { border-radius: 22px; display: flex; flex-direction: column; padding: 12px 10px 14px; container-type: inline-size; }
+  .felt { border-radius: 22px; display: flex; flex-direction: column; padding: 10px 10px 10px; container-type: inline-size; }
 
   /* Motspelarna i en rad överst, lika breda. Status på en egen rad i skylten. Under skylten bara
      det uppvända kortet och märkena. Långa namn kortas med tre punkter. */
@@ -799,17 +905,23 @@ body.no-anim * { animation: none !important; transition: none !important; }
   /* (Stark selektor: datorns regel lägger motspelarnas märken vid sidan av skylten) */
   .seats.strip .seat .seat-under .seat-marks { position: static; left: auto; right: auto; top: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 4px; }
   .seat-under .mark { font-size: 13px; }
-  .seat-cards .card.back { display: none; }
+  /* Hur många kort motspelaren har kvar: små baksidor omlott efter det uppvända kortet */
+  .seats.strip .seat-cards { align-items: center; gap: 0; }
+  .seat-cards .card.back { width: 12px; height: 18px; border-width: 1.5px; border-radius: 2px; box-shadow: none; }
+  .seat-cards .card.back:not(:first-child) { margin-left: -4px; }
+  .seat-cards .card:not(.back) + .card.back { margin-left: 5px; }
   .seat-cards .card { width: 24px; height: 34px; }
   .seat-cards .card .rank { font-size: 17px; }
 
   /* Din skylt längst ner på filten, märkena i en rad under */
   .seat-me { order: 2; display: flex; justify-content: center; position: relative; z-index: 3; }
-  .seat-me .seat { position: static; translate: none; }
-  .seat.me .seat-badge { min-width: 110px; padding: 8px 16px; box-shadow: 4px 4px 0 var(--gk-guld); }
-  .seat.me.turn .seat-badge { box-shadow: var(--gk-ring), 4px 4px 0 var(--gk-guld); }
-  .seat.me.loser .seat-badge { box-shadow: var(--gk-ring-rod), 4px 4px 0 var(--gk-guld); }
-  .seat.me .nick { font-size: 20px; } .seat.me .seat-line { font-size: 14px; }
+  /* En låg rad: namn och saldo bredvid varandra, märkena till höger - sticket får platsen */
+  .seat-me .seat { position: static; translate: none; flex-direction: row; gap: 8px; }
+  .seat.me .seat-badge { flex-direction: row; align-items: baseline; gap: 10px; min-width: 0; padding: 5px 14px;
+    box-shadow: 3px 3px 0 var(--gk-guld); }
+  .seat.me.turn .seat-badge { box-shadow: var(--gk-ring), 3px 3px 0 var(--gk-guld); }
+  .seat.me.loser .seat-badge { box-shadow: var(--gk-ring-rod), 3px 3px 0 var(--gk-guld); }
+  .seat.me .nick { font-size: 18px; } .seat.me .seat-line { font-size: 14px; }
 
   /* Mitten: gurktrycket mitt på filten. Tom mitt: GURSCH på gurkan, fasen och statusraden under
      trycket. Kort i mitten: fasen och statusraden över trycket, korten under (ovanpå gurkan). */
@@ -818,23 +930,26 @@ body.no-anim * { animation: none !important; transition: none !important; }
   .table-print { --print-w: min(324px, 86cqi); position: relative; left: auto; top: auto; translate: none; flex: none;
     width: var(--print-w); order: 1; margin: 6px 0 calc(var(--print-w) * -.396 + 34px); }
   .felt.center-empty .table-print { order: -1; margin: 0 0 14px; }
+  /* Kort i mitten: gurkan göms hellre än att den klipps av i underkant */
+  .felt:not(.center-empty) .table-print { display: none; }
   .table-print-word { font-size: min(36px, 9.5cqi); }
   .piles, .trick-area { order: 2; }   /* händelseraden står kvar direkt under statusraden */
+  .table-center > * { flex-shrink: 0; }   /* inget i mitten krymper in under din skylt - mitten scrollar hellre */
   .table-center { position: relative; left: auto; top: auto; order: 1; flex: 1 1 auto; min-height: 0; overflow-y: auto;
-    translate: none; width: 100%; padding: 12px 0; z-index: 5;
+    translate: none; width: 100%; padding: 4px 0; z-index: 5;
     display: flex; flex-direction: column; justify-content: safe center; align-items: center; }
-  .phase-sub { margin-top: 6px; min-height: 2.3em; text-wrap: balance; }   /* högarna flyttar sig inte när texten ändras */
+  .phase-sub { margin-top: 4px; min-height: 1.3em; text-wrap: balance; }   /* högarna flyttar sig inte när texten ändras */
   .table-note { min-height: 1.3em; }
   .pause-banner { top: 0; }
   /* Sticket radbryts: två eller tre rutor per rad */
-  .trick-area { margin-top: 8px; min-height: 80px; gap: 8px 14px; max-width: 300px; }
+  .trick-area { margin-top: 8px; min-height: 80px; gap: 8px 10px; max-width: none; }
   .trick-play .who { font-size: 12px; }
   .trick-play .cards .card:not(:first-child) { margin-left: -12px; }
   .trick-play .combo { font-size: 11px; padding: 1px 6px; }
 
   /* Under bordet: turtimern som en list över hela bredden, uppmaningen, räknare och tid på en rad,
      handen, och knapparna i en rad över hela bredden. */
-  .handbar { padding: 14px max(12px, var(--safe-right)) calc(22px + var(--safe-bottom)) max(12px, var(--safe-left)); background: var(--gk-black); }
+  .handbar { padding: 12px max(12px, var(--safe-right)) calc(12px + var(--safe-bottom)) max(12px, var(--safe-left)); background: var(--gk-black); }
   .hand-pad { position: static; width: 100%; min-width: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas: "hint hint" "count clock" "hand hand" "actions actions";
@@ -843,10 +958,10 @@ body.no-anim * { animation: none !important; transition: none !important; }
   .hand-timer { grid-area: auto; position: absolute; left: 0; right: 0; top: 0; height: 5px; margin: 0; border-radius: 0; }
   .hand-timer-bar { border-radius: 0; }
   .hand-hint { font-size: 15px; line-height: 1.3; min-height: 2.6em; display: flex; align-items: center; justify-content: center; }
-  .sel-count, .turn-clock { font-size: 14px; min-height: 1.2em; }   /* raden finns även när den är tom */
+  .sel-count, .turn-clock { font-size: 14px; min-height: 1.2em; white-space: nowrap; }   /* raden finns även när den är tom */
   .turn-clock { text-align: right; }
-  .hand-pad:has(> .actions:empty) .turn-clock { grid-area: clock; text-align: right; }
-  .hand-pad:has(> .actions:empty) .actions { display: flex; }   /* raden står kvar, så att handen inte hoppar */
+  .hand-pad.no-actions .turn-clock { grid-area: clock; text-align: right; }
+  .hand-pad.no-actions .actions { display: flex; }   /* raden står kvar, så att handen inte hoppar */
   /* Fem kort på EN rad */
   .hand { --card-w: 56px; --card-h: 76px; gap: 6px; padding-top: 8px; min-height: 84px; flex-wrap: nowrap; }
   .hand .card { border-radius: 5px; }
@@ -870,7 +985,7 @@ body.no-anim * { animation: none !important; transition: none !important; }
 .center-timer .turn-timer-bar:not(.urgent) { background: rgba(240,232,204,.85); }
 /* Tiden i knappraden: "DIN TUR · 45 s" - röd när det är knappt och din tur */
 .turn-clock { grid-area: clock; text-align: right; font-family: var(--gk-font-rubrik); font-size: 15px; font-weight: 700; line-height: 1.2;
-  letter-spacing: .1em; white-space: nowrap; font-variant-numeric: tabular-nums; color: #b9c4b6; }
+  letter-spacing: .1em; font-variant-numeric: tabular-nums; color: #b9c4b6; }
 .turn-clock .clock-label { text-transform: uppercase; }
 .turn-clock.urgent { color: var(--gk-varning); animation: clockPulse 1s ease-in-out infinite; }
 @keyframes clockPulse { 50% { opacity: .55; } }

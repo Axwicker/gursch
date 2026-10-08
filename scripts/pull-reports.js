@@ -30,6 +30,8 @@ for (const { report } of reports) {
   const file = path.join(REPORTS_DIR, reportFileName(report));
   if (!existsSync(file)) writeFileSync(file, `${JSON.stringify(report, null, 2)}\n`);
   console.log(`  ${path.relative(ROOT, file)}  [${report.category ?? 'regel'}] ${report.reportedBy}: ${report.description.split('\n')[0].slice(0, 80)}`);
+  const c = report.client;
+  if (c) console.log(`      ${c.narrow ? 'mobil' : 'dator'} ${c.viewport}, zoom ${c.zoom}${c.actionsOnScreen === false ? ', KNAPPARNA UTANFÖR SKÄRMEN' : ''} · ${c.userAgent ?? ''}`.slice(0, 200));
 }
 if (reports.length) {
   await supabaseRequest(db, 'PATCH', 'reports', {

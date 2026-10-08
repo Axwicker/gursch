@@ -4,6 +4,7 @@ import { randomInt } from 'node:crypto';
 import { GurschGame, PHASE } from '../engine/game.js';
 import { seededRandom } from '../engine/cards.js';
 import { chooseBotAction, shouldCallSlask, slaskReactionMs } from '../engine/bot.js';
+import { tutorialShouldCall } from '../engine/tutorial.js';
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
@@ -31,11 +32,13 @@ export class RoomManager {
     return code;
   }
 
-  createRoom(settings = {}) {
+  /** tutorial: { slaskCallsLeft } för övningsrundan, annars null. */
+  createRoom(settings = {}, { tutorial = null } = {}) {
     const code = this.createCode();
     const room = {
       code,
-      game: new GurschGame({ id: code, settings, rng: roomRng() }),
+      game: new GurschGame({ id: code, settings, rng: roomRng(), tutorial: Boolean(tutorial) }),
+      tutorial,
       sockets: new Map(),   // socketId -> playerId
       tokens: new Map(),    // playerId -> hemlig token för återanslutning
       turnTimer: null,
@@ -97,7 +100,19 @@ export class RoomManager {
       if (room.botSlaskKey === key) return;
       room.botSlaskKey = key;
       const pub = g.publicState();
+      const slaskerIsBot = g.players.find((p) => p.id === ps.playerId)?.isBot;
       for (const bot of g.players.filter((p) => p.isBot && p.id !== ps.playerId)) {
+        if (room.tutorial && g.roundNumber === 1) {
+          // Övningsrundan: en bott (den första) synar spelarens slask, och bara en gång.
+          // Efter första rundan spelar bottarna som vanligt.
+          if (!tutorialShouldCall({ slaskerIsBot, callsLeft: room.tutorial.slaskCallsLeft })) break;
+          room.botSlaskTimers.push(setTimeout(() => this.runBot(room, () => {
+            if (g.pendingSlask !== ps || ps.callerId || room.tutorial.slaskCallsLeft <= 0) return;
+            g.handleAction(bot.id, { type: 'callSlask' });
+            room.tutorial.slaskCallsLeft -= 1;
+          }), Math.min(slaskReactionMs(bot.botLevel), Math.max(300, ps.deadline - Date.now() - 300))));
+          break;
+        }
         if (!shouldCallSlask({ pub, botId: bot.id, level: bot.botLevel })) continue;
         // Reaktionstid minst ~1 s (lätt ~2,5 s) så att människor har en ärlig chans att hinna först.
         const delay = Math.min(slaskReactionMs(bot.botLevel), Math.max(300, ps.deadline - Date.now() - 300));

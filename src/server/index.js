@@ -10,6 +10,9 @@ import { readFileSync } from 'node:fs';
 import { RoomManager } from './rooms.js';
 import { createStore } from './store.js';
 import { GameError, BOT_LEVELS } from '../engine/game.js';
+import {
+  TUTORIAL_SETTINGS, TUTORIAL_BOTS, TUTORIAL_BOT_LEVEL, TUTORIAL_SLASK_CALLS, tutorialDeck,
+} from '../engine/tutorial.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '../../public');
@@ -20,6 +23,27 @@ const HOST_GRACE_MS = 30_000;
 const VERSION = JSON.parse(readFileSync(path.join(__dirname, '../../package.json'), 'utf8')).version;
 const REPORT_CATEGORIES = ['regel', 'bugg', 'utseende', 'annat'];
 const REPORTS_PER_MINUTE = 3;
+const CLIENT_ERRORS_PER_MINUTE = 5;
+
+/**
+ * Klientens skärm och webbläsare i en rapport (fönsterstorlek, zoom, om knapparna syns).
+ * Bara enkla värden med fasta nycklar - inget annat från klienten följer med.
+ */
+function cleanClientInfo(info) {
+  if (!info || typeof info !== 'object') return null;
+  const num = (v) => (Number.isFinite(v) ? Math.round(v * 100) / 100 : null);
+  const str = (v, n = 300) => (typeof v === 'string' ? v.slice(0, n) : null);
+  return {
+    userAgent: str(info.userAgent),
+    viewport: str(info.viewport, 40),
+    visualViewport: str(info.visualViewport, 60),
+    zoom: num(info.zoom),
+    dpr: num(info.dpr),
+    narrow: Boolean(info.narrow),
+    actions: str(info.actions, 200),
+    actionsOnScreen: typeof info.actionsOnScreen === 'boolean' ? info.actionsOnScreen : null,
+  };
+}
 
 const store = createStore({ reportsDir: REPORTS_DIR, version: VERSION });
 const logError = (room, error) => store.logError({ room: room?.code ?? null, phase: room?.game.phase ?? null, error });
@@ -118,9 +142,12 @@ function attachSocket(socket, room, playerId) {
 }
 
 io.on('connection', (socket) => {
-  socket.on('createRoom', ({ nickname, settings, bots = 0, botLevel = 'medium' } = {}, cb) => {
+  socket.on('createRoom', ({ nickname, settings, bots = 0, botLevel = 'medium', tutorial = false } = {}, cb) => {
     if (!nickname || !String(nickname).trim()) return ack(cb, { error: 'Skriv ett nickname' });
-    const room = manager.createRoom(settings || {});
+    // Övningsrundan: egna inställningar och bottar, och den börjar direkt (ingen lobby).
+    const room = tutorial
+      ? manager.createRoom(TUTORIAL_SETTINGS, { tutorial: { slaskCallsLeft: TUTORIAL_SLASK_CALLS } })
+      : manager.createRoom(settings || {});
     // Id:t är publikt (syns i state); token är hemlig och krävs för att återansluta.
     const id = randomUUID();
     const token = randomUUID();
@@ -129,9 +156,10 @@ io.on('connection', (socket) => {
     } catch (err) { return ack(cb, { error: err.message }); }
     room.game.hostId = id;
     room.tokens.set(id, token);
-    const botCount = Math.min(4, Math.max(0, Math.floor(Number(bots) || 0)));
-    const level = BOT_LEVELS.includes(botLevel) ? botLevel : 'medium';
+    const botCount = tutorial ? TUTORIAL_BOTS : Math.min(4, Math.max(0, Math.floor(Number(bots) || 0)));
+    const level = tutorial ? TUTORIAL_BOT_LEVEL : BOT_LEVELS.includes(botLevel) ? botLevel : 'medium';
     for (let i = 0; i < botCount; i++) room.game.addBot(id, level);
+    if (tutorial) room.game.startGame(id, { deck: tutorialDeck(room.game, id) });
     attachSocket(socket, room, id);
     ack(cb, { ok: true, code: room.code, playerId: id, token });
     broadcast(room);
@@ -152,6 +180,8 @@ io.on('connection', (socket) => {
     } else if (reconnectOnly) {
       // Automatisk återanslutning får aldrig skapa en ny spelare.
       return ack(cb, { error: 'Din plats i rummet finns inte längre - gå med igen' });
+    } else if (room.tutorial) {
+      return ack(cb, { error: 'Det är en övningsrunda – den går inte att gå med i' });
     } else {
       if (!nickname || !String(nickname).trim()) return ack(cb, { error: 'Skriv ett nickname' });
       id = randomUUID();
@@ -194,8 +224,9 @@ io.on('connection', (socket) => {
   });
 
   // Paus medan någon skriver en felrapport (alla timers och bottar står still).
-  socket.on('pauseGame', (_p, cb) => {
-    withRoom(socket, cb, (room, playerId) => room.game.pause(playerId));
+  // reason 'tutorial': guiden i övningsrundan pratar (motorn tillåter det bara där).
+  socket.on('pauseGame', ({ reason } = {}, cb) => {
+    withRoom(socket, cb, (room, playerId) => room.game.pause(playerId, { reason: reason === 'tutorial' ? 'tutorial' : 'report' }));
   });
 
   socket.on('resumeGame', (_p, cb) => {
@@ -224,7 +255,7 @@ io.on('connection', (socket) => {
 
   // Felrapport. Sparas som fil lokalt och i Supabase på betaservern (store.js). Loggen lämnar
   // aldrig servern, så den kan tas även mitt i en runda utan att avslöja någons kort.
-  socket.on('submitReport', async ({ description, category } = {}, cb) => {
+  socket.on('submitReport', async ({ description, category, client } = {}, cb) => {
     const room = manager.getRoom(socket.data.code);
     const playerId = socket.data.playerId;
     if (!room || !playerId) return ack(cb, { error: 'Du är inte med i rummet' });
@@ -247,6 +278,7 @@ io.on('connection', (socket) => {
       room: room.code,
       createdAt: new Date(now).toISOString(),
       phaseWhenReported: room.game.phase,
+      client: cleanClientInfo(client),
       log,
     };
     try {
@@ -258,6 +290,18 @@ io.on('connection', (socket) => {
       logError(room, err);
       ack(cb, { error: 'Kunde inte spara rapporten – försök igen' });
     }
+  });
+
+  // Ett fel i webbläsaren (t.ex. när knapparna ritas) - loggas som serverfel med prefixet [klient].
+  socket.on('clientError', ({ message, stack, userAgent } = {}) => {
+    const now = Date.now();
+    socket.data.errorTimes = (socket.data.errorTimes ?? []).filter((t) => now - t < 60_000);
+    if (socket.data.errorTimes.length >= CLIENT_ERRORS_PER_MINUTE) return;
+    socket.data.errorTimes.push(now);
+    const room = manager.getRoom(socket.data.code);
+    const error = new Error(`[klient] ${String(message ?? '').slice(0, 500)}`);
+    error.stack = `[klient] ${String(stack ?? '').slice(0, 6000)}\n${String(userAgent ?? '').slice(0, 300)}`;
+    logError(room ?? null, error);
   });
 
   socket.on('leaveRoom', (_p, cb) => {

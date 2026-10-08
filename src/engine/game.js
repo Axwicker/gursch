@@ -72,9 +72,24 @@ export function sanitizeSettings(settings) {
   return clean;
 }
 
+/** Lägger korten i `deck` överst i draghögen (drawCards tar från slutet), i den ordningen. */
+function stackDeck(shuffled, deck) {
+  if (!deck) return shuffled;
+  const ids = new Set(deck);
+  if (ids.size !== deck.length) throw new GameError('Riggad lek har dubbletter');
+  const byId = new Map(shuffled.map((c) => [c.id, c]));
+  const top = deck.map((id) => {
+    const card = byId.get(id);
+    if (!card) throw new GameError(`Okänt kort i riggad lek: ${id}`);
+    return card;
+  });
+  return shuffled.filter((c) => !ids.has(c.id)).concat(top.reverse());
+}
+
 export class GurschGame {
-  constructor({ id, hostId = null, settings = {}, rng = Math.random, now = Date.now } = {}) {
+  constructor({ id, hostId = null, settings = {}, rng = Math.random, now = Date.now, tutorial = false } = {}) {
     this.id = id;
+    this.tutorial = tutorial;   // övningsrunda med coach (src/engine/tutorial.js)
     this.rng = rng;
     this.now = now;             // injicerbar klocka för tester av timers
     this.hostId = hostId;
@@ -95,7 +110,7 @@ export class GurschGame {
     this.turnKey = null;
     this.roundLogs = new Map(); // avslutade rundors loggar (frö + drag) för felrapporter
     this.inTimer = false;       // drag som görs av tick()/expireSlask() loggas inte separat
-    this.paused = null;         // { playerId, since, until } medan någon skriver en felrapport
+    this.paused = null;         // { playerId, since, until, reason } medan någon skriver en felrapport eller läser guiden
   }
 
   // ---------------------------------------------------------------- spelare
@@ -205,15 +220,20 @@ export class GurschGame {
 
   // ------------------------------------------------------------ rundstart
 
-  startGame(playerId) {
+  /** options går vidare till startRound (övningsrundan skickar en riggad giv). */
+  startGame(playerId, options = {}) {
     this.requireHost(playerId);
     if (this.phase !== PHASE.LOBBY) throw new GameError('Spelet är redan igång');
     if (this.players.length < 2) throw new GameError('Minst 2 spelare krävs');
-    this.startRound();
+    this.startRound(options);
   }
 
-  /** seed: bara för uppspelning av en loggad runda - annars slumpas ett nytt frö. */
-  startRound({ seed = Math.floor(this.rng() * 2 ** 32) } = {}) {
+  /**
+   * seed: bara för uppspelning av en loggad runda - annars slumpas ett nytt frö.
+   * deck: kort-id:n som delas ut först, i utdelningsordning (övningsrundans riggade giv).
+   * Resten av leken blandas som vanligt under dem. Sätts bara av servern, aldrig av klienten.
+   */
+  startRound({ seed = Math.floor(this.rng() * 2 ** 32), deck = null } = {}) {
     if (this.players.length < 2) throw new GameError('Minst 2 spelare krävs');
     // All slump i rundan (utdelning, omblandning, mini-gursch) kommer från rundans frö.
     const rng = seededRandom(seed);
@@ -222,7 +242,7 @@ export class GurschGame {
     this.pendingSlask = null;
     for (const p of this.players) { p.slasks = 0; p.status = null; }
 
-    const piles = { draw: shuffleDeck(createDeck(), rng), discard: [] };
+    const piles = { draw: stackDeck(shuffleDeck(createDeck(), rng), deck), discard: [] };
     const dealOrder = this.rotate(this.players.map((p) => p.id), this.dealerIndex + 1);
 
     const hands = new Map();
@@ -257,6 +277,8 @@ export class GurschGame {
         version: 1,
         roundNumber: this.roundNumber,
         seed,
+        ...(deck ? { deck: deck.slice() } : {}),
+        ...(this.tutorial ? { tutorial: true } : {}),
         dealerIndex: this.dealerIndex,
         startedAt: this.now(),
         settings: { ...this.settings },
@@ -357,7 +379,9 @@ export class GurschGame {
   dispatch(playerId, action) {
     this.player(playerId);
     if (this.paused) {
-      throw new GameError(`Spelet är pausat – ${this.player(this.paused.playerId).nickname} skriver en felrapport`);
+      throw new GameError(this.paused.reason === 'tutorial'
+        ? 'Läs klart guiden först'
+        : `Spelet är pausat – ${this.player(this.paused.playerId).nickname} skriver en felrapport`);
     }
     if (this.pendingSlask && !this.pendingSlask.resolved) {
       // Under slaskfönstret är bara CALL SLASK tillåtet.
@@ -496,16 +520,19 @@ export class GurschGame {
   // ---- paus (medan någon skriver en felrapport) --------------------------
 
   /** Fryser spelet: inga drag, och alla timers står still tills resume(). */
-  pause(playerId) {
+  pause(playerId, { reason = 'report' } = {}) {
     const p = this.player(playerId);
     if (p.isBot) throw new GameError('En bot kan inte pausa');
+    if (!['report', 'tutorial'].includes(reason) || (reason === 'tutorial' && !this.tutorial)) {
+      throw new GameError('Ogiltig paus');
+    }
     if (!this.round || this.phase === PHASE.LOBBY || this.phase === PHASE.ROUND_RESULT) {
       throw new GameError('Ingen runda pågår');
     }
     if (this.paused) throw new GameError(`${this.player(this.paused.playerId).nickname} har redan pausat`);
     const now = this.now();
-    this.paused = { playerId, since: now, until: now + MAX_PAUSE_MS };
-    this.record(this.round, { pause: true, playerId });
+    this.paused = { playerId, since: now, until: now + MAX_PAUSE_MS, reason };
+    this.record(this.round, { pause: true, playerId, ...(reason !== 'report' ? { reason } : {}) });
     this.pushEvent({ type: 'paused', playerId });
   }
 
@@ -994,7 +1021,7 @@ export class GurschGame {
     trick.plays.push({ playerId, cards });
     this.pushEvent({ type: 'play', playerId, cards: cards.map((c) => ({ id: c.id, rank: c.rank, suit: c.suit })) });
 
-    // Direkt utgång med five-of-a-kind / quint two
+    // [R27] Direkt utgång med five-of-a-kind / quint two: rundan tar slut, de andra räknar hela handen
     if (trick.plays.length === 1 && cards.length === 5 && isFiveOfAKind(cards)) {
       ctx.quintExitPlayerId = playerId;
       this.pushEvent({
@@ -1075,10 +1102,8 @@ export class GurschGame {
 
   finishNormalPlay() {
     const r = this.round;
-    const excluded = r.quintExitPlayerId;
-    const candidates = this.players
-      .map((p) => p.id)
-      .filter((id) => id !== excluded);
+    // [R27] Även den som gick ut på en quint kan förlora - quinten räknas som vanligt slutvärde.
+    const candidates = this.players.map((p) => p.id);
 
     const values = new Map(r.finalValues);
     const maxValue = Math.max(...candidates.map((id) => values.get(id)));
@@ -1144,8 +1169,7 @@ export class GurschGame {
   finishMiniGursch() {
     const r = this.round;
     const mini = r.mini;
-    const excluded = mini.quintExitPlayerId;
-    const candidates = mini.participants.filter((id) => id !== excluded);
+    const candidates = mini.participants;   // [R27] quinten kan förlora även här
     const maxValue = Math.max(...candidates.map((id) => mini.finalValues.get(id)));
     const tied = candidates.filter((id) => mini.finalValues.get(id) === maxValue);
 
@@ -1463,6 +1487,7 @@ export class GurschGame {
         multiplier: tb.multiplier,
       } : null,
       turnDeadline: this.turnDeadline,
+      tutorial: this.tutorial,
       paused: this.paused ? { ...this.paused } : null,
       // Bara antal - för högarna mitt på bordet (vilka kort som ligger där är hemligt).
       piles: ctx?.piles ? { draw: ctx.piles.draw.length, discard: ctx.piles.discard.length } : null,
@@ -1509,7 +1534,9 @@ export class GurschGame {
     const p = this.players.find((x) => x.id === playerId);
     if (!p || !this.round) return actions;
 
-    if (this.paused) return actions;   // allt står still medan någon skriver en felrapport
+    // Allt står still medan någon skriver en felrapport. Medan guiden pratar syns knapparna ändå,
+    // så att den kan peka på dem (klienten fortsätter spelet innan draget skickas).
+    if (this.paused && this.paused.reason !== 'tutorial') return actions;
     if (this.pendingSlask && !this.pendingSlask.resolved) {
       if (this.pendingSlask.playerId !== playerId && !this.pendingSlask.callerId) actions.push({ type: 'callSlask' });
       return actions;

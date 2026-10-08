@@ -130,8 +130,9 @@ man gick ut på, alltså de man lade i sista sticket:
 - mixed: summan av korten (7:an räknas som 7)
 
 **R27.** Spelar någon ut fem lika (*five of a kind*, även med 7:or, till exempel *quint two*
-som bara är 2:or och 7:or) går den spelaren ut direkt och kan inte förlora rundan. De andras
-slutvärde blir hela deras hand.
+som bara är 2:or och 7:or) går den spelaren ut direkt och rundan tar slut. De andras
+slutvärde blir hela deras hand. Quinten räknas som vanligt slutvärde (fem kungar = 65), så den
+som går ut på en quint kan förlora precis som alla andra.
 
 **R28.** Den med högst slutvärde förlorar och betalar slutvärdet × multiplier till varje
 annan spelare.
@@ -183,6 +184,13 @@ fungerar. När rapporten är klar fortsätter spelet med samma tid kvar som inna
 pausade kan fortsätta. Pausen släpper av sig själv efter 3 minuter, eller om den som pausade
 tappar anslutningen.
 
+**A7.** Övningsrundan (*Lär dig Gursch* på startsidan) är en runda mot två lätta bottar med
+×1 och utan turtimer. Första given är bestämd i förväg: du får 3, 3, 7 och K dolda och en
+uppvänd dam, så du vinner floppen. Bottarna synar din första slask men ingen mer, och de
+synar aldrig varandra. En guide förklarar varje moment första gången det händer och pausar
+spelet medan den pratar. Knapparna syns ändå, och trycker du på ett drag fortsätter spelet.
+Ingen annan kan gå med. Efter första rundan spelar man vidare som vanligt.
+
 ---
 
 ## Rapportera ett regelfel
@@ -192,7 +200,8 @@ tappar anslutningen.
    (A6), så ingen tid eller tur går förlorad.
 2. Beskriv vad som blev fel, till exempel "Leo fick lägga en 9:a på en ensam 7:a".
 3. Rapporten sparas direkt i projektets mapp `reports/`. Den innehåller rundans frö och alla
-   drag fram till det ögonblicket. Den skickas aldrig till spelarna, så ingen kan se någon
+   drag fram till det ögonblicket, och hur din skärm såg ut (webbläsare, fönsterstorlek, zoom
+   och om knapparna låg synliga). Den skickas aldrig till spelarna, så ingen kan se någon
    annans kort genom den.
 4. Säg till Claude att kolla rapporterna. Claude spelar upp rundan, rättar felet och lägger
    rapporten i `test/replays/`, så att felet aldrig kan komma tillbaka.

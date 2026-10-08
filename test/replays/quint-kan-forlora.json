@@ -1,0 +1,209 @@
+{
+  "log": {
+    "seed": 3341390552,
+    "events": [
+      {
+        "t": 1791373844566,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H14"
+          ]
+        },
+        "playerId": "fefc193a-0d21-40dd-a098-1bd9e52d24db"
+      },
+      {
+        "t": 1791373846093,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H9"
+          ]
+        },
+        "playerId": "bot-1-341465723"
+      },
+      {
+        "t": 1791373847596,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S12"
+          ]
+        },
+        "playerId": "bot-2-8570197"
+      },
+      {
+        "t": 1791373848473,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H12"
+          ]
+        },
+        "playerId": "bot-3-574491856"
+      },
+      {
+        "t": 1791373849335,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H13"
+          ]
+        },
+        "playerId": "bot-4-893190504"
+      },
+      {
+        "t": 1791373853477,
+        "action": {
+          "type": "propose",
+          "count": 4
+        },
+        "playerId": "bot-4-893190504"
+      },
+      {
+        "t": 1791373854830,
+        "action": {
+          "type": "stay"
+        },
+        "playerId": "bot-3-574491856"
+      },
+      {
+        "t": 1791373859388,
+        "action": {
+          "type": "pass"
+        },
+        "playerId": "fefc193a-0d21-40dd-a098-1bd9e52d24db"
+      },
+      {
+        "t": 1791373860273,
+        "action": {
+          "type": "pass"
+        },
+        "playerId": "bot-1-341465723"
+      },
+      {
+        "t": 1791373861443,
+        "action": {
+          "type": "pass"
+        },
+        "playerId": "bot-2-8570197"
+      },
+      {
+        "t": 1791373862929,
+        "action": {
+          "type": "pass"
+        },
+        "playerId": "bot-3-574491856"
+      },
+      {
+        "t": 1791373864382,
+        "action": {
+          "type": "pass"
+        },
+        "playerId": "bot-4-893190504"
+      },
+      {
+        "t": 1791373867898,
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "S13",
+            "D13",
+            "C13",
+            "H7",
+            "C7"
+          ]
+        },
+        "playerId": "fefc193a-0d21-40dd-a098-1bd9e52d24db"
+      }
+    ],
+    "format": "gursch-round",
+    "result": {
+      "loserId": "bot-2-8570197",
+      "balances": {
+        "bot-2-8570197": -16400,
+        "bot-1-341465723": 4100,
+        "bot-3-574491856": 4100,
+        "bot-4-893190504": 4100,
+        "fefc193a-0d21-40dd-a098-1bd9e52d24db": 4100
+      },
+      "miniLevel": 0,
+      "loserValue": 41,
+      "multiplier": 100
+    },
+    "players": [
+      {
+        "id": "fefc193a-0d21-40dd-a098-1bd9e52d24db",
+        "isBot": false,
+        "balance": 0,
+        "botLevel": null,
+        "nickname": "Vän 4"
+      },
+      {
+        "id": "bot-1-341465723",
+        "isBot": true,
+        "balance": 0,
+        "botLevel": "hard",
+        "nickname": "Bot Bengt"
+      },
+      {
+        "id": "bot-2-8570197",
+        "isBot": true,
+        "balance": 0,
+        "botLevel": "hard",
+        "nickname": "Bot Greta"
+      },
+      {
+        "id": "bot-3-574491856",
+        "isBot": true,
+        "balance": 0,
+        "botLevel": "hard",
+        "nickname": "Bot Sixten"
+      },
+      {
+        "id": "bot-4-893190504",
+        "isBot": true,
+        "balance": 0,
+        "botLevel": "hard",
+        "nickname": "Bot Majken"
+      }
+    ],
+    "version": 1,
+    "settings": {
+      "sound": true,
+      "maxSlasks": 3,
+      "animations": true,
+      "chatEnabled": true,
+      "turnSeconds": 45,
+      "miniGurschCap": 0,
+      "flopMultFactor": 1,
+      "multiplierMode": "fixed",
+      "multiplierValue": 100,
+      "slaskCallSeconds": 7,
+      "negotiationSeconds": 20
+    },
+    "startedAt": 1791373837631,
+    "inProgress": false,
+    "dealerIndex": 0,
+    "roundNumber": 1
+  },
+  "room": "VJWQ",
+  "format": "gursch-report",
+  "version": 1,
+  "category": "regel",
+  "createdAt": "2026-10-07T11:52:26.660Z",
+  "appVersion": "0.1.0",
+  "reportedBy": "Vän 4",
+  "description": "Jag gick ut på 65 och bot Greta på 41 men bot Greta förlorade? Man vinner inte automatiskt bara för att man går ut på en quint. Värdet räknas oavsett på det totala värdet av handen.",
+  "phaseWhenReported": "ROUND_RESULT",
+  "expect": [
+    {
+      "result": {
+        "loserId": "fefc193a-0d21-40dd-a098-1bd9e52d24db",
+        "loserValue": 65,
+        "multiplier": 100
+      }
+    }
+  ],
+  "note": "R27 (ändrad 2026-10-08): en quint kan förlora. Vän 4 gick ut på fem kungar (65), högst av alla, och förlorar."
+}

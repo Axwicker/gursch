@@ -91,13 +91,14 @@ function chooseDiscard(hand, action, leads) {
 }
 
 /**
- * Slängförhandling i realtid. Alla försöker slänga tills någon har en väldigt bra hand: boten
- * föreslår så många kort som den vill bli av med och går gärna med på de andras förslag.
- * STAY säger den bara med en väldigt bra hand (se isGreatHand).
+ * Slängförhandling i realtid. Boten har en egen åsikt: först föreslår den så många kort som den
+ * vill bli av med, och sedan går den bara med på förslag som ligger nära (±1, lätt ±2). Ett förslag
+ * långt från vad den vill följer den inte - då blir det ingen enighet, och spelet börjar när tiden
+ * tar slut. STAY säger den bara med en väldigt bra hand (se isGreatHand).
  */
 function chooseNegotiation(pub, hand, botId, rng, level) {
   const n = pub.negotiation;
-  const mine = n.proposals[botId];
+  const mine = n.proposals[botId] ?? null;
   const propose = (count) => (count === mine ? null : { type: 'propose', count });
   // [R16] Förhandlingarna har inget tak, så bottarna tröttnar själva efter några varv.
   // Annars kan ett rum med bara bottar förhandla för evigt.
@@ -107,9 +108,11 @@ function chooseNegotiation(pub, hand, botId, rng, level) {
   const leads = pub.flopWinnerId === botId;
   const want = wantedDiscards(hand, leads);
   if (want === 0) return { type: 'stay' };
+  // Första gången: säg vad boten själv vill, i stället för att direkt ta efter någon annan.
+  if (mine === null) return propose(want);
   const others = n.participants.filter((id) => id !== botId).map((id) => n.proposals[id]).filter((v) => v !== null);
   const tolerance = level === 'easy' ? 2 : 1;
-  const acceptable = others.filter((c) => c <= want + tolerance);
+  const acceptable = others.filter((c) => Math.abs(c - want) <= tolerance);
   if (!acceptable.length) return propose(want);
   // Gå mot det vanligaste acceptabla förslaget; vid lika det som ligger närmast önskat antal.
   const votes = new Map();
@@ -118,6 +121,9 @@ function chooseNegotiation(pub, hand, botId, rng, level) {
   return propose(target);
 }
 
+/** Exporteras för tester. */
+export { chooseNegotiation };
+
 /** Kortval efter enighet: slängordningen (dåliga kort först, 7:or och låga kort sist). */
 function chooseDiscardSelection(hand, count, leads) {
   return discardOrder(hand, leads).slice(0, count);
@@ -125,7 +131,7 @@ function chooseDiscardSelection(hand, count, leads) {
 
 /** Utspel: välj den kombination som lämnar billigast rest, med bonus för stark ledning. */
 function chooseLead(hand, leads, rng) {
-  // Fem lika (quint) = direkt utgång, kan aldrig förlora.
+  // Fem lika (quint) = direkt utgång, och de andra får räkna hela sin hand.
   const quint = leads.find((l) => l.length === 5);
   if (quint) return quint;
 
@@ -263,7 +269,7 @@ function buildSim(pub, hands, order, rng) {
 /** Botens resultat i "slutvärdesenheter": vinst V om någon annan förlorar, annars -(n-1)V. */
 function payoff(g, pub, botId, order) {
   const r = g.round;
-  const candidates = order.filter((id) => id !== r.quintExitPlayerId);
+  const candidates = order;   // [R27] även en quint kan förlora
   const values = candidates.map((id) => r.finalValues.get(id));
   const max = Math.max(...values);
   const tied = candidates.filter((id) => r.finalValues.get(id) === max);
@@ -291,8 +297,6 @@ function playOut(g, rng) {
 
 function chooseHardPlay(pub, hand, play, botId, rng) {
   const candidates = optionCards(hand, play);
-  const quint = play.lead && candidates.find((l) => l.length === 5);
-  if (quint) return quint;
   if (candidates.length === 1) return candidates[0];
 
   const order = pub.mini ? pub.mini.participants : pub.players.map((p) => p.id);

@@ -13,14 +13,14 @@ export function logFromReport(report) {
 /** Skapar spelet i rundans startläge (före första draget). */
 export function startReplay(log) {
   const clock = { t: log.startedAt };
-  const game = new GurschGame({ id: 'REPLAY', settings: log.settings, now: () => clock.t });
+  const game = new GurschGame({ id: 'REPLAY', settings: log.settings, now: () => clock.t, tutorial: Boolean(log.tutorial) });
   for (const p of log.players) {
     game.addPlayer({ id: p.id, nickname: p.nickname, isBot: p.isBot, botLevel: p.botLevel });
     game.player(p.id).balance = p.balance;
   }
   game.dealerIndex = log.dealerIndex;
   game.roundNumber = log.roundNumber - 1;
-  game.startRound({ seed: log.seed });
+  game.startRound({ seed: log.seed, deck: log.deck ?? null });
   return { game, clock };
 }
 
@@ -32,7 +32,7 @@ export function applyEvent(game, clock, event) {
   } else if (event.expireSlask) {
     if (!game.expireSlask()) throw new Error('Inget slaskfönster att stänga vid uppspelning');
   } else if (event.pause) {
-    game.pause(event.playerId);
+    game.pause(event.playerId, { reason: event.reason ?? 'report' });
   } else if (event.resume) {
     game.resume(event.playerId, { force: true });
   } else {

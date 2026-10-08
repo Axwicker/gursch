@@ -20,11 +20,14 @@ src/engine/combination.js  kombinationer, 7-regeln, clean/semi-mixed, slutvärde
 src/engine/money.js        multiplier, ledger, round-/slaskbetalningar (heltal kr)
 src/engine/bot.js          AI-motspelare (ser bara publikt state + sin egen hand)
 src/engine/replay.js       uppspelning av loggade rundor (felrapporter)
+src/engine/tutorial.js     övningsrundan: riggad giv, inställningar, bottarnas synande
 scripts/replay.js          visar en rapporterad runda drag för drag
 src/engine/game.js         state machine: flop, discard, slask, stick, mini-gursch, resultat
 src/server/rooms.js        rum, slask-timers, städning
 src/server/index.js        Express + Socket.IO, hidden information, reconnect
 public/                    UI (lobby, pokerbord, animationer, chat, history)
+public/learn.js            "Lär dig Gursch": bildspelet med reglerna
+public/tutorial.js         guiden i övningsrundan (gurkmannen i en pratbubbla)
 test/                      tester, taggade med regelnummer; test/replays/ = rapporterade rundor
 ```
 
@@ -56,7 +59,7 @@ Five-of-a-kind/Quint two i ett ledutspel avbryter stickspelet och går direkt ti
 
 ## Regler
 
-Alla spelregler finns numrerade i **[RULES.md](RULES.md)** (R1–R31 plus appens regler A1–A6).
+Alla spelregler finns numrerade i **[RULES.md](RULES.md)** (R1–R31 plus appens regler A1–A7).
 Alla regler är bekräftade. Testerna refererar till reglerna med
 taggar som `[R24]`, och `test/rules-coverage.test.js` fallerar om en regel saknar test.
 

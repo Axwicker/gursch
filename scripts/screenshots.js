@@ -205,8 +205,8 @@ async function runViewport(browser, name) {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-  const shot = async (file) => {
-    await page.screenshot({ path: path.join(dir, `${file}.png`) });
+  const shot = async (file, from = page) => {
+    await from.screenshot({ path: path.join(dir, `${file}.png`) });
     console.log(`  ${name}/${file}`);
   };
 
@@ -232,7 +232,39 @@ async function runViewport(browser, name) {
 
   await playRound(page, shot);
   await context.close();
+  await runTutorial(browser, name, shot, errors);
   return errors;
+}
+
+/** "Lär dig Gursch": bildspelet, övningsrundans guide och Regler mitt i spelet. Eget fönster utan sparat rum. */
+async function runTutorial(browser, name, shot, errors) {
+  const context = await browser.newContext({ ...VIEWPORTS[name], locale: 'sv-SE', reducedMotion: 'no-preference' });
+  const page = await context.newPage();
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  const s = (file) => shot(file, page);
+
+  await page.goto(BASE);
+  await page.waitForFunction(() => document.fonts.ready);
+  await page.click('#btn-learn');
+  await page.waitForTimeout(300);
+  await s('30-lar-dig');
+  await page.click('.learn-dot:nth-child(4)');
+  await page.waitForTimeout(300);
+  await s('31-lar-dig-forhandling');
+  await page.click('.learn-dot:nth-child(9)');
+  await page.click('#learn-play');
+  await page.waitForSelector('#coach:not([hidden])');
+  await page.waitForTimeout(3000);   // utdelningen
+  await s('32-ovning-valkommen');
+  await page.click('#coach-ok');
+  await page.click('#coach-ok');
+  await page.waitForTimeout(500);
+  await s('33-ovning-hand');
+  await clickTopbar(page, 'btn-rules');
+  await page.waitForTimeout(300);
+  await s('34-regler-i-spelet');
+  await context.close();
 }
 
 // ------------------------------------------------------------------ översiktssida

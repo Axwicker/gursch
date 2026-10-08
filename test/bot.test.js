@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { GurschGame, PHASE } from '../src/engine/game.js';
-import { chooseBotAction, shouldCallSlask, handJudgement } from '../src/engine/bot.js';
+import { chooseBotAction, shouldCallSlask, handJudgement, chooseNegotiation } from '../src/engine/bot.js';
 import { subsets, isValidLead } from '../src/engine/combination.js';
 import { seededRng, makeGame, rigRound, hand, realtimeStep, randomRealtimeAction } from './helpers.js';
 
@@ -148,4 +148,23 @@ test('för den som leder första sticket är par bra kort', () => {
   const { isGreatHand, wantedDiscards } = handJudgement;
   assert.equal(isGreatHand(hand('K', 'K', '3', '2', 'A'), true), true, 'flopvinnare: K,K är bra');
   assert.equal(wantedDiscards(hand('K', 'K', '3', '2', 'A'), false), 2, 'andra: K,K ska bort');
+});
+
+// ---- slängförhandlingen: boten har en egen åsikt (rapport 2026-10-07, en testare) ----
+
+const negPub = (proposals, number = 1) => ({
+  flopWinnerId: 'h',
+  negotiation: { number, participants: Object.keys(proposals), proposals },
+});
+
+test('[R13] boten föreslår först vad den själv vill, även om spelaren redan föreslagit', () => {
+  const bad = hand('9', '10', 'J', 'Q', 'K');   // vill slänga 4
+  const action = chooseNegotiation(negPub({ bot: null, h: 1 }), bad, 'bot', () => 0.99, 'medium');
+  assert.deepEqual(action, { type: 'propose', count: 4 });
+});
+
+test('[R13] boten följer inte ett förslag långt från vad den vill, men möts på ±1', () => {
+  const bad = hand('9', '10', 'J', 'Q', 'K');   // vill slänga 4
+  assert.equal(chooseNegotiation(negPub({ bot: 4, h: 1 }), bad, 'bot', () => 0.99, 'medium'), null, 'står kvar på 4');
+  assert.deepEqual(chooseNegotiation(negPub({ bot: 4, h: 3 }), bad, 'bot', () => 0.99, 'medium'), { type: 'propose', count: 3 });
 });

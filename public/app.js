@@ -3,6 +3,8 @@
 import {
   evaluateCombination, compareCombinations, calculateFinalValue, describeCombination, MIXED, CLEAN,
 } from '/engine/combination.js';
+import { initLearn } from '/learn.js';
+import { initCoach } from '/tutorial.js';
 
 const socket = io();
 const $ = (id) => document.getElementById(id);
@@ -107,10 +109,20 @@ function nickOf(id) { return S?.players.find((p) => p.id === id)?.nickname ?? '?
 function animationsOn() { return S ? S.settings.animations : true; }
 
 function emit(event, payload = {}) {
+  if (event === 'action') coach.beforeAction();   // guiden stänger och fortsätter spelet före draget
   socket.emit(event, payload, (res) => {
     if (res?.error) toast(res.error, true);
   });
 }
+
+// Guiden i övningsrundan (public/tutorial.js). Den pausar och fortsätter spelet själv.
+const coach = initCoach({
+  $, el,
+  emit: (event, payload = {}, cb) => socket.emit(event, payload, (res) => {
+    if (res?.error && event !== 'pauseGame') toast(res.error, true);
+    cb?.(res);
+  }),
+});
 
 // ------------------------------------------------------------------ dialoger
 // Öppna: fokus flyttas in i dialogen och tillbaka till det som hade fokus när den stängs.
@@ -201,6 +213,20 @@ for (const radio of document.querySelectorAll('input[name="practice-level"]')) {
 $('btn-create').onclick = () => createRoom(0);
 $('btn-practice').onclick = () => createRoom(3, selectedLevel());   // eget rum med tre bottar
 
+// Lär dig Gursch: knappen har guldram tills guiden har öppnats en gång
+const learn = initLearn({
+  $, el, cardNode, openDialog, closeDialog,
+  onPlay: () => createRoom(0, 'easy', { tutorial: true }),
+});
+$('btn-rules').onclick = () => learn.open({ inGame: true });
+const LEARNED_KEY = 'gursch.learned';
+try { $('btn-learn').classList.toggle('ny', !localStorage.getItem(LEARNED_KEY)); } catch { /* lagring avstängd */ }
+$('btn-learn').onclick = () => {
+  try { localStorage.setItem(LEARNED_KEY, '1'); } catch { /* lagring avstängd */ }
+  $('btn-learn').classList.remove('ny');
+  learn.open();
+};
+
 const LEVEL_TEXT = { easy: 'Lätt', medium: 'Medel', hard: 'Svår' };
 
 // Namnfältet finns i båda panelerna (Skapa spel och Gå med i spel) och visar samma värde.
@@ -219,11 +245,13 @@ function requireNickname(field = $('player-nick')) {
   return nickname;
 }
 
-function createRoom(bots, botLevel = 'medium') {
-  const nickname = requireNickname();
-  if (!nickname) return;
-  store.nickname = nickname;
-  socket.emit('createRoom', { nickname, settings: {}, bots, botLevel }, (res) => {
+/** tutorial: övningsrundan. Där behövs inget namn - bottarna bryr sig inte. */
+function createRoom(bots, botLevel = 'medium', { tutorial = false } = {}) {
+  const typed = tutorial ? $('player-nick').value.trim() : requireNickname();
+  if (!tutorial && !typed) return;
+  const nickname = typed || store.nickname || 'Gäst';
+  if (typed) store.nickname = typed;
+  socket.emit('createRoom', { nickname, settings: {}, bots, botLevel, tutorial }, (res) => {
     if (res.error) return ($('home-error').textContent = res.error);
     store.playerId = res.playerId; store.token = res.token; store.room = res.code;
     me = res.playerId; code = res.code;
@@ -269,6 +297,7 @@ function showInvite(roomCode) {
 
 /** Tillbaka till startsidan (efter att ha lämnat ett rum). */
 function goHome() {
+  coach.reset();
   store.room = null;
   S = null; code = null;
   selected.clear();
@@ -303,6 +332,16 @@ $('btn-leave').onclick = () => { emit('leaveRoom'); goHome(); };
  */
 $('btn-leave-game').onclick = () => {
   if (!S) return;
+  if (S.tutorial) {
+    confirmDialog({
+      title: 'Lämna övningsrundan?',
+      text: 'Du kan starta en ny övningsrunda från startsidan när du vill.',
+      confirm: 'Lämna',
+      cancel: 'Stanna',
+      onConfirm: () => { leavingOnPurpose = true; goHome(); socket.disconnect(); socket.connect(); },
+    });
+    return;
+  }
   const between = S.phase === 'ROUND_RESULT';
   const otherHumans = S.players.some((p) => p.id !== me && !p.isBot && p.connected);
   if (!between && !S.turnSeconds && otherHumans) {
@@ -622,12 +661,15 @@ function renderCenter() {
 
   if (S.discard) {
     const d = S.discard;
-    if (d.requiredCount === null) {
-      sub = `${nickOf(d.proposerId ?? turn)} bestämmer antalet kort`;
+    if (d.requiredCount === null && turn && S.flopWinnerId && turn !== S.flopWinnerId) {
+      // Flopvinnaren sa stay - säg det, så att ingen tror att den som väljer nu vann floppen.
+      sub = `${nickOf(S.flopWinnerId)} vann floppen (${RANK_LABELS[S.flopRank] ?? '?'}) men sa stay · ${yourTurn ? 'du bestämmer antalet' : `${nickOf(turn)} bestämmer antalet`}`;
     } else {
-      sub = `${nickOf(d.proposerId)} valde ${d.requiredCount} kort`;
+      sub = d.requiredCount === null
+        ? `${nickOf(d.proposerId ?? turn)} bestämmer antalet kort`
+        : `${nickOf(d.proposerId)} valde ${d.requiredCount} kort`;
+      if (turn) sub += ` · ${yourTurn ? 'din tur' : `väntar på ${nickOf(turn)}`}`;
     }
-    if (turn) sub += ` · ${yourTurn ? 'din tur' : `väntar på ${nickOf(turn)}`}`;
   } else if (S.negotiation) {
     const n = S.negotiation;
     sub = n.agreedCount
@@ -658,7 +700,7 @@ function renderCenter() {
   $('phase-sub').textContent = sub;
 
   renderMultiplier();
-  $('chip-code').textContent = code;
+  $('chip-code').textContent = S.tutorial ? 'Övning' : code;
 
   renderPiles();
   renderTrickArea();
@@ -1125,6 +1167,7 @@ function renderActions() {
     if (a.type === 'discard' || a.type === 'play') node.disabled = !selectionValid(a);
   });
   syncChildren($('actions'), entries.map((e) => e.node));
+  document.querySelector('.hand-pad').classList.toggle('no-actions', entries.length === 0);
 }
 
 // ------------------------------------------------------------------ slask overlay
@@ -1225,7 +1268,7 @@ function tickTurnTimer() {
   let label = clock.firstElementChild;
   if (!label) { label = el('span', 'clock-label'); clock.replaceChildren(label, document.createTextNode('')); }
   label.textContent = cd.label;
-  clock.lastChild.textContent = ` · ${secs} s`;
+  clock.lastChild.textContent = ` · ${secs}\u00a0s`;   // "40 s" bryts aldrig isär
   clock.classList.toggle('urgent', mine && urgent);
   // Varningspip varje sekund de sista fem sekunderna när det är din tur.
   if (mine && secs <= 5 && secs > 0 && secs !== lastWarnSecond) {
@@ -1338,8 +1381,35 @@ $('btn-play-again').onclick = () => emit('nextRound');
 
 // ---- felrapport: sparas på servern (reports/) med rundans logg - går även mitt i en runda ----
 let iPaused = false;   // pausade jag spelet när rapportrutan öppnades?
+let reportClient = null;   // skärmen när rapportrutan öppnades - följer med rapporten
+
+/**
+ * Hur skärmen såg ut för den som rapporterar: fönster, zoom och om knapparna låg synliga.
+ * Mäts innan spelet pausas (under pausen finns inga knappar).
+ */
+function clientInfo() {
+  const vv = window.visualViewport;
+  const box = $('actions').getBoundingClientRect();
+  const top = vv ? vv.offsetTop : 0;
+  const left = vv ? vv.offsetLeft : 0;
+  const height = vv ? vv.height : innerHeight;
+  const width = vv ? vv.width : innerWidth;
+  const hasButtons = $('actions').children.length > 0;
+  return {
+    userAgent: navigator.userAgent,
+    viewport: `${innerWidth}x${innerHeight}`,
+    visualViewport: vv ? `${Math.round(vv.width)}x${Math.round(vv.height)}@${Math.round(vv.offsetLeft)},${Math.round(vv.offsetTop)}` : null,
+    zoom: vv?.scale ?? 1,
+    dpr: devicePixelRatio,
+    narrow: narrowMedia.matches,
+    actions: P.actions.map((a) => a.type).join(','),
+    actionsOnScreen: hasButtons ? box.height > 0 && box.top >= top - 1 && box.bottom <= top + height + 1
+      && box.left >= left - 1 && box.right <= left + width + 1 : null,
+  };
+}
 
 function openReport() {
+  reportClient = clientInfo();
   $('report-round').textContent = S.result?.round ?? S.roundNumber;
   openDialog($('report-overlay'), $('report-text'));
   // Pausa spelet för alla medan rapporten skrivs, så att ingen tid eller tur går förlorad.
@@ -1364,7 +1434,7 @@ $('btn-report-save').onclick = () => {
   if (!description) { toast('Beskriv vad som blev fel', true); return; }
   const btn = $('btn-report-save');
   btn.disabled = true;
-  socket.emit('submitReport', { description, category: $('report-category').value }, (res) => {
+  socket.emit('submitReport', { description, category: $('report-category').value, client: reportClient }, (res) => {
     btn.disabled = false;
     if (res?.error) { toast(res.error, true); return; }
     $('report-text').value = '';
@@ -1376,8 +1446,9 @@ $('btn-report-save').onclick = () => {
 /** Banderoll för alla medan spelet är pausat. */
 function renderPause() {
   const banner = $('pause-banner');
-  banner.hidden = !S.paused;
-  if (!S.paused) return;
+  // Guiden pausar också - då är det gurkmannens bubbla som syns, inte pausrutan.
+  banner.hidden = !S.paused || S.paused.reason === 'tutorial';
+  if (banner.hidden) return;
   // Krämfärgad ruta: rubrik och förklaring.
   banner.replaceChildren(
     el('div', 'pause-title', 'Spelet är pausat'),
@@ -1427,6 +1498,7 @@ function renderResult() {
   const isHost = S.hostId === me;
   $('btn-play-again').disabled = !isHost;
   $('btn-to-lobby').disabled = !isHost;
+  $('btn-to-lobby').hidden = S.tutorial;   // övningsrundan har ingen lobby - ingen kan gå med
   // Fokus till resultatet när det kommer (Ny runda för hosten, annars rubriken) - inte om man skriver i chatten.
   if (opening && mayMoveFocus()) (isHost ? $('btn-play-again') : $('result-title')).focus({ preventScroll: true });
   $('result-hint').textContent = isHost ? '' : `Väntar på att ${nickOf(S.hostId)} startar nästa runda.`;
@@ -1494,7 +1566,7 @@ function buildResultRows(r) {
 
   const extra = $('result-extra');
   extra.innerHTML = '';
-  if (r.quintExitPlayerId) extra.append(el('div', '', `Quint/five of a kind: ${nickOf(r.quintExitPlayerId)} gick ut direkt och kunde inte bli loser.`));
+  if (r.quintExitPlayerId) extra.append(el('div', '', `Quint/five of a kind: ${nickOf(r.quintExitPlayerId)} gick ut direkt – de andra räknade hela sin hand.`));
   for (const s of r.slaskLog) {
     extra.append(el('div', '', `Slask: ${nickOf(s.slaskerId)} (${s.hand.join(',')}) synad av ${nickOf(s.callerId)} · ${s.faceCards} face cards · ${s.amount} kr`));
   }
@@ -1597,7 +1669,8 @@ function removeAfter(g) {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) return;
   for (const a of document.getAnimations()) {
-    if (a.effect?.target?.closest?.('#card-fx, #hand')) a.finish();
+    // Oändliga animationer (guidens pulserande ram) har inget slut att hoppa till.
+    if (a.effect?.target?.closest?.('#card-fx, #hand') && a.effect.getComputedTiming().endTime !== Infinity) a.finish();
   }
   $('seats').classList.remove('dealing');
 });
@@ -1898,6 +1971,20 @@ function handleEvents(events) {
   }
 }
 
+// ------------------------------------------------------------------ fel i klienten
+
+/** Skickar ett fel i webbläsaren till servern (loggas som serverfel med [klient]). Högst ett per sort. */
+const sentErrors = new Set();
+function reportClientError(err) {
+  console.error(err);
+  const message = String(err?.message ?? err);
+  if (sentErrors.has(message)) return;
+  sentErrors.add(message);
+  socket.emit('clientError', { message, stack: String(err?.stack ?? ''), userAgent: navigator.userAgent });
+}
+window.addEventListener('error', (e) => reportClientError(e.error ?? e.message));
+window.addEventListener('unhandledrejection', (e) => reportClientError(e.reason));
+
 // ------------------------------------------------------------------ state
 
 socket.on('state', ({ code: roomCode, you, state, private: priv, events, serverTime }) => {
@@ -1935,15 +2022,17 @@ socket.on('state', ({ code: roomCode, you, state, private: priv, events, serverT
     renderLobby();
   } else {
     showScreen('screen-game');
-    renderSeats(); renderCenter(); renderHand(); renderActions();
-    renderSlask(); renderResult(); renderChat(); renderHistory();
-    renderPause();
-    tickTurnTimer();
+    // Var del ritas för sig: ett fel i t.ex. bordet får aldrig ta knapparna med sig.
+    for (const render of [renderSeats, renderCenter, renderHand, renderActions, renderSlask, renderResult,
+      renderChat, renderHistory, renderPause, tickTurnTimer]) {
+      try { render(); } catch (err) { reportClientError(err); }
+    }
   }
   if (events?.length && !firstState) handleEvents(events);
   else if (events?.length) handleEvents(events.filter((e) => e.type === 'money'));
   lastPhase = S.phase;
   statesSeen += 1;
+  try { coach.update({ S, P, me, code, nick: nickOf }); } catch (err) { reportClientError(err); }
 });
 
 socket.on('connect', () => {
