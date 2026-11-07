@@ -27,7 +27,7 @@ export const PHASE = {
 
 export const DEFAULT_SETTINGS = {
   multiplierMode: 'fixed',   // 'fixed' | 'flop'
-  multiplierValue: 10,       // 1,5,10,25,50,100
+  multiplierValue: 10,       // 1,2,3,4,5,10,25,50,100
   flopMultFactor: 1,         // flopmult xN
   maxSlasks: 3,
   miniGurschCap: 0,          // 0 = obegränsat, annars max antal nivåer
@@ -50,7 +50,7 @@ const BOT_NAMES = ['Bot Bengt', 'Bot Greta', 'Bot Sixten', 'Bot Majken', 'Bot Do
 // Tillåtna värden per inställning. Allt från klienten valideras mot detta.
 const SETTING_RULES = {
   multiplierMode: (v) => ['fixed', 'flop'].includes(v),
-  multiplierValue: (v) => [1, 5, 10, 25, 50, 100].includes(v),
+  multiplierValue: (v) => [1, 2, 3, 4, 5, 10, 25, 50, 100].includes(v),
   flopMultFactor: (v) => [1, 2, 3, 4].includes(v),
   maxSlasks: (v) => Number.isInteger(v) && v >= 0 && v <= 5,
   miniGurschCap: (v) => Number.isInteger(v) && v >= 0 && v <= 5,

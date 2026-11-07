@@ -12,7 +12,7 @@ export const TX = {
 /**
  * Multiplier för rundan.
  * settings.multiplierMode: 'fixed' | 'flop'
- * settings.multiplierValue: talet vid 'fixed' (1,5,10,25,50,100)
+ * settings.multiplierValue: talet vid 'fixed' (1,2,3,4,5,10,25,50,100)
  * settings.flopMultFactor:  N vid 'flop' (flopmult xN), flopvärde * N
  */
 export function resolveMultiplier(settings, flopCardRank) {

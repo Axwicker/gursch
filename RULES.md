@@ -28,7 +28,7 @@ Vid lika vinner den som fick sitt kort sist i utdelningsordningen.
 Floppkortet syns för alla under floppen och första slängrundan. När första slängrundan är
 slut göms det.
 
-**R6.** Multiplier: antingen fast (×1, ×5, ×10, ×25, ×50, ×100) eller *flopmult*, där
+**R6.** Multiplier: antingen fast (×1, ×2, ×3, ×4, ×5, ×10, ×25, ×50, ×100) eller *flopmult*, där
 flopkortets värde gånger 1–4 blir multiplier.
 
 ## Kombinationer och 7:an
