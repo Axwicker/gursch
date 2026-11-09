@@ -1,6 +1,10 @@
 # Gursch
 
-Realtids multiplayer-webbapp för kortspelet **Gursch** (2–5 spelare, en 52-kortslek).
+**Gursch** är ett kortspel för 2–5 spelare med en vanlig kortlek. Det här är en realtids multiplayer-webbapp där du spelar gratis i webbläsaren med vänner eller mot bottar.
+
+**Spela: [gursch.beer](https://gursch.beer)** · [Regler](https://gursch.beer/regler) · [Regelbok i repot](RULES.md)
+
+Servern avgör allt och skickar varje spelare bara dess egen hand, så ingen kan se andras dolda kort eller fuska. Det syns i `src/server/index.js`.
 
 ```bash
 npm install
