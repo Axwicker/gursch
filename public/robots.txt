@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /join/
+Disallow: /komponenter.html
+
+Sitemap: https://gursch.beer/sitemap.xml

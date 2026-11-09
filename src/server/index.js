@@ -59,7 +59,11 @@ app.use(express.static(PUBLIC_DIR));
 // Servern är fortfarande ensam om att avgöra - samma kod, en sanning.
 app.use('/engine', express.static(ENGINE_DIR));
 app.get('/health', (_req, res) => res.json({ ok: true, version: VERSION, rooms: manager.rooms.size }));
-app.get('/join/:code', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
+// Inbjudningslänkar är privata och ska inte indexeras av sökmotorer.
+app.get('/join/:code', (_req, res) => {
+  res.set('X-Robots-Tag', 'noindex, nofollow');
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+});
 
 const manager = new RoomManager({ onBroadcast: (room) => broadcast(room), onError: logError });
 setInterval(() => manager.sweep(), 60_000).unref?.();
