@@ -8,10 +8,11 @@
 export const LEARN_SLIDES = [
   {
     title: 'Gå ut lågt',
-    text: 'Alla spelar ut sina kort i stick. Korten du lägger i sista sticket blir ditt slutvärde. '
-      + 'Den med högst slutvärde förlorar och betalar slutvärdet × multipliern till var och en av de andra.',
+    text: 'Alla spelar ut sina kort i stick: en spelar ut, de andra lägger lika många kort, och det bästa vinner. '
+      + 'Korten du lägger i sista sticket blir ditt slutvärde. Den med högst slutvärde förlorar och betalar '
+      + 'slutvärdet × multipliern (rummets insats, till exempel ×10) till var och en av de andra.',
     rows: [
-      { cards: ['2C', '9H'], text: '2 + 9 = 11. Billigt.', tone: 'win' },
+      { cards: ['2C', '7H'], text: 'Två tvåor (7:an är joker): 2 × 2 = 4. Billigt.', tone: 'win' },
       { cards: ['KS', 'KD'], text: '13 × 2 = 26. Dyrt.', tone: 'lose' },
     ],
     rules: ['R26', 'R28'],
@@ -30,7 +31,7 @@ export const LEARN_SLIDES = [
   {
     title: '7:an är joker',
     text: 'I en kombination blir 7:an det du behöver. Lika valörer är clean, lika valörer plus 7:or är semi-mixed '
-      + 'och allt annat är mixed. Spelar du ut en 7:a ensam är den lika stark som ett ess.',
+      + 'och allt annat är mixed. En ensam 7:a i ett stick är lika stark som ett ess.',
     rows: [
       { cards: ['KS', '7H'], text: 'Två kungar (semi-mixed)' },
       { cards: ['2C', '2D', '7S'], text: 'Tre tvåor (semi-mixed)' },
@@ -41,7 +42,7 @@ export const LEARN_SLIDES = [
   {
     title: 'Släng och förhandla',
     text: 'Först slänger man i tur och ordning. Den första som slänger bestämmer hur många kort (1–4), och de andra '
-      + 'slänger lika många eller säger STAY. Sedan förhandlar alla samtidigt: välj 1–4 och ändra dig när du vill. '
+      + 'slänger lika många eller säger STAY och behåller sina kort. Sedan förhandlar alla samtidigt: välj 1–4 och ändra dig när du vill. '
       + 'Visar alla samma tal i 2 sekunder slänger alla så många, och en ny förhandling börjar. '
       + 'STAY, eller att tiden tar slut, startar spelet.',
     rows: [
@@ -52,7 +53,7 @@ export const LEARN_SLIDES = [
   },
   {
     title: 'Slask',
-    text: 'På din tur kan du slaska: hela handen åker i slänghögen och du får fem nya kort. De andra har 7 sekunder på sig att syna. '
+    text: 'På din tur kan du slaska: hela handen åker i slänghögen och du får fem nya kort. De andra har några sekunder på sig att syna. '
       + 'Fanns det face cards (J, Q, K, A) i den gamla handen betalar du 10 kr per face card till den som synade. '
       + 'Fanns det inga får du 25 kr. Innan stickspelet får alla en sista chans att slaska.',
     rows: [
@@ -86,17 +87,17 @@ export const LEARN_SLIDES = [
     text: 'Ett senare spel tar över bara om det är minst lika högt och minst lika rent (clean slår semi-mixed), '
       + 'och bättre i något av dem. Mixed vinner aldrig. Vid exakt lika vinner den som lade sist.',
     rows: [
-      { cards: ['8C', '8H'], text: 'Clean åttor leder', tone: 'win' },
-      { cards: ['AS', '7D'], text: 'A,7 efter 8,8 tar inte över' },
-      { cards: ['KS', 'KH'], text: 'K,K efter K,7 tar över' },
+      { cards: ['8C', '8H'], text: 'Utspel: två åttor (clean)' },
+      { cards: ['AS', '7D'], text: 'Tar inte över: högre, men semi-mixed är mindre rent' },
+      { cards: ['KS', 'KH'], text: 'Tar över: högre och lika rent', tone: 'win' },
     ],
     rules: ['R25'],
   },
   {
     title: 'Sista sticket',
-    text: 'I sista sticket går alla ut. Clean och semi-mixed räknas som värdet × antal kort, mixed som summan '
-      + '(7:an räknas då som 7). Fem lika avslutar rundan direkt. Har flera samma högsta värde spelar de en mini-gursch '
-      + 'med högre multiplier.',
+    text: 'Alla har lika många kort. Lägger den som spelar ut alla sina kort är det sista sticket, och då går alla ut. '
+      + 'Clean och semi-mixed räknas som värdet × antal kort, mixed som summan (7:an räknas då som 7). '
+      + 'Spelar någon ut fem lika slutar rundan direkt. Har flera samma högsta värde spelar de en mini-gursch med högre multiplier.',
     rows: [
       { cards: ['3C', '3H'], text: '3 × 2 = 6' },
       { cards: ['JD', '7S'], text: 'Två knektar: 11 × 2 = 22', tone: 'lose' },

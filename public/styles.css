@@ -687,11 +687,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 
 /* ---- guiden i övningsrundan (public/tutorial.js) ----
  * Gurkmannen till vänster om en krämfärgad pratbubbla, överst på bordet. Över slask- och
- * resultatrutan (60) och mobilmenyn (62), under sidopanelerna (65) och dialogerna (70).
+ * resultatrutan (60), under mobilmenyn (62), sidopanelerna (65) och dialogerna (70).
  * Det han pratar om får en pulserande guldram (.coach-mark).
  */
 .coach {
-  position: fixed; z-index: 64; left: 50%; top: calc(72px + var(--safe-top)); translate: -50% 0;
+  position: fixed; z-index: 61; left: 50%; top: calc(72px + var(--safe-top)); translate: -50% 0;
   width: min(560px, calc(100vw - 32px)); display: flex; align-items: flex-end; gap: 6px;
   pointer-events: none;
 }
@@ -817,7 +817,7 @@ body.no-anim * { animation: none !important; transition: none !important; }
 }
 /* Topplisten: ordet GURSCH först bort, sedan bara ikoner på knapparna */
 @media (max-width: 1080px) { .topbar-title { display: none; } }
-@media (max-width: 900px) {
+@media (max-width: 1000px) {   /* fem knappar med text får inte plats smalare än så */
   .topbar-btn { width: 40px; padding: 0; }
   .topbar-btn .icon { display: block; }
   .tool-label { display: none; }

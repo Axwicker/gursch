@@ -87,8 +87,8 @@ export const COACH_STEPS = [
     id: 'lead',
     when: (c) => c.S.phase === 'TRICK' && c.has('play') && !c.S.trick?.plays.length,
     pages: () => [
-      'Du spelar ut. Lägg 1–5 kort som är clean (lika valörer) eller semi-mixed (lika valörer plus 7:or). Kort som inte går att spela är gråa.',
-      'Tänk framåt: korten du lägger i sista sticket blir ditt slutvärde, och högst förlorar. Bli av med de höga korten i tid.',
+      'Du spelar ut. Lägg 1–5 kort som är clean (lika valörer) eller semi-mixed (lika valörer plus 7:or). Ett ensamt kort går alltid.',
+      'Tänk framåt: lägger du alla dina kort på en gång blir det sista sticket, och då går alla ut. Korten man går ut på blir slutvärdet, och högst förlorar.',
     ],
     target: '#hand',
   },
@@ -120,6 +120,12 @@ export const COACH_STEPS = [
     id: 'mini',
     when: (c) => c.S.phase === 'MINI_GURSCH',
     pages: () => ['Flera fick samma högsta slutvärde! De spelar en mini-gursch: 3 nya kort och högre multiplier. Den som förlorar den betalar.'],
+  },
+  {
+    // [R31] Övningsrundan har mini-gursch-gränsen 1, så blir det lika igen avgörs det med en dragning.
+    id: 'tiebreak',
+    when: (c) => c.S.phase === 'TIEBREAK_DRAW',
+    pages: () => ['Lika igen! Nu avgörs det med en dragning: de som är lika drar ett dolt kort var. Högst kort vinner, och den med lägst kort betalar (7:an räknas som 7).'],
   },
   {
     id: 'result',
@@ -190,8 +196,7 @@ export function initCoach({ $, el, emit }) {
 
   function show(step) {
     current = { step, pages: step.pages(ctx), page: 0 };
-    seen.add(step.id);
-    saveSeen();
+    seen.add(step.id);   // sparas först när bubblan stängs - laddar man om sidan visas steget igen
     render();
     unmark();
     const target = step.target && document.querySelector(step.target);
@@ -209,6 +214,7 @@ export function initCoach({ $, el, emit }) {
   }
 
   function hide() {
+    if (current) saveSeen();
     current = null;
     box.hidden = true;
     unmark();

@@ -21,6 +21,10 @@ test('guiden hänvisar bara till regler som finns i RULES.md', () => {
   }
 });
 
+test('[R18] guiden lovar ingen fast tid att syna (den går att ändra i lobbyn)', () => {
+  for (const s of LEARN_SLIDES) assert.doesNotMatch(s.text, /\d+ sekunder på sig/, s.title);
+});
+
 test('guidens kort är riktiga kort', () => {
   for (const s of LEARN_SLIDES) {
     for (const row of s.rows) {
@@ -39,7 +43,7 @@ test('[R7] [R8] guidens exempel på 7:an och mixed', () => {
 });
 
 test('[R26] guidens slutvärden stämmer', () => {
-  const values = { 'Gå ut lågt': [11, 26], 'Sista sticket': [6, 22, 14] };
+  const values = { 'Gå ut lågt': [4, 26], 'Sista sticket': [6, 22, 14] };
   for (const [title, expected] of Object.entries(values)) {
     const rows = slide(title).rows;
     assert.deepEqual(rows.map((r) => calculateFinalValue(cards(...r.cards))), expected, title);
@@ -55,6 +59,9 @@ test('[R24] guidens exempel på följregeln: 7,9,K,A mot Q,Q', () => {
 });
 
 test('[R25] guidens exempel på vem som leder sticket', () => {
-  assert.ok(compareCombinations(cards('AS', '7D'), cards('8C', '8H')) < 0);   // A,7 tar inte 8,8
-  assert.ok(compareCombinations(cards('KS', 'KH'), cards('KD', '7C')) > 0);   // K,K tar K,7
+  // Raderna är ett stick i ordning: 8,8 leder, A,7 tar inte över, K,K tar över
+  const [eights, aceSeven, kings] = slide('Vem vinner sticket?').rows.map((r) => cards(...r.cards));
+  assert.ok(compareCombinations(aceSeven, eights) < 0);
+  assert.ok(compareCombinations(kings, eights) > 0);
+  assert.equal(slide('Vem vinner sticket?').rows.findIndex((r) => r.tone === 'win'), 2, 'K,K är markerad som vinnare');
 });
