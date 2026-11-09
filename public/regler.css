@@ -1,0 +1,30 @@
+/* Stil för den statiska regelsidan (public/regler.html). Färgerna är desamma som i spelet (gk.css). */
+:root { --grund: #10211b; --kram: #f0e8cc; --papper: #fbf7e9; --guld: #c9a55a; --linje: #d6cdaf; --text: #10211b; --dampad: #4f5f55; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+body { margin: 0; background: var(--grund); color: var(--kram); font: 400 18px/1.6 "Barlow", system-ui, sans-serif; }
+a { color: var(--guld); }
+.topp { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: var(--grund); border-bottom: 2px solid rgba(240,232,204,.15); }
+.varumarke { font: 400 26px/1 "Alfa Slab One", Georgia, serif; color: var(--kram); text-decoration: none; letter-spacing: .02em; }
+.knapp { display: inline-block; padding: 10px 20px; background: var(--guld); color: var(--grund); font: 700 18px/1.2 "Barlow Condensed", system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; border: 2px solid var(--grund); border-radius: 4px; box-shadow: 3px 3px 0 #0a1612; }
+.knapp:hover { background: #d8b76e; }
+main { max-width: 760px; margin: 0 auto; padding: 32px 20px 56px; }
+h1 { font: 400 clamp(34px, 7vw, 52px)/1.1 "Alfa Slab One", Georgia, serif; margin: 0 0 16px; }
+.ingress { font-size: 20px; color: #e4dcc0; }
+.innehall { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 8px; }
+.innehall a { padding: 6px 12px; border: 1.5px solid rgba(240,232,204,.4); border-radius: 4px; color: var(--kram); text-decoration: none; font: 600 16px/1.2 "Barlow Condensed", system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase; }
+.innehall a:hover { border-color: var(--guld); color: var(--guld); }
+section { background: var(--kram); color: var(--text); border: 2px solid #0a1612; border-radius: 6px; box-shadow: 4px 4px 0 #0a1612; padding: 8px 24px 20px; margin-top: 28px; }
+h2 { font: 700 28px/1.2 "Barlow Condensed", system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; margin: 16px 0 8px; }
+section p { margin: 12px 0; }
+section p[id] { scroll-margin-top: 76px; }
+section ul { margin: 8px 0 12px; padding-left: 24px; }
+section li { margin: 4px 0; }
+section a { color: #1f6b45; }
+code { background: var(--papper); padding: 1px 5px; border-radius: 3px; font-size: .9em; }
+.cta { text-align: center; background: var(--papper); }
+.cta .knapp { margin: 4px 0 8px; }
+footer { padding: 24px 20px 40px; text-align: center; color: #9fb0a2; font-size: 15px; }
+footer a { color: #9fb0a2; }
+:focus-visible { outline: 3px solid var(--guld); outline-offset: 2px; }
+@media (max-width: 520px) { body { font-size: 17px; } section { padding: 6px 16px 16px; } }
