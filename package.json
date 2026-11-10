@@ -11,6 +11,7 @@
     "start": "node src/server/index.js",
     "dev": "node --watch src/server/index.js",
     "test": "node --test \"test/*.test.js\"",
+    "test:layout": "node --test test/ui/layout.test.js",
     "build:regler": "node scripts/build-regler.js",
     "replay": "node scripts/replay.js",
     "screenshots": "node scripts/screenshots.js",

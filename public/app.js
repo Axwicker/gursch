@@ -612,7 +612,7 @@ function renderSeats() {
     let cards = null;
     if (p.id !== me && p.handCount > 0) {
       badge.append(el('span', 'sr-only', `${p.handCount} kort${p.visibleCards.length ? `, uppvänt: ${cardNames(p.visibleCards)}` : ''}`));
-      cards = el('div', 'seat-cards');
+      cards = el('div', `seat-cards${p.visibleCards.length ? '' : ' only-backs'}`);
       cards.setAttribute('aria-hidden', 'true');
       let shown = 0;
       for (const c of p.visibleCards) { cards.append(cardNode(c)); shown++; }
@@ -759,7 +759,7 @@ let seenTrickNo = 0;   // numret på det senaste stick vi visade (för rundans s
 function renderTrickArea() {
   const area = $('trick-area');
   area.classList.toggle('tiebreak', Boolean(S.tiebreak));
-  if (S.tiebreak) { renderTiebreak(area); return; }
+  if (S.tiebreak) { $('felt').classList.remove('has-plays'); renderTiebreak(area); return; }
   const t = S.trick;
   // Visa det pågående sticket, eller det senast avgjorda tills någon leder nästa.
   // När rundan är slut visas sista sticket kvar under pausen före resultatet.
@@ -774,6 +774,7 @@ function renderTrickArea() {
   const keyOf = (play) => `${S.roundNumber}:${S.mini?.level ?? 0}:${trickNo}:${play.playerId}`;
   const byKey = new Map(plays.map((play) => [keyOf(play), play]));
   area.classList.toggle('previous', Boolean(showingLast));
+  $('felt').classList.toggle('has-plays', plays.length > 0);
   const entries = keyedNodes(trickNodes, [...byKey.keys()], (key) => {
     const play = byKey.get(key);
     const wrap = el('div', 'trick-play');
@@ -808,9 +809,10 @@ function renderTrickArea() {
     node.classList.toggle('winner', leads && Boolean(showingLast));
     node.classList.toggle('highest', high);
     const tag = final
-      ? (loserId === play.playerId ? ' · förlorar' : high && !loserId ? ' · högst' : '')
-      : (leads ? (showingLast ? ' · vann' : ' · leder') : '');
-    node.querySelector('.who').textContent = nickOf(play.playerId) + tag;
+      ? (loserId === play.playerId ? 'förlorar' : high && !loserId ? 'högst' : '')
+      : (leads ? (showingLast ? 'vann' : 'leder') : '');
+    // Namn och tillägg för sig: på smala skärmar kortas namnet och tillägget står ovanför (se CSS).
+    node.querySelector('.who').replaceChildren(el('span', 'who-name', nickOf(play.playerId)), ...(tag ? [el('span', 'who-tag', tag)] : []));
     return node;
   });
   trickCaption.textContent = final ? 'Sista sticket – högst slutvärde förlorar' : 'Förra sticket';
@@ -890,6 +892,7 @@ function showTiebreakIntro(e) {
     el('p', '', 'Var och en väljer ett av de dolda korten, i tur och ordning. Högst kort vinner (2 lägst, A högst, 7:an är 7). Den som drar lägst betalar.'),
   );
   $('fx').append(box);
+  keepAboveHand(box);
   setTimeout(() => box.remove(), 5200);
 }
 
@@ -961,8 +964,17 @@ function canSelectCards() {
   return P.actions.some((a) => a.type === 'discard' || a.type === 'play');
 }
 
+/** Ett tryck på ett låst kort: ledtexten lyser upp och säger vad som gäller just nu. */
+let hintNudgeTimer = null;
+function nudgeHint() {
+  $('hand-hint').classList.add('nudge');
+  clearTimeout(hintNudgeTimer);
+  hintNudgeTimer = setTimeout(() => $('hand-hint').classList.remove('nudge'), 700);
+  beep(200, 0.06, 'triangle', 0.02);
+}
+
 function toggleCard(cardId) {
-  if (!canSelectCards()) return;
+  if (!canSelectCards()) { nudgeHint(); return; }
   if (selected.has(cardId)) selected.delete(cardId);
   else selected.add(cardId);
   beep(selected.has(cardId) ? 560 : 400, 0.05, 'triangle', 0.03);
@@ -1317,7 +1329,11 @@ document.addEventListener('pointerdown', (e) => {
   setMenu(false);
 });
 // Blir fönstret brett igen syns topplistens knappar - då ska menyn inte ligga kvar öppen.
-narrowMedia.addEventListener('change', (e) => { if (!e.matches) setMenu(false); });
+// Skyltarna ritas också om här: vid fönstrets resize-händelse är matches ännu inte uppdaterad i Safari.
+narrowMedia.addEventListener('change', (e) => {
+  if (!e.matches) setMenu(false);
+  if (S && S.phase !== 'LOBBY') renderSeats();
+});
 $('chat-form').onsubmit = (e) => {
   e.preventDefault();
   const text = $('chat-input').value.trim();
@@ -1903,7 +1919,22 @@ function banner(text, kind = '') {
   if (!animationsOn()) { toast(text); return; }
   const n = el('div', `fx-banner${kind ? ` ${kind}` : ''}`, text);
   $('fx').append(n);
+  keepAboveHand(n);
   setTimeout(() => n.remove(), 2000);
+}
+
+/**
+ * Lyfter en centrerad text i fx-lagret så att den slutar ovanför handen. I låga fönster ligger
+ * handen ovanpå bordet, och fx-lagrets procentplats hamnar då mitt i korten.
+ * Mäter offsetHeight: rektangeln skalas av animationen.
+ */
+function keepAboveHand(node) {
+  const layerTop = $('fx').getBoundingClientRect().top;
+  const handTop = document.querySelector('.hand-pad').getBoundingClientRect().top - layerTop;
+  const topbarBottom = document.querySelector('.topbar').getBoundingClientRect().bottom - layerTop;
+  const half = node.offsetHeight / 2;
+  const highest = handTop - half - 8;
+  if (parseFloat(getComputedStyle(node).top) > highest) node.style.top = `${Math.max(topbarBottom + half + 4, highest)}px`;
 }
 
 function handleEvents(events) {
@@ -1993,8 +2024,9 @@ socket.on('state', ({ code: roomCode, you, state, private: priv, events, serverT
   code = roomCode; me = you;
   const prevPhase = S?.phase;
   S = state; P = priv;
-  // Läses (och emit används) av skärmbildsskriptet, som inte ska bero på knapptexter.
-  window.__gursch = { S, P, me, emit };
+  // Läses (och emit används) av skärmbildsskriptet och layouttesterna, som inte ska bero på knapptexter.
+  // render: layouttesterna ritar ovanliga lägen (dragningen) utan att spela fram dem. Bara visning.
+  window.__gursch = { S, P, me, emit, render: { renderCenter, renderSeats, renderHand, banner } };
   store.room = roomCode;
 
   document.body.classList.toggle('no-anim', !S.settings.animations);
@@ -2061,8 +2093,6 @@ socket.on('connect', () => {
   }
   leavingOnPurpose = false;
 });
-
-window.addEventListener('resize', () => { if (S && S.phase !== 'LOBBY') renderSeats(); });
 
 let leavingOnPurpose = false;   // "Lämna spelet" kopplar ned med flit - inget felmeddelande då
 socket.on('disconnect', () => { if (!leavingOnPurpose) toast('Tappade anslutningen – försöker återansluta…', true); });
