@@ -118,7 +118,8 @@ renare än semi-mixed), och är bättre i minst ett av dem. Exempel:
 - 2,2 efter A,7: tar inte över, lägre värde vinner aldrig, även om det är clean.
 - K,K efter K,7, eller A,7 efter K,7: tar över.
 
-Mixed vinner aldrig. Vid exakt lika (samma värde och typ) vinner den som lade sist.
+Mixed vinner aldrig. Är två semi-mixed lika höga vinner den med färst 7:or: A,A,7 slår A,7,7,
+oavsett vem som lade först. Annars vinner den som lade sist vid exakt lika (samma värde och typ).
 Ordningen spelar roll: med tre spelare kan 8,8 → A,7 → 2,2 sluta med att 8,8 vinner.
 
 ## Slutvärde och betalning

@@ -47,7 +47,8 @@ export function isMixed(cards) { return evaluateCombination(cards).type === MIXE
  * compareCombinations(a, b) - tar a (lagd senare) över ledningen från b?
  *   >0  a tar ledningen: minst lika högt värde OCH minst lika "ren" (clean > semi-mixed),
  *       och bättre i minst ett av dem
- *    0  exakt lika värde och typ - den som lade sist tar ledningen
+ *    0  exakt lika värde, typ och antal 7:or - den som lade sist tar ledningen
+ *       (vid lika värde och typ vinner den med färst 7:or: A,A,7 slår A,7,7)
  *   <0  b behåller ledningen
  * Ett högre semi-mixed tar alltså inte över ett clean (A,7 tar inte 8,8), och ett clean
  * med lägre värde tar inte över ett högre semi-mixed (2,2 tar inte A,7). Mixed vinner aldrig.
@@ -60,7 +61,13 @@ export function compareCombinations(aCards, bCards) {
   if (b.type === MIXED) return 1;
   const aClean = a.type === CLEAN ? 1 : 0;
   const bClean = b.type === CLEAN ? 1 : 0;
-  if (a.trickValue === b.trickValue && aClean === bClean) return 0;
+  if (a.trickValue === b.trickValue && aClean === bClean) {
+    // [R25] Två semi-mixed med lika värde: fler riktiga kort slår fler 7:or (A,A,7 tar över A,7,7).
+    // Gäller inte clean: en ensam 7:a är lika stark som ett ensamt ess (R7).
+    if (a.type !== SEMI) return 0;
+    const sevens = (cards) => cards.filter((c) => c.rank === SEVEN).length;
+    return Math.sign(sevens(bCards) - sevens(aCards));
+  }
   return a.trickValue >= b.trickValue && aClean >= bClean ? 1 : -1;
 }
 

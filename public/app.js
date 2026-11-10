@@ -50,6 +50,7 @@ let selected = new Set();
 let lastPhase = null;
 let lastRound = 0;
 let seenChatId = null;
+let chatSeeded = false;   // sant efter första ritningen i rummet: gamla meddelanden räknas inte som olästa
 const chatNodes = new Map();   // meddelande-id -> element
 let clockOffset = 0;   // serverns klocka minus vår, för nedräkningar
 const serverNow = () => Date.now() + clockOffset;
@@ -325,6 +326,7 @@ function goHome() {
   coach.reset();
   store.room = null;
   S = null; code = null;
+  chatSeeded = false; seenChatId = null;
   syncWakeLock();
   selected.clear();
   history.replaceState({}, '', '/');
@@ -1343,8 +1345,9 @@ function togglePanel(panel, focusTarget) {
 }
 /** Oläst chatt: pricken på chattknappen - och på mobilen på menyknappen och menyns CHATT. */
 function setChatUnread(unread) {
-  for (const id of ['chat-unread', 'menu-unread', 'menu-chat-unread']) $(id).hidden = !unread;
+  for (const id of ['chat-unread', 'menu-unread', 'menu-chat-unread', 'lobby-chat-unread']) $(id).hidden = !unread;
 }
+$('btn-lobby-chat').onclick = () => $('btn-chat-toggle').onclick();
 $('btn-chat-toggle').onclick = () => {
   setChatUnread(false);
   togglePanel($('chat-panel'), $('chat-input'));
@@ -1386,6 +1389,7 @@ $('chat-form').onsubmit = (e) => {
 
 function renderChat() {
   $('btn-chat-toggle').style.display = S.settings.chatEnabled ? '' : 'none';
+  $('btn-lobby-chat').hidden = !S.settings.chatEnabled;
   $('menu-chat').hidden = !S.settings.chatEnabled;
   if (!S.settings.chatEnabled) { $('chat-panel').classList.remove('open'); return; }
   const log = $('chat-log');
@@ -1406,11 +1410,13 @@ function renderChat() {
   syncChildren(log, entries.map((e) => e.node));
   if (added || firstRender) log.scrollTop = log.scrollHeight;
   const lastId = S.chat.at(-1)?.id ?? null;
-  if (lastId && seenChatId !== null && lastId !== seenChatId && !$('chat-panel').classList.contains('open')) {
+  // (Inte seenChatId !== null: då blev rummets allra första meddelande aldrig oläst.)
+  if (lastId && chatSeeded && lastId !== seenChatId && !$('chat-panel').classList.contains('open')) {
     beep(700, 0.05, 'sine', 0.025);
     setChatUnread(true);
   }
   seenChatId = lastId;
+  chatSeeded = true;
 }
 
 function renderHistory() {
@@ -2096,6 +2102,7 @@ socket.on('state', ({ code: roomCode, you, state, private: priv, events, serverT
   if (S.phase === 'LOBBY') {
     showScreen('screen-lobby');
     renderLobby();
+    try { renderChat(); } catch (err) { reportClientError(err); }   // chatten finns redan i lobbyn
   } else {
     showScreen('screen-game');
     // Var del ritas för sig: ett fel i t.ex. bordet får aldrig ta knapparna med sig.

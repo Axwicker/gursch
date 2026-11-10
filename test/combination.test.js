@@ -84,3 +84,10 @@ test('[R27] five-of-a-kind och quint two identifieras', () => {
   assert.ok(!isQuintTwo(hand('K', 'K', 'K', 'K', '7')));
   assert.equal(evaluateCombination(hand('2', '2', '2', '7', '7')).value, 2);
 });
+
+test('[R25] lika värde och typ: färre 7:or vinner (rapport runda 12)', () => {
+  assert.ok(compareCombinations(hand('A', 'A', '7'), hand('A', '7', '7')) > 0, 'A,A,7 tar över A,7,7');
+  assert.ok(compareCombinations(hand('A', '7', '7'), hand('A', 'A', '7')) < 0, 'A,7,7 tar inte över A,A,7');
+  assert.equal(compareCombinations(hand('K', 'K', '7'), hand('K', 'K', '7')), 0, 'lika många 7:or: sist lagd vinner');
+  assert.ok(compareCombinations(hand('A', '7', '7'), hand('K', 'K', '7')) > 0, 'högre värde vinner som förut, även med fler 7:or');
+});

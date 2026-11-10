@@ -1,0 +1,277 @@
+{
+  "log": {
+    "seed": 1239175507,
+    "events": [
+      {
+        "t": 1791660016618,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D10",
+            "C9"
+          ]
+        },
+        "playerId": "58e56976-2337-4937-aa09-cb1c258a8de0"
+      },
+      {
+        "t": 1791660018338,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D3",
+            "H12"
+          ]
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660019843,
+        "action": {
+          "type": "propose",
+          "count": 1
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660024558,
+        "action": {
+          "type": "propose",
+          "count": 1
+        },
+        "playerId": "58e56976-2337-4937-aa09-cb1c258a8de0"
+      },
+      {
+        "t": 1791660026561,
+        "tick": true
+      },
+      {
+        "t": 1791660027356,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "S9"
+          ]
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660027568,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D11"
+          ]
+        },
+        "playerId": "58e56976-2337-4937-aa09-cb1c258a8de0"
+      },
+      {
+        "t": 1791660029272,
+        "action": {
+          "type": "propose",
+          "count": 1
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660031389,
+        "action": {
+          "type": "propose",
+          "count": 1
+        },
+        "playerId": "58e56976-2337-4937-aa09-cb1c258a8de0"
+      },
+      {
+        "t": 1791660033389,
+        "tick": true
+      },
+      {
+        "t": 1791660034203,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D6"
+          ]
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660047038,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "D9"
+          ]
+        },
+        "playerId": "58e56976-2337-4937-aa09-cb1c258a8de0"
+      },
+      {
+        "t": 1791660048394,
+        "action": {
+          "type": "propose",
+          "count": 1
+        },
+        "playerId": "58e56976-2337-4937-aa09-cb1c258a8de0"
+      },
+      {
+        "t": 1791660048631,
+        "action": {
+          "type": "propose",
+          "count": 1
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660050631,
+        "tick": true
+      },
+      {
+        "t": 1791660051367,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "C6"
+          ]
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660055531,
+        "action": {
+          "type": "discard",
+          "cardIds": [
+            "H8"
+          ]
+        },
+        "playerId": "58e56976-2337-4937-aa09-cb1c258a8de0"
+      },
+      {
+        "t": 1791660057199,
+        "action": {
+          "type": "stay"
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660058488,
+        "action": {
+          "type": "pass"
+        },
+        "playerId": "58e56976-2337-4937-aa09-cb1c258a8de0"
+      },
+      {
+        "t": 1791660059415,
+        "action": {
+          "type": "pass"
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660060888,
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "C14",
+            "S14",
+            "H7"
+          ]
+        },
+        "playerId": "58e56976-2337-4937-aa09-cb1c258a8de0"
+      },
+      {
+        "t": 1791660062540,
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "D14",
+            "S7",
+            "D7"
+          ]
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660068822,
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "S2",
+            "C2"
+          ]
+        },
+        "playerId": "ed463a68-42ec-4025-bde9-b4948d04483b"
+      },
+      {
+        "t": 1791660072574,
+        "action": {
+          "type": "play",
+          "cardIds": [
+            "H11",
+            "H2"
+          ]
+        },
+        "playerId": "58e56976-2337-4937-aa09-cb1c258a8de0"
+      }
+    ],
+    "format": "gursch-round",
+    "result": {
+      "loserId": "58e56976-2337-4937-aa09-cb1c258a8de0",
+      "balances": {
+        "58e56976-2337-4937-aa09-cb1c258a8de0": 400,
+        "ed463a68-42ec-4025-bde9-b4948d04483b": -400
+      },
+      "miniLevel": 0,
+      "loserValue": 13,
+      "multiplier": 10
+    },
+    "players": [
+      {
+        "id": "58e56976-2337-4937-aa09-cb1c258a8de0",
+        "isBot": false,
+        "balance": 530,
+        "botLevel": null,
+        "nickname": "Vän 1"
+      },
+      {
+        "id": "ed463a68-42ec-4025-bde9-b4948d04483b",
+        "isBot": false,
+        "balance": -530,
+        "botLevel": null,
+        "nickname": "Vän 2"
+      }
+    ],
+    "version": 1,
+    "settings": {
+      "sound": true,
+      "maxSlasks": 3,
+      "animations": true,
+      "chatEnabled": true,
+      "turnSeconds": 45,
+      "miniGurschCap": 0,
+      "flopMultFactor": 1,
+      "multiplierMode": "fixed",
+      "multiplierValue": 10,
+      "slaskCallSeconds": 7,
+      "negotiationSeconds": 20
+    },
+    "startedAt": 1791660011475,
+    "inProgress": false,
+    "dealerIndex": 1,
+    "roundNumber": 12
+  },
+  "room": "B8SN",
+  "format": "gursch-report",
+  "version": 1,
+  "category": "regel",
+  "createdAt": "2026-10-10T19:22:08.585Z",
+  "appVersion": "0.1.1",
+  "reportedBy": "Vän 2",
+  "description": "Vän 1:s A,A,7 borde vinna över mina A,7,7 eftersom hen lägger fler ess",
+  "phaseWhenReported": "ROUND_RESULT",
+  "expect": [
+    {
+      "event": 21,
+      "trickWinner": "58e56976-2337-4937-aa09-cb1c258a8de0"
+    }
+  ],
+  "note": "R25 (ändrad 2026-11-10): vid lika värde och typ vinner färst 7:or. Vän 2:s A,7,7 tar inte över Vän 1:s A,A,7."
+}

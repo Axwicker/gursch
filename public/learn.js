@@ -85,7 +85,7 @@ export const LEARN_SLIDES = [
   {
     title: 'Vem vinner sticket?',
     text: 'Ett senare spel tar över bara om det är minst lika högt och minst lika rent (clean slår semi-mixed), '
-      + 'och bättre i något av dem. Mixed vinner aldrig. Vid exakt lika vinner den som lade sist.',
+      + 'och bättre i något av dem. Mixed vinner aldrig. Är två semi-mixed lika höga vinner den med färst 7:or, annars den som lade sist.',
     rows: [
       { cards: ['8C', '8H'], text: 'Utspel: två åttor (clean)' },
       { cards: ['AS', '7D'], text: 'Tar inte över: högre, men semi-mixed är mindre rent' },
