@@ -17,6 +17,9 @@ const secureRng = () => randomInt(2 ** 47) / 2 ** 47;
  */
 const roomRng = () => (process.env.GURSCH_SEED ? seededRandom(Number(process.env.GURSCH_SEED)) : secureRng);
 
+export const HOST_GRACE_MS = 30_000;          // [A4] så länge får hosten vara borta innan rollen lämnas över
+export const LOBBY_OFFLINE_MS = 2 * 60_000;   // [A4] så länge får en spelare vara borta i lobbyn
+
 export class RoomManager {
   constructor({ onBroadcast, onError } = {}) {
     this.rooms = new Map();          // code -> room
@@ -208,6 +211,11 @@ export class RoomManager {
   sweep() {
     const now = Date.now();
     for (const [code, room] of this.rooms) {
+      // [A4] Hosten kan ha försvunnit när ingen annan var ansluten, och spökplatser ska inte blockera rummet.
+      const newHost = room.game.ensureConnectedHost(HOST_GRACE_MS);
+      const removed = room.game.removeOfflineFromLobby(LOBBY_OFFLINE_MS);
+      for (const id of removed) room.tokens.delete(id);
+      if (newHost || removed.length) this.onBroadcast?.(room);
       // Bottar räknas inte: ett rum med bara bottar kvar ska städas bort.
       const anyConnected = room.game.players.some((p) => p.connected && !p.isBot);
       if (!anyConnected) {

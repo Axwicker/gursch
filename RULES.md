@@ -174,7 +174,8 @@ tillåtna drag (`legalPlays`) används av servern, bottarna, timern och gränssn
 
 **A4.** Nya spelare kan gå med i lobbyn eller mellan rundor, men ingen kan lämna mitt i en
 runda. En host som varit frånkopplad i 30 s ersätts av en ansluten spelare. En bot kan
-aldrig vara host.
+aldrig vara host. Hosten kan ta bort spelare i lobbyn. En spelare som varit borta i 2 minuter
+i lobbyn och inte spelat om några pengar tas bort automatiskt.
 
 **A5.** Inställningar kontrolleras på servern och kan bara ändras mellan rundor.
 
@@ -190,6 +191,11 @@ uppvänd dam, så du vinner floppen. Bottarna synar din första slask men ingen 
 synar aldrig varandra. En guide förklarar varje moment första gången det händer och pausar
 spelet medan den pratar. Knapparna syns ändå, och trycker du på ett drag fortsätter spelet.
 Ingen annan kan gå med. Efter första rundan spelar man vidare som vanligt.
+
+**A8.** En frånkopplad spelare stoppar inte spelet. I förhandlingen behöver bara de anslutna
+vara överens. Har en frånkopplad spelare turen, eller väntar spelet på hens kortval, görs det
+passiva draget efter 20 s, även om turtimern är av. Den som kommer tillbaka i tid fortsätter
+som vanligt med full tid.
 
 ---
 

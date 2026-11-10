@@ -42,6 +42,7 @@ export const DEFAULT_SETTINGS = {
 const MAX_ROUND_LOGS = 20;
 const MAX_PAUSE_MS = 3 * 60 * 1000;  // en paus släpper av sig själv efter 3 minuter           // så många avslutade rundor sparas för felrapporter
 const AGREE_CONFIRM_MS = 2000;       // när alla är överens: så länge hinner man ändra sig
+export const OFFLINE_TURN_MS = 20_000;   // [A8] så länge väntar spelet på en frånkopplad spelare
 export const TIEBREAK_SETTLE_MS = 2500;  // [R31] så länge syns det sista dragna kortet före resultatet
 export const REVEAL_MS = 3000;       // [R11] ett ensamt draget kort syns så här länge när det dras
 export const BOT_LEVELS = ['easy', 'medium', 'hard'];
@@ -164,6 +165,27 @@ export class GurschGame {
     this.removePlayer(botId);
   }
 
+  /** [A4] Host tar bort en spelare i lobbyn eller mellan rundor (t.ex. en spökplats). */
+  kickPlayer(playerId, targetId) {
+    this.requireHost(playerId);
+    if (targetId === playerId) throw new GameError('Du kan inte ta bort dig själv');
+    if (!this.players.some((p) => p.id === targetId)) throw new GameError('Spelaren finns inte');
+    this.removePlayer(targetId);
+  }
+
+  /**
+   * [A4] Städar spökplatser i lobbyn: spelare som varit borta länge och inte spelat om några pengar.
+   * Saldon rörs aldrig, så den som kommer tillbaka mellan rundor har kvar sin plats.
+   */
+  removeOfflineFromLobby(minOfflineMs) {
+    if (this.phase !== PHASE.LOBBY) return [];
+    const now = this.now();
+    const gone = this.players.filter((p) => !p.isBot && !p.connected && p.balance === 0
+      && p.disconnectedAt && now - p.disconnectedAt >= minOfflineMs).map((p) => p.id);
+    for (const id of gone) this.removePlayer(id);
+    return gone;
+  }
+
   removePlayer(id) {
     if (this.phase !== PHASE.LOBBY && this.phase !== PHASE.ROUND_RESULT && this.phase !== PHASE.ENDED) {
       throw new GameError('Du kan inte lämna mitt i en runda');
@@ -179,14 +201,29 @@ export class GurschGame {
 
   setConnected(id, connected) {
     const p = this.players.find((x) => x.id === id);
-    if (!p) return;
+    if (!p || p.connected === connected) return;
     p.connected = connected;
+    p.disconnectedAt = connected ? null : this.now();
+    if (!this.round || [PHASE.LOBBY, PHASE.ROUND_RESULT, PHASE.ENDED].includes(this.phase)) return;
+    // [A8] Påverkar enighet och timers, så det måste med i loggen för att uppspelningen ska stämma.
+    this.record(this.round, { connected, playerId: id });
+    if (this.phase === PHASE.NEGOTIATION) this.updateAgreement();
+    if (this.phase === PHASE.DISCARD_SELECT) this.scheduleOfflineDiscard();
+    if (this.currentTurnPlayerId() === id) { this.turnKey = null; this.refreshTurnTimer(); }
   }
 
-  /** En frånkopplad host får inte låsa rummet: lämna över till en ansluten spelare. */
-  ensureConnectedHost() {
+  isConnected(id) {
+    return Boolean(this.players.find((p) => p.id === id)?.connected);
+  }
+
+  /**
+   * En frånkopplad host får inte låsa rummet: lämna över till en ansluten spelare.
+   * minOfflineMs: ge hosten en stund att ladda om sidan.
+   */
+  ensureConnectedHost(minOfflineMs = 0) {
     const host = this.players.find((p) => p.id === this.hostId);
     if (host?.connected) return false;
+    if (host?.disconnectedAt && this.now() - host.disconnectedAt < minOfflineMs) return false;
     const next = this.players.find((p) => p.connected && !p.isBot);
     if (!next) return false;
     this.hostId = next.id;
@@ -410,7 +447,9 @@ export class GurschGame {
   refreshTurnTimer() {
     const turnPlayerId = this.pendingSlask ? null : this.currentTurnPlayerId();
     const seconds = this.settings.turnSeconds;
-    if (!turnPlayerId || !seconds || this.phase === PHASE.ROUND_RESULT || this.phase === PHASE.LOBBY) {
+    // [A8] En frånkopplad spelare får en kort frist, även när turtimern är av - annars låser hen rundan.
+    const offline = Boolean(turnPlayerId) && !this.isConnected(turnPlayerId);
+    if (!turnPlayerId || (!seconds && !offline) || this.phase === PHASE.ROUND_RESULT || this.phase === PHASE.LOBBY) {
       this.turnDeadline = null;
       this.turnKey = null;
       return;
@@ -418,7 +457,7 @@ export class GurschGame {
     const key = `${this.roundNumber}:${this.phase}:${turnPlayerId}:${this.moveCount}`;
     if (key === this.turnKey) return;
     this.turnKey = key;
-    this.turnDeadline = this.now() + seconds * 1000;
+    this.turnDeadline = this.now() + Math.min(seconds ? seconds * 1000 : Infinity, offline ? OFFLINE_TURN_MS : Infinity);
   }
 
   /** Draget som görs åt en spelare vars tid tagit slut: alltid det passiva alternativet. */
@@ -512,7 +551,10 @@ export class GurschGame {
     const reveal = this.round.revealUntil ?? null;
     const soonest = (t) => (reveal && (!t || reveal < t) ? reveal : t);
     if (this.phase === PHASE.NEGOTIATION) return soonest(this.round.negotiation.confirmAt ?? this.round.negotiation.deadline);
-    if (this.phase === PHASE.DISCARD_SELECT) return soonest(this.round.discardSelect.deadline);
+    if (this.phase === PHASE.DISCARD_SELECT) {
+      const { deadline, offlineAt } = this.round.discardSelect;
+      return soonest(deadline && offlineAt ? Math.min(deadline, offlineAt) : deadline ?? offlineAt ?? null);
+    }
     if (this.phase === PHASE.TIEBREAK_DRAW && this.round.tiebreak.settleAt) return this.round.tiebreak.settleAt;
     return soonest(this.turnDeadline);
   }
@@ -554,6 +596,7 @@ export class GurschGame {
       if (r.negotiation.confirmAt) r.negotiation.confirmAt += shift;
     }
     if (r?.discardSelect?.deadline) r.discardSelect.deadline += shift;
+    if (r?.discardSelect?.offlineAt) r.discardSelect.offlineAt += shift;
     if (r?.revealUntil) r.revealUntil += shift;
     if (r?.tiebreak?.settleAt) r.tiebreak.settleAt += shift;
     const pausedBy = this.paused.playerId;
@@ -824,8 +867,9 @@ export class GurschGame {
   /** Startar (eller bryter) bekräftelsen när alla visar samma tal. */
   updateAgreement() {
     const n = this.round.negotiation;
-    const values = n.participants.map((id) => n.proposals.get(id));
-    const agreed = values.every((v) => v !== null && v === values[0]) ? values[0] : null;
+    // [A8] Bara de anslutna behöver vara överens: en frånkopplad spelare ska inte kunna stoppa det.
+    const values = n.participants.filter((id) => this.isConnected(id)).map((id) => n.proposals.get(id));
+    const agreed = values.length && values.every((v) => v !== null && v === values[0]) ? values[0] : null;
     if (agreed !== null && agreed !== n.agreedCount) {
       n.agreedCount = agreed;
       n.confirmAt = this.now() + AGREE_CONFIRM_MS;
@@ -873,10 +917,20 @@ export class GurschGame {
       participants,
       selections: new Map(),
       deadline: seconds ? this.now() + seconds * 1000 : null,
+      offlineAt: null,
     };
     for (const p of this.players) p.status = null;
     this.phase = PHASE.DISCARD_SELECT;
+    this.scheduleOfflineDiscard();
     this.pushEvent({ type: 'negotiationAgreed', count, participants });
+  }
+
+  /** [A8] Väntar någon frånkopplad i kortvalet väljs korten åt hen efter en kort frist. */
+  scheduleOfflineDiscard() {
+    const ds = this.round.discardSelect;
+    const waiting = ds.participants.some((id) => !ds.selections.has(id) && !this.isConnected(id));
+    if (!waiting) ds.offlineAt = null;
+    else if (!ds.offlineAt) ds.offlineAt = this.now() + OFFLINE_TURN_MS;
   }
 
   actSelectDiscard(playerId, cardIds) {
@@ -900,13 +954,16 @@ export class GurschGame {
 
   tickDiscardSelect() {
     const ds = this.round.discardSelect;
-    if (!ds.deadline || this.now() < ds.deadline) return false;
+    const expired = Boolean(ds.deadline) && this.now() >= ds.deadline;
+    const offlineDue = Boolean(ds.offlineAt) && this.now() >= ds.offlineAt;
+    if (!expired && !offlineDue) return false;
     for (const id of ds.participants) {
-      if (ds.selections.has(id)) continue;
+      if (ds.selections.has(id) || (!expired && this.isConnected(id))) continue;
       ds.selections.set(id, this.autoDiscardSelection(id, ds.count));
       this.pushEvent({ type: 'timeout', playerId: id, action: 'discard' });
     }
-    this.finishDiscardSelect();
+    ds.offlineAt = null;
+    if (ds.participants.every((id) => ds.selections.has(id))) this.finishDiscardSelect();
     return true;
   }
 

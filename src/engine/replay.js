@@ -35,6 +35,8 @@ export function applyEvent(game, clock, event) {
     game.pause(event.playerId, { reason: event.reason ?? 'report' });
   } else if (event.resume) {
     game.resume(event.playerId, { force: true });
+  } else if ('connected' in event) {
+    game.setConnected(event.playerId, event.connected);
   } else {
     game.handleAction(event.playerId, event.action);
   }

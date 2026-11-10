@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { RoomManager } from './rooms.js';
+import { RoomManager, HOST_GRACE_MS } from './rooms.js';
 import { createStore } from './store.js';
 import { GameError, BOT_LEVELS } from '../engine/game.js';
 import {
@@ -19,7 +19,6 @@ const PUBLIC_DIR = path.join(__dirname, '../../public');
 const ENGINE_DIR = path.join(__dirname, '../engine');
 const REPORTS_DIR = path.join(__dirname, '../../reports');
 const PORT = process.env.PORT || 3000;
-const HOST_GRACE_MS = 30_000;
 const VERSION = JSON.parse(readFileSync(path.join(__dirname, '../../package.json'), 'utf8')).version;
 const REPORT_CATEGORIES = ['regel', 'bugg', 'utseende', 'annat'];
 const REPORTS_PER_MINUTE = 3;
@@ -179,10 +178,16 @@ io.on('connection', (socket) => {
     // en annan spelares plats (och se dess dolda kort) med hjälp av det publika id:t.
     const reconnecting = Boolean(playerId && token && room.tokens.get(playerId) === token
       && game.players.some((p) => p.id === playerId));
+    // Samma socket försöker gå med igen (dubbelklick, eller klick som buffrats under en kallstart):
+    // svara med platsen den redan har i stället för att skapa en spökspelare.
+    if (!reconnecting && socket.data.code === room.code && room.sockets.has(socket.id)) {
+      return ack(cb, { ok: true, code: room.code, playerId: socket.data.playerId, token: room.tokens.get(socket.data.playerId), reconnected: false });
+    }
     let id = playerId;
     let secret = token;
     if (reconnecting) {
       game.setConnected(id, true);
+      game.ensureConnectedHost(HOST_GRACE_MS);   // hosten kan ha försvunnit medan alla var borta
     } else if (reconnectOnly) {
       // Automatisk återanslutning får aldrig skapa en ny spelare.
       return ack(cb, { error: 'Din plats i rummet finns inte längre - gå med igen' });
@@ -249,6 +254,23 @@ io.on('connection', (socket) => {
 
   socket.on('removeBot', ({ botId } = {}, cb) => {
     withRoom(socket, cb, (room, playerId) => room.game.removeBot(playerId, botId));
+  });
+
+  socket.on('kickPlayer', ({ targetId } = {}, cb) => {
+    withRoom(socket, cb, (room, playerId) => {
+      room.game.kickPlayer(playerId, targetId);
+      room.tokens.delete(targetId);
+      for (const [socketId, id] of room.sockets) {
+        if (id !== targetId) continue;
+        room.sockets.delete(socketId);
+        const target = io.sockets.sockets.get(socketId);
+        if (!target) continue;
+        target.leave(room.code);
+        target.data.code = null;
+        target.data.playerId = null;
+        target.emit('kicked');
+      }
+    });
   });
 
   socket.on('updateSettings', (settings = {}, cb) => {

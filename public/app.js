@@ -39,6 +39,12 @@ const store = {
 let S = null;        // publikt state
 let P = { hand: [], actions: [] };  // privat state
 let me = null;
+let online = true;   // falskt från att anslutningen tappas tills servern tagit tillbaka oss i rummet
+/** Anslutningen är tillbaka och vi är med i rummet igen: dragen släpps på och bannern försvinner. */
+function markOnline() {
+  online = true;
+  document.getElementById('conn-banner').hidden = true;
+}
 let code = null;
 let selected = new Set();
 let lastPhase = null;
@@ -109,6 +115,7 @@ function nickOf(id) { return S?.players.find((p) => p.id === id)?.nickname ?? '?
 function animationsOn() { return S ? S.settings.animations : true; }
 
 function emit(event, payload = {}) {
+  if (!online) { toast('Inte ansluten – försök igen om en stund', true); return; }
   if (event === 'action') coach.beforeAction();   // guiden stänger och fortsätter spelet före draget
   socket.emit(event, payload, (res) => {
     if (res?.error) toast(res.error, true);
@@ -245,13 +252,30 @@ function requireNickname(field = $('player-nick')) {
   return nickname;
 }
 
+/**
+ * Skapa rum och gå med: bara ett anrop åt gången. Annars ger ett dubbelklick, eller klick som
+ * buffras medan servern vaknar, flera rum eller en spökspelare.
+ */
+let roomBusy = false;
+function roomRequest(event, payload, done) {
+  if (roomBusy) return;
+  roomBusy = true;
+  const slow = setTimeout(() => { $('home-error').textContent = 'Startar servern, det kan ta upp till en minut …'; }, 2500);
+  socket.emit(event, payload, (res) => {
+    clearTimeout(slow);
+    roomBusy = false;
+    if (!res.error) $('home-error').textContent = '';
+    done(res);
+  });
+}
+
 /** tutorial: övningsrundan. Där behövs inget namn - bottarna bryr sig inte. */
 function createRoom(bots, botLevel = 'medium', { tutorial = false } = {}) {
   const typed = tutorial ? $('player-nick').value.trim() : requireNickname();
   if (!tutorial && !typed) return;
   const nickname = typed || store.nickname || 'Gäst';
   if (typed) store.nickname = typed;
-  socket.emit('createRoom', { nickname, settings: {}, bots, botLevel, tutorial }, (res) => {
+  roomRequest('createRoom', { nickname, settings: {}, bots, botLevel, tutorial }, (res) => {
     if (res.error) return ($('home-error').textContent = res.error);
     store.playerId = res.playerId; store.token = res.token; store.room = res.code;
     me = res.playerId; code = res.code;
@@ -267,7 +291,7 @@ function joinRoom(roomCode) {
   const nickname = requireNickname($('player-nick-join'));
   if (!nickname) return;
   store.nickname = nickname;
-  socket.emit('joinRoom', { code: roomCode, nickname, playerId: store.playerId || undefined, token: store.token || undefined }, (res) => {
+  roomRequest('joinRoom', { code: roomCode, nickname, playerId: store.playerId || undefined, token: store.token || undefined }, (res) => {
     if (res.error) return ($('home-error').textContent = res.error);
     store.playerId = res.playerId; store.token = res.token; store.room = res.code;
     me = res.playerId; code = res.code;
@@ -300,6 +324,7 @@ function goHome() {
   coach.reset();
   store.room = null;
   S = null; code = null;
+  syncWakeLock();
   selected.clear();
   history.replaceState({}, '', '/');
   setInvitedLayout(false);
@@ -440,6 +465,15 @@ function renderLobby() {
       rm.setAttribute('aria-label', `Ta bort ${p.nickname}`);
       rm.onclick = () => emit('removeBot', { botId: p.id });
       li.append(rm);
+    }
+    if (!p.isBot && p.id !== me && isHostView) {
+      const kick = el('button', 'gk-btn gk-ghost-dark btn-remove-bot');
+      kick.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>';
+      kick.title = `Ta bort ${p.nickname}`;
+      kick.setAttribute('aria-label', `Ta bort ${p.nickname}`);
+      const remove = () => emit('kickPlayer', { targetId: p.id });
+      kick.onclick = () => (p.connected ? confirmDialog({ title: `Ta bort ${p.nickname}?`, text: 'Spelaren lämnar rummet.', confirm: 'Ta bort', onConfirm: remove }) : remove());
+      li.append(kick);
     }
   });
   syncChildren(list, entries.map((e) => e.node));
@@ -1143,6 +1177,8 @@ function createActionNode(type) {
   const b = el('button', ACTION_CLASS[type]);
   b.onclick = () => {
     if (!P.actions.some((a) => a.type === type)) return;
+    // Annars hade markeringen rensats för ett drag som aldrig skickas.
+    if (!online) { toast('Inte ansluten – försök igen om en stund', true); return; }
     if (type === 'tiebreakPick') {
       const options = P.actions.find((a) => a.type === type).options;
       emit('action', { type, index: options[Math.floor(Math.random() * options.length)] });
@@ -2064,6 +2100,7 @@ socket.on('state', ({ code: roomCode, you, state, private: priv, events, serverT
   else if (events?.length) handleEvents(events.filter((e) => e.type === 'money'));
   lastPhase = S.phase;
   statesSeen += 1;
+  syncWakeLock();
   try { coach.update({ S, P, me, code, nick: nickOf }); } catch (err) { reportClientError(err); }
 });
 
@@ -2072,6 +2109,7 @@ socket.on('connect', () => {
   const roomCode = urlCode || store.room;
   if (roomCode && store.playerId) {
     socket.emit('joinRoom', { code: roomCode, playerId: store.playerId, token: store.token, reconnectOnly: true }, (res) => {
+      markOnline();
       if (res.error) {
         // Felet är bara intressant om spelaren faktiskt var med i just det här rummet.
         const wasInRoom = store.room === roomCode;
@@ -2087,15 +2125,43 @@ socket.on('connect', () => {
         toast('Återansluten');
       }
     });
-  } else if (urlCode) {
-    showInvite(urlCode);
-    showScreen('screen-home');
+  } else {
+    markOnline();
+    if (urlCode) {
+      showInvite(urlCode);
+      showScreen('screen-home');
+    }
   }
   leavingOnPurpose = false;
 });
 
 let leavingOnPurpose = false;   // "Lämna spelet" kopplar ned med flit - inget felmeddelande då
-socket.on('disconnect', () => { if (!leavingOnPurpose) toast('Tappade anslutningen – försöker återansluta…', true); });
+socket.on('disconnect', () => {
+  if (leavingOnPurpose) return;
+  online = false;
+  if (S) $('conn-banner').hidden = false;
+  else toast('Tappade anslutningen – försöker återansluta…', true);
+});
+socket.on('kicked', () => {
+  goHome();
+  toast('Du togs bort från rummet', true);
+});
+
+/** Håller skärmen tänd under spelet: en telefon som låser sig tappar anslutningen. */
+let wakeLock = null;
+let wakeLockPending = false;
+async function syncWakeLock() {
+  const want = Boolean(S) && document.visibilityState === 'visible' && 'wakeLock' in navigator;
+  if (!want) { wakeLock?.release(); wakeLock = null; return; }
+  if (wakeLock || wakeLockPending) return;
+  wakeLockPending = true;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release', () => { wakeLock = null; });
+  } catch { /* ingen fara: telefonen låser sig bara som vanligt */ }
+  wakeLockPending = false;
+}
+document.addEventListener('visibilitychange', syncWakeLock);
 
 // Init
 // Övergångarna slås på först när sidan har ritats (se .gk-laddar i gk.css).

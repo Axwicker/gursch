@@ -62,6 +62,7 @@ function describe(game, event) {
   if (event.expireSlask) return '⏱  slaskfönstret stängs (ingen synade)';
   if (event.pause) return `⏸  ${nick(event.playerId)} pausar (skriver en felrapport)`;
   if (event.resume) return `▶  spelet fortsätter${event.auto ? ' (pausen släppte efter 3 min)' : ''}`;
+  if ('connected' in event) return `${event.connected ? '🔌' : '⚡'} ${nick(event.playerId)} ${event.connected ? 'återansluter' : 'tappar anslutningen'}`;
   const { type, cardIds = [], count } = event.action;
   const cards = cardIds.map((id) => label(findCard(game, id))).join(' ');
   const who = nick(event.playerId);
