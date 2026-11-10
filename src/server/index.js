@@ -8,6 +8,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { RoomManager, HOST_GRACE_MS } from './rooms.js';
+import { RateLimiter } from './ratelimit.js';
 import { createStore } from './store.js';
 import { GameError, BOT_LEVELS } from '../engine/game.js';
 import {
@@ -23,6 +24,10 @@ const VERSION = JSON.parse(readFileSync(path.join(__dirname, '../../package.json
 const REPORT_CATEGORIES = ['regel', 'bugg', 'utseende', 'annat'];
 const REPORTS_PER_MINUTE = 3;
 const CLIENT_ERRORS_PER_MINUTE = 5;
+// Tak per IP och minut (kompisar bakom samma wifi delar IP, så de är generösa).
+const LIMITS = { createRoom: 20, joinRoom: 60, roomInfo: 60, chat: 30 };
+const ROOM_NOT_FOUND = { error: 'Rummet finns inte – kontrollera koden eller skapa ett nytt', notFound: true };
+const TOO_MANY = { error: 'För många försök – vänta en stund' };
 
 /**
  * Klientens skärm och webbläsare i en rapport (fönsterstorlek, zoom, om knapparna syns).
@@ -51,13 +56,20 @@ process.on('unhandledRejection', (err) => logError(null, err));
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: '*' } });
+// Komprimerar större uppdateringar: ett helt spelläge är 3–29 kB och går till alla vid varje drag.
+const io = new Server(httpServer, { cors: { origin: '*' }, perMessageDeflate: { threshold: 1024 } });
 
+// Bilderna byter filnamn om de ändras; JS och CSS saknar version i namnet och får ingen cache.
+app.use('/assets', express.static(path.join(PUBLIC_DIR, 'assets'), { maxAge: '7d' }));
 app.use(express.static(PUBLIC_DIR));
 // Klienten importerar kombinationsreglerna härifrån för förhandsvisning av valda kort.
 // Servern är fortfarande ensam om att avgöra - samma kod, en sanning.
 app.use('/engine', express.static(ENGINE_DIR));
-app.get('/health', (_req, res) => res.json({ ok: true, version: VERSION, rooms: manager.rooms.size }));
+app.get('/health', (_req, res) => {
+  store.checkReports();
+  // reports är "error" om felrapporterna inte går att spara. ok är bara om servern själv lever (Render läser det).
+  res.json({ ok: true, version: VERSION, rooms: manager.rooms.size, reports: store.reportsStatus });
+});
 // Regelsidan är en statisk, indexerbar sida (genereras av scripts/build-regler.js).
 app.get('/regler', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'regler.html')));
 // Inbjudningslänkar är privata och ska inte indexeras av sökmotorer.
@@ -67,7 +79,12 @@ app.get('/join/:code', (_req, res) => {
 });
 
 const manager = new RoomManager({ onBroadcast: (room) => broadcast(room), onError: logError });
-setInterval(() => manager.sweep(), 60_000).unref?.();
+const limiter = new RateLimiter();
+setInterval(() => { manager.sweep(); limiter.prune(); }, 60_000).unref?.();
+
+/** Klientens IP. Bakom Render/Cloudflare står den i x-forwarded-for. */
+const clientIp = (socket) => String(socket.handshake.headers['x-forwarded-for'] ?? socket.handshake.address).split(',')[0].trim();
+const allowed = (socket, event) => limiter.allow(`${event}:${clientIp(socket)}`, LIMITS[event]);
 
 /** Skickar publikt state till alla och privat state till rätt spelare. */
 function broadcast(room) {
@@ -147,7 +164,14 @@ function attachSocket(socket, room, playerId) {
 }
 
 io.on('connection', (socket) => {
+  // Alla händelser väntar sig ett objekt: null eller en sträng från en trasig klient blir ett tomt.
+  socket.use((packet, next) => {
+    if (packet[1] === null || ['string', 'number', 'boolean'].includes(typeof packet[1])) packet[1] = {};
+    next();
+  });
+
   socket.on('createRoom', ({ nickname, settings, bots = 0, botLevel = 'medium', tutorial = false } = {}, cb) => {
+    if (!allowed(socket, 'createRoom')) return ack(cb, TOO_MANY);
     if (!nickname || !String(nickname).trim()) return ack(cb, { error: 'Skriv ett nickname' });
     // Övningsrundan: egna inställningar och bottar, och den börjar direkt (ingen lobby).
     const room = tutorial
@@ -171,8 +195,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('joinRoom', ({ code, nickname, playerId, token, reconnectOnly } = {}, cb) => {
+    if (!allowed(socket, 'joinRoom')) return ack(cb, TOO_MANY);
     const room = manager.getRoom(code);
-    if (!room) return ack(cb, { error: 'Fel rumskod' });
+    if (!room) return ack(cb, ROOM_NOT_FOUND);
     const game = room.game;
     // Återanslutning kräver rätt token - annars kunde vem som helst ta över
     // en annan spelares plats (och se dess dolda kort) med hjälp av det publika id:t.
@@ -208,8 +233,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('roomInfo', ({ code } = {}, cb) => {
+    if (!allowed(socket, 'roomInfo')) return ack(cb, TOO_MANY);
     const room = manager.getRoom(code);
-    if (!room) return ack(cb, { error: 'Fel rumskod' });
+    if (!room) return ack(cb, ROOM_NOT_FOUND);
     ack(cb, {
       ok: true,
       code: room.code,
@@ -278,6 +304,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('chat', ({ text } = {}, cb) => {
+    if (!allowed(socket, 'chat')) return ack(cb, TOO_MANY);
     withRoom(socket, cb, (room, playerId) => room.game.addChat(playerId, text));
   });
 

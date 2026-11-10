@@ -61,8 +61,8 @@
     <!-- Vänster: lampan, ljuskäglan, ljusovalen och gurkmannen. Skuggan under skorna ingår i bilden. -->
     <div class="home-scene">
       <svg class="home-light" viewBox="0 0 560 800" aria-hidden="true"><polygon points="69,349 200,309 512,716 22,716" fill="#1a3329"/><ellipse cx="270" cy="716" rx="248" ry="50" fill="#28503e"/></svg>
-      <img class="home-lamp" src="/assets/golvlampa.png" alt="" />
-      <img class="home-mascot" src="/assets/gursch-maskot-med-skugga.png" alt="Gurkan: en gurka i fedora, solglasögon och kritstrecksrandig kostym med cigarr" />
+      <img class="home-lamp" src="/assets/golvlampa.webp" alt="" />
+      <img class="home-mascot" src="/assets/gursch-maskot-med-skugga.webp" alt="Gurkan: en gurka i fedora, solglasögon och kritstrecksrandig kostym med cigarr" />
     </div>
 
     <div class="home-main">
@@ -99,7 +99,7 @@
 
       <button id="btn-learn" class="gk-btn gk-ghost-light home-learn" type="button" aria-haspopup="dialog">Ny här? Lär dig Gursch</button>
 
-      <p class="home-error" id="home-error"></p>
+      <p class="home-error" id="home-error" role="alert"></p>
       <div class="home-notes">
         <p class="home-foot">2–5 spelare · en kortlek · alla börjar på 0 kr · <a href="/regler" style="color:inherit">Regler</a></p>
         <p class="home-foot beta-note" id="beta-note">Betaversion – hittar du ett fel, tryck på flaggan i spelet och beskriv det.</p>
@@ -113,7 +113,7 @@
   <div class="lobby-wrap">
     <header class="lobby-head">
       <div class="lobby-brand">
-        <img class="lobby-logo" src="/assets/gursch-marke-sticker-tjock.png" alt="" />
+        <img loading="lazy" class="lobby-logo" src="/assets/gursch-marke-sticker-tjock.webp" alt="" />
         <div>
           <div class="lobby-eyebrow">Rumskod</div>
           <div class="room-code" id="lobby-code">----</div>
@@ -206,7 +206,7 @@
   <div class="game-layout">
     <header class="topbar">
       <div class="topbar-left">
-        <img class="topbar-logo" src="/assets/gursch-marke-sticker-tjock.png" alt="" />
+        <img loading="lazy" class="topbar-logo" src="/assets/gursch-marke-sticker-tjock.webp" alt="" />
         <span class="topbar-title" aria-hidden="true">GURSCH</span>
         <div class="topbar-tags">
           <span class="chip chip-round" id="chip-round">Runda 1</span>
@@ -247,11 +247,11 @@
       <!-- Bordet: fem fåtöljer under en oval med krämfärgad kant och filt (design-handoff/referens/bord.html) -->
       <div class="table">
         <div class="chairs" aria-hidden="true">
-          <div class="chair chair-tl"><img src="/assets/fatolj.png" alt="" /></div>
-          <div class="chair chair-tr"><img src="/assets/fatolj.png" alt="" /></div>
-          <div class="chair chair-left"><img src="/assets/fatolj.png" alt="" /></div>
-          <div class="chair chair-right"><img src="/assets/fatolj.png" alt="" /></div>
-          <div class="chair chair-me"><img src="/assets/fatolj.png" alt="" /></div>
+          <div class="chair chair-tl"><img loading="lazy" src="/assets/fatolj.webp" alt="" /></div>
+          <div class="chair chair-tr"><img loading="lazy" src="/assets/fatolj.webp" alt="" /></div>
+          <div class="chair chair-left"><img loading="lazy" src="/assets/fatolj.webp" alt="" /></div>
+          <div class="chair chair-right"><img loading="lazy" src="/assets/fatolj.webp" alt="" /></div>
+          <div class="chair chair-me"><img loading="lazy" src="/assets/fatolj.webp" alt="" /></div>
         </div>
         <div class="table-rim">
           <div class="felt" id="felt">
@@ -259,7 +259,7 @@
               <!-- Gurktrycket ritas först - allt annat ligger ovanpå. Ordet syns bara när mitten är tom.
                    Det ligger i mitten-rutan så att mobilen kan lägga det i flödet (se CSS). -->
               <div class="table-print" aria-hidden="true">
-                <img src="/assets/gurktryck-filt.png" alt="" />
+                <img loading="lazy" src="/assets/gurktryck-filt.webp" alt="" />
                 <span class="table-print-word">GURSCH</span>
               </div>
               <div class="pause-banner" id="pause-banner" role="status" aria-live="polite" hidden></div>
@@ -312,7 +312,7 @@
   <!-- Guiden i övningsrundan (public/tutorial.js): gurkmannen och en pratbubbla överst på bordet.
        Inte modal - bordet och knapparna går att använda medan den syns. -->
   <div class="coach" id="coach" role="status" aria-live="polite" hidden>
-    <img class="coach-mascot" src="/assets/gursch-maskot-med-skugga.png" alt="" />
+    <img loading="lazy" class="coach-mascot" src="/assets/gursch-maskot-med-skugga.webp" alt="" />
     <div class="gk-panel coach-bubble">
       <p class="coach-text" id="coach-text"></p>
       <div class="coach-actions">
@@ -339,7 +339,7 @@
   <!-- Rundresultatet. Inte modal: toppraden (historik, chatt, lämna) går att nå medan resultatet visas. -->
   <div class="result-overlay" id="result-overlay" role="dialog" aria-labelledby="result-title" aria-describedby="result-why">
     <div class="gk-panel result-box">
-      <img class="result-logo" src="/assets/gursch-marke-sticker-tjock.png" alt="" />
+      <img loading="lazy" class="result-logo" src="/assets/gursch-marke-sticker-tjock.webp" alt="" />
       <div class="result-head">
         <h2 id="result-title" tabindex="-1">Rundan klar</h2>
         <div class="result-meta" id="result-meta"></div>
@@ -358,6 +358,12 @@
     </div>
   </div>
 </section>
+<!-- Liggande telefon: bordet får inte plats bredvid handen (se .rotate-hint i CSS) -->
+<div class="rotate-hint" id="rotate-hint" role="status">
+  <p class="rotate-title">Vrid telefonen</p>
+  <p class="rotate-text">Bordet och dina kort får bara plats när telefonen står upp.</p>
+  <button id="rotate-dismiss" class="gk-btn gk-ghost-light">Spela ändå</button>
+</div>
 
 <!-- Dialoger: krämfärgad panel mitt på skärmen, mörk slöja bakom (utan oskärpa) -->
 <div class="gk-overlay report-overlay" id="report-overlay" role="dialog" aria-modal="true" aria-labelledby="report-title">
@@ -387,7 +393,7 @@
 <div class="gk-overlay learn-overlay" id="learn-overlay" role="dialog" aria-modal="true" aria-labelledby="learn-title" aria-describedby="learn-text">
   <div class="gk-panel gk-dialog learn-box">
     <div class="learn-head">
-      <img class="learn-mascot" src="/assets/gursch-maskot-med-skugga.png" alt="" />
+      <img loading="lazy" class="learn-mascot" src="/assets/gursch-maskot-med-skugga.webp" alt="" />
       <div class="learn-head-text">
         <div class="learn-step" id="learn-step"></div>
         <h2 class="gk-panel-titel" id="learn-title"></h2>
@@ -429,7 +435,7 @@
 <!-- Uppläses av skärmläsare: "Din tur", vem som vann sticket … -->
 <div class="sr-only" id="sr-status" aria-live="polite"></div>
 
-<script src="/socket.io/socket.io.js"></script>
+<script src="/socket.io/socket.io.min.js"></script>
 <script src="/app.js" type="module"></script>
 </body>
 </html>

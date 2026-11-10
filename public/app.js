@@ -283,6 +283,7 @@ function createRoom(bots, botLevel = 'medium', { tutorial = false } = {}) {
   });
 }
 
+$('rotate-dismiss').onclick = () => $('rotate-hint').classList.add('dismissed');
 $('btn-join').onclick = () => joinRoom($('join-code').value.trim().toUpperCase());
 $('join-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btn-join').click(); });
 
@@ -662,8 +663,8 @@ function renderSeats() {
       if (marks.children.length) seat.append(marks);
       if (cards) seat.append(cards);
     }
-    // Smal skärm: den egna platsen ligger längst ned i bordets flöde, under sticket.
-    (strip && p.id === me ? $('seat-me') : seats).append(seat);
+    // Din plats står alltid i bordets flöde, under mitten: den kan då aldrig hamna ovanpå sticket.
+    (p.id === me ? $('seat-me') : seats).append(seat);
   });
 }
 
@@ -1290,6 +1291,7 @@ function countdownFraction() {
   return cd ? Math.min(1, Math.max(0, cd.deadline - timerNow()) / (cd.totalMs || 1)) : 0;
 }
 
+let tenSecondsAnnounced = null;   // den deadline vi redan sagt "10 sekunder kvar" om
 function tickTurnTimer() {
   const clock = $('turn-clock');
   const handBar = $('hand-timer-bar');
@@ -1309,6 +1311,10 @@ function tickTurnTimer() {
     bar.classList.toggle('urgent', urgent);
   }
   const mine = cd.mine;
+  if (mine && secs === 10 && tenSecondsAnnounced !== cd.deadline) {
+    tenSecondsAnnounced = cd.deadline;
+    announce('10 sekunder kvar');
+  }
   // Nedräkningen löper längs underläggets överkant - guld, röd när det är knappt.
   handBar.style.width = `${frac * 100}%`;
   handBar.classList.toggle('urgent', urgent);
@@ -1343,7 +1349,7 @@ $('btn-chat-toggle').onclick = () => {
   setChatUnread(false);
   togglePanel($('chat-panel'), $('chat-input'));
 };
-$('btn-history').onclick = () => togglePanel($('history-panel'), $('history-panel').querySelector('[data-close]'));
+$('btn-history').onclick = () => { togglePanel($('history-panel'), $('history-panel').querySelector('[data-close]')); renderHistory(); };
 for (const b of document.querySelectorAll('[data-close]')) b.onclick = () => closeDialog($(b.dataset.close));
 
 // ---- mobilmenyn (560 px och smalare): HISTORIK, CHATT, RAPPORTERA FEL, LÄMNA SPELET ----
@@ -1408,6 +1414,7 @@ function renderChat() {
 }
 
 function renderHistory() {
+  if (!$('history-panel').classList.contains('open')) return;   // ritas när panelen öppnas (kan vara hundratals rader)
   const box = $('history');
   box.innerHTML = '';
   if (!S.history.length) { box.append(el('p', 'hint', 'Inga transaktioner än.')); return; }
@@ -1994,7 +2001,8 @@ function handleEvents(events) {
         else if (e.playerId !== me) toast('Spelet fortsätter');
         break;
       case 'negotiation': if (e.number > 1) noteTable(`Förhandling ${e.number}: kom överens igen om antal kort`); break;
-      case 'agreementPending': beep(620, .07, 'triangle', .04); break;
+      case 'propose': if (e.playerId !== me) announce(`${nickOf(e.playerId)} föreslår ${e.count} kort`); break;
+      case 'agreementPending': beep(620, .07, 'triangle', .04); announce(`Alla föreslår ${e.count} kort`); break;
       case 'negotiationAgreed': banner(`ALLA ÖVERENS: ${e.count} KORT`); beep(740, .12, 'sine', .05); break;
       case 'negotiationFailed': banner('INGEN ENIGHET – SPELET BÖRJAR'); break;
       case 'slask': banner('SLASK!', 'slask'); chime([392, 294], { gain: 0.04 }); break;
@@ -2006,7 +2014,7 @@ function handleEvents(events) {
         const caller = e.callerId === me ? 'Du' : nickOf(e.callerId);
         // Samma regel som money.js: face cards -> slaskaren betalar 10 kr/st, inga -> synaren betalar 25 kr.
         const text = !e.callerId ? `${mineSlask ? 'Du' : nickOf(e.playerId)} slaskade osynad`
-          : e.faceCards > 0 ? `${caller} synade ${slaskerObj} (${e.hand.join(',')}): ${e.faceCards} face cards – ${slaskerSubj} betalar ${e.amount} kr`
+          : e.faceCards > 0 ? `${caller} synade ${slaskerObj} (${e.hand.join(',')}): ${e.faceCards} face card${e.faceCards === 1 ? '' : 's'} – ${slaskerSubj} betalar ${e.amount} kr`
             : `${caller} synade ${slaskerObj} (${e.hand.join(',')}): inga face cards – ${e.callerId === me ? 'du' : caller} betalar ${e.amount} kr`;
         noteTable(text, 9000);
         noteSeat(e.playerId, e.callerId ? 'Synad' : 'Osynad');
@@ -2117,7 +2125,7 @@ socket.on('connect', () => {
         showScreen('screen-home');
         // Rummen ligger i serverns minne: efter en omstart (ny version, eller när betaservern
         // somnat) finns rummet inte längre. Säg det rakt ut i stället för att bara hamna på start.
-        if (wasInRoom && res.error === 'Fel rumskod') {
+        if (wasInRoom && res.notFound) {
           toast('Servern har startats om och rummet finns inte längre – skapa ett nytt rum', true);
         }
         if (urlCode) { showInvite(urlCode); if (wasInRoom) $('home-error').textContent = res.error; }

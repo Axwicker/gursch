@@ -1,0 +1,23 @@
+name: Håll betan vaken
+
+# Renders gratisplan somnar efter 15 minuter utan trafik, och Supabase pausas efter en vecka.
+# /health håller båda vakna. Misslyckas körningen (servern svarar inte, eller felrapporterna
+# går inte att spara) får repots ägare ett mejl från GitHub.
+# Scheman är ungefärliga, därav var femte minut. En tjänst dygnet runt ryms i Renders 750 h/månad.
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Anropa /health
+        run: |
+          body=$(curl --fail --silent --show-error --max-time 90 https://gursch.beer/health)
+          echo "$body"
+          if echo "$body" | grep -q '"reports":"error"'; then
+            echo "::error::Felrapporterna går inte att spara - är Supabase pausat?"
+            exit 1
+          fi

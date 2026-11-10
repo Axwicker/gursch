@@ -269,7 +269,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 }
 /* Ovalen fyller bredden och tar den höjd som finns - men blir aldrig rundare än 2,2 : 1
    (höga fönster) eller längre än 3,6 : 1 (mycket breda). I 1280 × 800 blir den som referensen. */
-.table { position: relative; display: flex; width: 100%; max-width: 360cqh; height: min(100cqh, 100cqw / 2.2); }
+.table { position: relative; display: flex; width: 100%; height: 38vw;   /* Safari före 16 saknar cq-enheter */
+  max-width: 360cqh; height: min(100cqh, 100cqw / 2.2); }
 .table-rim {
   position: relative; flex: 1; display: flex; padding: 7px;
   border-radius: 9999px; background: var(--gk-kram);
@@ -279,6 +280,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
   position: relative; flex: 1; min-width: 0;
   border-radius: 9999px; border: var(--gk-ram) solid var(--gk-black); background: var(--gk-filt);
   container-type: size;   /* gurktryckets ord skalas med bordet (cqi) */
+  display: flex; flex-direction: column;   /* mitten tar platsen som blir över ovanför din skylt */
 }
 
 /* Fåtöljerna står inskjutna under bordet. Storlek och plats i procent av ovalen. */
@@ -293,8 +295,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 
 /* Gurktrycket: ritas först på filten, halvgenomskinligt så att det följer filtens färg. Det ligger
    i .table-center men placeras mot filten (cqi/cqh = filtens bredd/höjd): 6,6 % ner, 49,4 % brett.
-   z-index -1: bakom allt annat i mitten. */
-.table-print { position: absolute; left: 50%; top: calc(6.6cqh - var(--center-top)); width: 49.4cqi; aspect-ratio: 540 / 214;
+   z-index -1: bakom allt annat i mitten. Mitten börjar överst på filten, så platserna stämmer. */
+.table-print { position: absolute; left: 50%; top: 6.6cqh; width: 50%; width: 49.4cqi; aspect-ratio: 540 / 214;
   translate: -50% 0; z-index: -1; pointer-events: none; }
 .table-print img { display: block; width: 100%; height: 100%; }
 .table-print-word {
@@ -308,12 +310,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .table-center {
   /* Lite högre än referensen (17 %): händelseraden under statusraden tar en egen rad */
   --center-top: 12cqh;
-  position: absolute; left: 50%; top: var(--center-top); translate: -50% 0;
-  width: min(600px, 56%); text-align: center; z-index: 2;
+  /* I flödet: rutan slutar där din skylt börjar, så överskott scrollas i stället för att hamna under skylten.
+     Hela bredden (trycket får plats), innehållet hålls i mitten med sidomarginalerna. */
+  position: relative; flex: 1 1 0; min-height: 0; overflow-y: auto; scrollbar-width: none;
+  padding: var(--center-top) max(22%, calc(50% - 300px)) 4px; text-align: center; z-index: 2;
 }
 .felt.center-empty .table-center { --center-top: 41cqh; }
 /* Lågt bord: mitten börjar högre upp, så att sticket inte når ner till din skylt */
-@container (max-height: 345px) { .felt:not(.center-empty) .table-center { --center-top: 7cqh; } }
+@container (max-height: 400px) { .felt:not(.center-empty) .table-center { --center-top: 6cqh; } }
 .phase-banner {
   font-family: var(--gk-font-rubrik); font-size: 20px; font-weight: 700; line-height: 1;
   letter-spacing: .24em; text-transform: uppercase; color: var(--gk-guld);
@@ -345,12 +349,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 }
 .trick-play.winner .who { color: var(--gk-guld); }
 .trick-play.winner .card { box-shadow: var(--gk-ring), 2px 3px 0 rgba(0,0,0,.42); }
-.trick-area.previous .trick-play { opacity: .55; }
+.trick-area.previous .trick-play .cards { opacity: .7; }   /* namnen behåller sin kontrast */
 .trick-caption { flex-basis: 100%; text-align: center; letter-spacing: .2em; }
 /* Sista sticket (R26): slutvärdet visas, och högst markeras i rött - det förlorar */
 .trick-play .final-value { display: none; }
 .trick-area.final .final-value { display: inline-block; }
-.trick-area.previous.final .trick-play { opacity: 1; }   /* sista sticket ligger kvar fullt synligt */
+.trick-area.previous.final .trick-play .cards { opacity: 1; }   /* sista sticket ligger kvar fullt synligt */
 .trick-area.final .trick-play .combo:not(.final-value) { display: none; }
 .trick-play.highest .who { color: var(--gk-minus-morkt); }
 .trick-play.highest .card { box-shadow: var(--gk-ring-rod), 2px 3px 0 rgba(0,0,0,.42); }
@@ -361,14 +365,16 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
  */
 /* Skyltarna tar aldrig klick: de har inga knappar, och korten på bordet (dragningen) kan ligga under dem. */
 .seats { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+/* Din plats: en egen rad i bordets flöde (märkena under skylten) */
+.seat-me { position: relative; z-index: 3; flex: none; display: flex; justify-content: center; padding-bottom: clamp(8px, 3.8cqh, 16px); pointer-events: none; }
 .seat-me:empty { display: none; }
+.seat-me .seat { position: static; translate: none; gap: 10px; min-width: 0; max-width: 100%; }
 .seat { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 8px; translate: -50% 0; }
 /* Platserna i procent av filten (referensen: filten 1094 × 364) */
 .seat[data-pos="tl"] { left: 24.4%; top: 3.8%; }
 .seat[data-pos="tr"] { left: 75.6%; top: 3.8%; }
 .seat[data-pos="left"] { left: 12%; top: 37.4%; }
 .seat[data-pos="right"] { left: 88%; top: 37.4%; }
-.seat[data-pos="me"] { left: 50%; bottom: 3.8%; gap: 10px; }
 .seat-badge {
   position: relative; min-width: 118px; padding: 9px 16px; border-radius: var(--gk-radie);
   display: flex; flex-direction: column; align-items: center;
@@ -402,6 +408,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .seat.me .status.slask { color: var(--gk-rod-fylld); }
 .seat.me.turn .seat-badge { box-shadow: var(--gk-ring), 5px 5px 0 var(--gk-guld); }
 .seat.me.loser .seat-badge { box-shadow: var(--gk-ring-rod), 5px 5px 0 var(--gk-guld); }
+/* Lågt bord: din skylt blir en låg rad med märkena bredvid, så att sticket får platsen */
+@container (max-height: 400px) {
+  .seat-me .seat { flex-direction: row; gap: 8px; }
+  .seat.me .seat-badge { flex-direction: row; align-items: baseline; gap: 10px; padding: 4px 14px; }
+  .seat-me .seat-marks, .seat.me .seat-line { flex: none; }
+}
 
 /* Märken: D-brickan (rund), FLOP (guld), SLASK 1/3 och Mini (mörka) */
 .seat-marks { display: flex; gap: 6px; align-items: center; }
@@ -518,8 +530,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .hand .card.selected:active:not(.locked) { transform: translateY(-5px); }
 /* Låsta kort syns även på touch, där muspekaren inte säger något. Tillåtna kort har full lyster. */
 .hand .card.locked { cursor: default; filter: saturate(.72) brightness(.9); }
-.hand .card.unplayable { opacity: .42; cursor: not-allowed; }
-.hand .card.unplayable.selected { opacity: .8; }
+.hand .card.unplayable { opacity: .72; cursor: not-allowed; }
+.hand .card.unplayable.selected { opacity: .92; }
 .hand .card.faceup-marker::before {
   content: "Uppvänd"; position: absolute; left: -6px; right: -6px; top: -17px; text-align: center;
   font-family: var(--gk-font-rubrik); font-size: 12px; font-weight: 700; line-height: 1; letter-spacing: .12em;
@@ -806,6 +818,14 @@ body.no-anim * { animation: none !important; transition: none !important; }
   padding: 8px 14px; border: var(--gk-ram) solid var(--gk-varning); border-radius: var(--gk-radie); background: var(--gk-black); color: var(--gk-kram);
   font-size: 15px; font-weight: 600; line-height: 1.3; text-align: center; pointer-events: none; }
 .conn-banner[hidden] { display: none; }
+/* Liggande telefon: bordet ryms inte bredvid handen, så vi ber spelaren vrida (går att välja bort) */
+.rotate-hint { display: none; position: fixed; inset: 0; z-index: 69; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 16px max(16px, var(--safe-right)) 16px max(16px, var(--safe-left)); background: var(--gk-grund); color: var(--gk-kram); text-align: center; }
+.rotate-title { margin: 0; font-family: var(--gk-font-titel); font-size: 32px; line-height: 1.1; letter-spacing: .04em; }
+.rotate-text { margin: 0 0 8px; font-size: 16px; line-height: 1.3; }
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+  #screen-game.active ~ .rotate-hint:not(.dismissed) { display: flex; }
+}
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .toast.error { border-color: var(--gk-varning); }
 .toast.long { font-family: var(--gk-font-text); font-size: 15px; font-weight: 500; line-height: 1.35; letter-spacing: 0; text-transform: none; }
@@ -818,7 +838,14 @@ body.no-anim * { animation: none !important; transition: none !important; }
   .seat.me .nick { font-size: 18px; } .seat.me .seat-line { font-size: 14px; }
   .seat-cards .card { width: 22px; height: 32px; }
   .seat-cards .card .rank { font-size: 15px; }
-  .table-center { width: 64%; }
+  .table-center { padding-left: 18%; padding-right: 18%; }
+  /* Fem ensamma kort ska rymmas på en rad, annars klipps sticket av mitten-rutan bakom din skylt.
+     Namnet kortas därför, och "leder" står på en egen rad ovanför så att det inte kortas bort. */
+  .trick-area { margin-top: 14px; gap: 18px 10px; }
+  .trick-play .who { position: relative; }
+  .trick-play .who-name { display: block; max-width: min(16.5cqi, 72px); overflow: hidden; text-overflow: ellipsis; }
+  .trick-play .who-tag { position: absolute; left: 50%; bottom: 100%; translate: -50% 0; margin-bottom: 2px; font-size: 11px; }
+  .trick-play .who-tag::before { content: none; }
   .hand-pad { padding-left: 22px; padding-right: 22px; }
   .hand { gap: 5px; }
   .actions .gk-btn { min-width: 0; padding: 0 12px; }
@@ -929,9 +956,9 @@ body.no-anim * { animation: none !important; transition: none !important; }
   .seat-cards .card .rank { font-size: 17px; }
 
   /* Din skylt längst ner på filten, märkena i en rad under */
-  .seat-me { order: 2; display: flex; justify-content: center; position: relative; z-index: 3; }
+  .seat-me { order: 2; padding-bottom: 0; }
   /* En låg rad: namn och saldo bredvid varandra, märkena till höger - sticket får platsen */
-  .seat-me .seat { position: static; translate: none; flex-direction: row; gap: 8px; min-width: 0; max-width: 100%; }
+  .seat-me .seat { flex-direction: row; gap: 8px; }
   .seat-me .seat-marks, .seat.me .seat-line { flex: none; }   /* namnet kortas först, saldo och märken står kvar */
   .seat.me .seat-badge { flex-direction: row; align-items: baseline; gap: 10px; min-width: 0; padding: 5px 14px;
     box-shadow: 3px 3px 0 var(--gk-guld); }
@@ -963,14 +990,10 @@ body.no-anim * { animation: none !important; transition: none !important; }
   .felt.has-plays .table-note:not(.show) { display: none; }
   .felt.has-plays .table-center { padding: 2px 0; }
   .trick-play { gap: 3px; }
-  .trick-play .who { position: relative; font-size: 12px; }
-  /* Fem ensamma kort ska rymmas på en rad, annars klipps sticket av mitten-rutan bakom din skylt.
-     Namnet kortas därför, och "leder" står på en egen rad ovanför så att det inte kortas bort. */
-  .trick-play .who-name { display: block; max-width: 16.5cqi; overflow: hidden; text-overflow: ellipsis; }
-  .trick-play .who-tag { position: absolute; left: 50%; bottom: 100%; translate: -50% 0; margin-bottom: 2px; font-size: 11px; }
-  .trick-play .who-tag::before { content: none; }
+  .tb-grid { --tb-overlap: 10px; }
+  .trick-play .who { font-size: 12px; }
   .trick-play .cards .card:not(:first-child) { margin-left: -12px; }
-  .trick-play .combo { font-size: 11px; padding: 1px 6px; }
+  .trick-play .combo { font-size: 12px; padding: 1px 6px; }
 
   /* Under bordet: turtimern som en list över hela bredden, uppmaningen, räknare och tid på en rad,
      handen, och knapparna i en rad över hela bredden. */
@@ -1012,7 +1035,7 @@ body.no-anim * { animation: none !important; transition: none !important; }
 .turn-clock { grid-area: clock; text-align: right; font-family: var(--gk-font-rubrik); font-size: 15px; font-weight: 700; line-height: 1.2;
   letter-spacing: .1em; font-variant-numeric: tabular-nums; color: #b9c4b6; }
 .turn-clock .clock-label { text-transform: uppercase; }
-.turn-clock.urgent { color: var(--gk-varning); animation: clockPulse 1s ease-in-out infinite; }
+.turn-clock.urgent { color: var(--gk-minus-morkt); animation: clockPulse 1s ease-in-out infinite; }
 @keyframes clockPulse { 50% { opacity: .55; } }
 
 /* ---- slängförhandling ----
@@ -1034,7 +1057,7 @@ textarea { resize: vertical; line-height: 1.4; }
 
 /* ---- paus (felrapport) ---- */
 /* Ligger ovanpå fasraden (inte i flödet), så att sticket och högarna inte flyttar sig när spelet pausas */
-.pause-banner { position: absolute; left: 50%; top: -10px; translate: -50% 0; z-index: 5;
+.pause-banner { position: absolute; left: 50%; top: calc(var(--center-top) - 10px); translate: -50% 0; z-index: 5;
   display: flex; flex-direction: column; gap: 4px; width: max-content; max-width: 100%; padding: 12px 20px; text-align: center; }
 .pause-banner[hidden] { display: none; }
 .pause-text { font-size: 15px; font-weight: 500; line-height: 1.3; }
@@ -1068,8 +1091,9 @@ textarea { resize: vertical; line-height: 1.4; }
 .tb-picks { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .tb-pick { font-variant-numeric: tabular-nums; }
 .tb-pick.lowest { color: var(--gk-minus-morkt); }
-.tb-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 0; max-width: min(760px, 100%); padding: 0 8px 18px 22px; }
-.tb-slot { position: relative; margin-left: -22px; padding: 0; border: 0; background: none; min-height: 0; border-radius: 5px;
+/* Korten överlappar men varje synlig del är minst 24 px (30 px på smala skärmar): annars är de svåra att träffa */
+.tb-grid { --tb-overlap: 16px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 0; max-width: min(760px, 100%); margin: 0 auto; padding: 0 8px 18px var(--tb-overlap); }
+.tb-slot { position: relative; margin-left: calc(var(--tb-overlap) * -1); padding: 0; border: 0; background: none; min-height: 0; border-radius: 5px;
   transition: transform var(--gk-tid) var(--gk-kurva); perspective: 400px; }
 .tb-slot:disabled { cursor: default; opacity: 1; }
 .tb-slot.pickable { cursor: pointer; }

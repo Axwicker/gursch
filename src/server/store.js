@@ -34,11 +34,29 @@ export function reportFileName(report) {
   return `${report.createdAt.replace(/[:.]/g, '-')}-runda-${report.log?.roundNumber ?? 'x'}.json`;
 }
 
+const ERRORS_PER_MINUTE = 30;              // så många serverfel sparas i databasen per minut
+const REPORTS_CHECK_MS = 6 * 60 * 60_000;  // hur ofta /health kontrollerar databasen
+
 export function createStore({ reportsDir, version, env = process.env }) {
   const db = supabaseFromEnv(env);
+  let errorTimes = [];
+  let lastCheck = 0;
 
   return {
     mode: db ? 'supabase' : 'file',
+    reportsStatus: db ? 'unknown' : 'file',
+
+    /**
+     * Kontrollerar att rapporterna går att spara. Körs av /health och väntar aldrig på svaret.
+     * Håller också Supabase vaket: projektet pausas annars efter en vecka utan trafik.
+     */
+    checkReports() {
+      if (!db || Date.now() - lastCheck < REPORTS_CHECK_MS) return;
+      lastCheck = Date.now();
+      supabaseRequest(db, 'GET', 'reports', { query: '?select=created_at&limit=1' })
+        .then(() => { this.reportsStatus = 'ok'; })
+        .catch((err) => { this.reportsStatus = 'error'; console.error('Rapporterna går inte att spara:', err.message); });
+    },
 
     /** Sparar en felrapport. Returnerar { where } för loggen. */
     async saveReport(report) {
@@ -70,6 +88,11 @@ export function createStore({ reportsDir, version, env = process.env }) {
       const stack = String(error?.stack ?? '').slice(0, 8000);
       console.error(`[serverfel] ${room ?? '-'} ${phase ?? '-'}:`, error);
       if (!db) return;
+      // En klient som bombarderar med trasiga anrop ska inte kunna fylla databasen.
+      const now = Date.now();
+      errorTimes = errorTimes.filter((t) => now - t < 60_000);
+      if (errorTimes.length >= ERRORS_PER_MINUTE) return;
+      errorTimes.push(now);
       try {
         await supabaseRequest(db, 'POST', 'server_errors', {
           body: { version, room, phase, message, stack }, prefer: 'return=minimal',

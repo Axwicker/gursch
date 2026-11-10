@@ -45,9 +45,9 @@ before(async () => {
 after(() => server?.kill());
 
 /** En pausad runda med fem spelare: inga timers och inga bottar stör mätningen. */
-async function startRound(browser) {
+async function startRound(browser, options = {}) {
   const context = await browser.newContext({
-    viewport: { width: 1280, height: 800 }, hasTouch: true, locale: 'sv-SE', reducedMotion: 'reduce',
+    viewport: { width: 1280, height: 800 }, hasTouch: true, locale: 'sv-SE', reducedMotion: 'reduce', ...options,
   });
   const page = await context.newPage();
   await page.goto(BASE);
@@ -64,6 +64,8 @@ async function startRound(browser) {
   await page.evaluate(() => window.__gursch.emit('pauseGame', {}));
   await page.waitForFunction(() => window.__gursch.S.paused);
   await page.evaluate(() => { document.getElementById('pause-banner').hidden = true; });
+  // Testerna mäter själva spelet: uppmaningen att vrida telefonen har ett eget test.
+  if (!options.isMobile) await page.evaluate(() => document.getElementById('rotate-hint').classList.add('dismissed'));
   return { context, page };
 }
 
@@ -165,26 +167,16 @@ for (const [engine, type] of [['chromium', chromium], ['webkit', webkit]]) {
       assert.deepEqual(problems, []);
     });
 
-    test('ett tryck på ett kort som ligger under din skylt når kortet', async () => {
-      await resize(page, 1024, 600);
-      await drawTiebreak(page, 32);
-      const point = await page.evaluate(() => {
-        const badge = document.querySelector('.seat.me .seat-badge').getBoundingClientRect();
-        for (const slot of document.querySelectorAll('.tb-slot')) {
-          const r = slot.getBoundingClientRect();
-          const x = r.left + 10, y = r.top + r.height * .55;
-          if (x > badge.left && x < badge.right && y > badge.top && y < badge.bottom) {
-            window.__tapped = null;
-            document.addEventListener('click', (e) => { window.__tapped = e.target.closest('.tb-slot')?.dataset.slot ?? 'annat'; }, { capture: true, once: true });
-            return { x, y, slot: slot.dataset.slot };
-          }
-        }
-        return null;
-      });
-      assert.ok(point, 'inget kort låg under skylten i 1024×600 - testet prövar inte längre det här');
-      await page.touchscreen.tap(point.x, point.y);
-      await page.waitForFunction(() => window.__tapped !== null);
-      assert.equal(await page.evaluate(() => window.__tapped), point.slot);
+    test('JS och CSS är överens om brytpunkten', async () => {
+      await page.evaluate(() => window.__gursch.render.renderSeats());
+      for (const [w, h] of [[560, 800], [561, 800], [561, 500], [768, 900], [769, 900], [768, 700], [700, 500]]) {
+        await resize(page, w, h);
+        const state = await page.evaluate(() => ({
+          css: getComputedStyle(document.querySelector('.chairs')).display === 'none',
+          js: document.getElementById('seats').classList.contains('strip'),
+        }));
+        assert.equal(state.js, state.css, `${where(w, h)}: JS och CSS valde olika layout`);
+      }
     });
 
     test('skyltarna följer layouten när skärmen vrids', async () => {
@@ -201,7 +193,7 @@ for (const [engine, type] of [['chromium', chromium], ['webkit', webkit]]) {
           meInFlow: Boolean(document.querySelector('#seat-me .seat.me')),
         }), NARROW);
         assert.equal(state.strip, state.narrow, `${where(...from)} → ${where(...to)}`);
-        assert.equal(state.meInFlow, state.narrow, `${where(...from)} → ${where(...to)}`);
+        assert.equal(state.meInFlow, true, 'din plats står alltid i flödet');
       }
     });
 
@@ -241,10 +233,10 @@ for (const [engine, type] of [['chromium', chromium], ['webkit', webkit]]) {
       assert.notEqual(await card.evaluate((n) => getComputedStyle(n).filter), 'none');
     });
 
-    test('ett helt stick med fem spelare ryms ovanför din skylt på stående telefon', async () => {
+    test('ett helt stick med fem spelare ryms ovanför din skylt', async () => {
       const problems = [];
       // 402×660 är den verkliga ytan i Safari på iPhone, enligt betarapporternas skärmdata.
-      for (const [w, h, each] of [[375, 667, 1], [390, 664, 1], [390, 844, 1], [402, 660, 1], [402, 660, 2], [402, 720, 2], [430, 932, 2]]) {
+      for (const [w, h, each] of [[375, 667, 1], [390, 664, 1], [390, 844, 1], [402, 660, 1], [402, 660, 2], [402, 720, 2], [430, 932, 2], [800, 600, 1], [1024, 600, 1], [1280, 600, 1], [1366, 768, 2]]) {
         await resize(page, w, h);
         await drawTrick(page, each);
         const clipped = await page.evaluate(() => {
@@ -259,6 +251,20 @@ for (const [engine, type] of [['chromium', chromium], ['webkit', webkit]]) {
       }
       assert.deepEqual(problems, []);
     });
+
+    if (engine === 'chromium') {   // pointer: coarse emuleras bara av Chromium
+      test('liggande telefon får en uppmaning att vrida, som går att välja bort', async () => {
+        const mobile = await startRound(browser, { isMobile: true, viewport: { width: 390, height: 844 } });
+        try {
+          const hint = mobile.page.locator('#rotate-hint');
+          assert.equal(await hint.isVisible(), false, 'stående ska inte visa uppmaningen');
+          await resize(mobile.page, 844, 390);
+          await hint.waitFor({ state: 'visible', timeout: 2000 });
+          await mobile.page.locator('#rotate-dismiss').tap();
+          await hint.waitFor({ state: 'hidden', timeout: 2000 });
+        } finally { await mobile.context.close(); }
+      });
+    }
 
     test('långa namn håller sig på bordet och inne i bilden', async () => {
       const problems = [];
@@ -279,7 +285,7 @@ for (const [engine, type] of [['chromium', chromium], ['webkit', webkit]]) {
       assert.deepEqual(problems, []);
     });
 
-    test('motspelarnas skyltar går inte in i varandra', { todo: 'fas 3: låga fönster' }, async () => {
+    test('motspelarnas skyltar går inte in i varandra', async () => {
       const problems = [];
       for (const [w, h] of SIZES) {
         await resize(page, w, h);
@@ -297,16 +303,18 @@ for (const [engine, type] of [['chromium', chromium], ['webkit', webkit]]) {
       assert.deepEqual(problems, []);
     });
 
-    test('din skylt ligger inte över korten på bordet', { todo: 'fas 3: skylten i flödet (#18)' }, async () => {
+    test('din skylt ligger inte över korten på bordet', async () => {
       const problems = [];
       for (const [w, h] of SIZES) {
         await resize(page, w, h);
         await drawTiebreak(page, 32);
         const hits = await page.evaluate(() => {
           const badge = document.querySelector('.seat.me .seat-badge').getBoundingClientRect();
+          const center = document.querySelector('.table-center').getBoundingClientRect();
           return [...document.querySelectorAll('.tb-slot')].filter((slot) => {
             const r = slot.getBoundingClientRect();
-            return Math.min(r.right, badge.right) > Math.max(r.left, badge.left) && Math.min(r.bottom, badge.bottom) > Math.max(r.top, badge.top);
+            const top = Math.max(r.top, center.top), bottom = Math.min(r.bottom, center.bottom);   // det som syns
+            return bottom > top && Math.min(r.right, badge.right) > Math.max(r.left, badge.left) && Math.min(bottom, badge.bottom) > Math.max(top, badge.top);
           }).length;
         });
         if (hits) problems.push(`${where(w, h)}: ${hits} kort`);
@@ -314,7 +322,7 @@ for (const [engine, type] of [['chromium', chromium], ['webkit', webkit]]) {
       assert.deepEqual(problems, []);
     });
 
-    test('dragningens kort ligger inte bakom handen', { todo: 'fas 3: låg layout (#20)' }, async () => {
+    test('dragningens kort ligger inte bakom handen', { todo: 'mycket låga fönster: handen ligger över bordet tills man scrollar' }, async () => {
       const problems = [];
       for (const [w, h] of SIZES) {
         await resize(page, w, h);

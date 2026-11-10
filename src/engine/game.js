@@ -68,7 +68,7 @@ export function sanitizeSettings(settings) {
   const clean = {};
   if (!settings || typeof settings !== 'object') return clean;
   for (const [k, v] of Object.entries(settings)) {
-    if (SETTING_RULES[k]?.(v)) clean[k] = v;
+    if (Object.hasOwn(SETTING_RULES, k) && SETTING_RULES[k](v)) clean[k] = v;
   }
   return clean;
 }
@@ -415,6 +415,9 @@ export class GurschGame {
 
   dispatch(playerId, action) {
     this.player(playerId);
+    // Klienten är inte betrodd: fel typer ska bli ett vanligt felmeddelande, inte ett serverfel.
+    if (action.cardIds !== undefined && (!Array.isArray(action.cardIds) || action.cardIds.length > 5
+      || action.cardIds.some((id) => typeof id !== 'string'))) throw new GameError('Ogiltiga kort');
     if (this.paused) {
       throw new GameError(this.paused.reason === 'tutorial'
         ? 'Läs klart guiden först'

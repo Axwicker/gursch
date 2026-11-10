@@ -90,3 +90,28 @@ test('[A4] bara hosten kan ta bort spelare', async () => {
   assert.ok((await call(guest, 'kickPlayer', { targetId: created.playerId })).error);
   assert.equal((await players(host)).length, 2);
 });
+
+test('trasiga anrop ger felmeddelande och servern lever vidare', async () => {
+  const { host } = await roomWithGuest();
+  assert.ok((await call(host, 'createRoom', null)).error);
+  assert.ok((await call(host, 'action', { type: 'play', cardIds: 5 })).error);
+  assert.ok((await call(host, 'action', { type: 'play', cardIds: [1, 2] })).error);
+  assert.ok((await fetch(`${URL}/health`)).ok);
+});
+
+test('health visar serverns skick, och bilder får cache men inte app.js', async () => {
+  const health = await (await fetch(`${URL}/health`)).json();
+  assert.equal(health.ok, true);
+  assert.equal(health.reports, 'file');
+  assert.match((await fetch(`${URL}/assets/fatolj.webp`)).headers.get('cache-control'), /max-age=604800/);
+  assert.match((await fetch(`${URL}/app.js`)).headers.get('cache-control'), /max-age=0/);
+  assert.ok((await fetch(`${URL}/socket.io/socket.io.min.js`)).ok);
+});
+
+test('för många försök stoppas', async () => {
+  const socket = await client();
+  const answers = [];
+  for (let i = 0; i < 65; i++) answers.push(await call(socket, 'roomInfo', { code: 'ZZZZ' }));
+  assert.equal(answers[0].notFound, true);
+  assert.match(answers.at(-1).error, /För många/);
+});
