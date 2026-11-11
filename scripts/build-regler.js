@@ -96,7 +96,7 @@ ${JSON.stringify({
 <main>
 <article>
 <h1>Regler för Gursch</h1>
-<p class="ingress">Gursch är ett kortspel för 2–5 spelare med en vanlig kortlek. Här finns alla regler, i samma ordning som de används i spelet. Vill du hellre öva direkt kan du <a href="/">spela mot bottar</a> och låta guiden visa dig hur det går till.</p>
+<p class="ingress">Gursch (ibland stavat Gurch) är ett kortspel för 2–5 spelare med en vanlig kortlek, med gurkan Gurkan som maskot. Här finns alla regler, i samma ordning som de används i spelet. Vill du hellre öva direkt kan du <a href="/">spela mot bottar</a> och låta guiden visa dig hur det går till.</p>
 <nav class="innehall" aria-label="Innehåll">
 ${sections.map((s) => `<a href="#${s.title.toLowerCase().replace(/[^a-zåäö0-9]+/g, '-').replace(/^-|-$/g, '')}">${esc(s.title)}</a>`).join('\n')}
 </nav>
