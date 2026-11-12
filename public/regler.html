@@ -34,9 +34,134 @@
       "name": "Regler för Gursch – så spelar du kortspelet",
       "description": "Alla regler för kortspelet Gursch: giv och flop, slängförhandling, slask, stickspel, följregeln, betalning och mini-gursch. 2–5 spelare, en kortlek.",
       "inLanguage": "sv-SE",
+      "dateModified": "2026-11-12",
       "isPartOf": {
         "@id": "https://gursch.beer/#website"
+      },
+      "about": {
+        "@id": "https://gursch.beer/#spel"
       }
+    },
+    {
+      "@type": "Game",
+      "@id": "https://gursch.beer/#spel",
+      "name": "Gursch",
+      "alternateName": "Gurch",
+      "url": "https://gursch.beer/",
+      "inLanguage": "sv-SE",
+      "description": "Kortspel för 2–5 spelare med en vanlig kortlek. Man slänger och drar kort, spelar ut handen i stick, och den som går ut på högst slutvärde förlorar rundan.",
+      "numberOfPlayers": {
+        "@type": "QuantitativeValue",
+        "minValue": 2,
+        "maxValue": 5
+      },
+      "gameItem": {
+        "@type": "Thing",
+        "name": "Kortlek med 52 kort"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://gursch.beer/regler#faq",
+      "inLanguage": "sv-SE",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Vad är Gursch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Gursch är ett kortspel för 2–5 spelare som spelas med en vanlig kortlek med 52 kort. Varje spelare får fem kort, byter kort i en eller flera slängrundor och spelar sedan ut handen i stick. Den som går ut på det högsta slutvärdet förlorar rundan och betalar de andra."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Hur många kan spela Gursch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Gursch spelas av 2–5 spelare med en enda kortlek."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Vad går Gursch ut på?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Målet i Gursch är att ha så lågt slutvärde som möjligt när rundan är slut. Slutvärdet räknas på korten man lägger i sista sticket. Den med högst slutvärde förlorar och betalar slutvärdet gånger rundans multiplier till varje annan spelare."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Hur går en runda i Gursch till?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "En runda i Gursch har fyra delar. Först delas fem kort ut, och den med det högsta uppvända kortet vinner floppen och får börja. Sedan slänger spelarna kort och drar nya, först i tur och ordning och därefter i förhandlingar där alla måste vara överens om antalet. Efter det spelas alla kort ut i stick. Till sist räknas slutvärdet, och den med högst slutvärde betalar de andra."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Vad gör 7:an i Gursch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "7:an är joker i kombinationer i Gursch: kung och 7:a räknas som två kungar. En ensam 7:a är lika stark som ett ess i sticket, men den räknas som 7 i slutvärdet."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Måste man slå i Gursch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nej, man måste inte slå i Gursch. Enligt följregeln ska varje kort man lägger vara en 7:a, minst lika högt som utspelet eller ett av ens lägsta kort. Alla lägger lika många kort som utspelet."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Vad är en slask i Gursch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "En slask i Gursch är att lägga hela handen i slänghögen och få fem nya kort. De andra spelarna kan syna slasken inom 7 sekunder. Fanns det knekt, dam, kung eller ess i den gamla handen betalar slaskaren 10 kr per sådant kort till den som synade, annars betalar den som synade 25 kr till slaskaren. Man får slaska högst tre gånger per runda."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Vad händer om man spelar ut fem lika i Gursch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Den som spelar ut fem lika i Gursch, även med 7:or som jokrar, går ut direkt och rundan tar slut. De andras slutvärde blir då hela deras hand. Fem lika räknas som ett vanligt slutvärde, till exempel 65 för fem kungar, så den som går ut på det kan ändå förlora."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Vad är en mini-gursch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "En mini-gursch är ett särspel i Gursch när flera spelare har samma högsta slutvärde. De som är lika får tre kort var ur en ny lek och spelar ett kort stickspel. Multipliern gångras med antalet deltagare, och förloraren betalar sitt slutvärde i mini-gurschen gånger den höjda multipliern."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Kan man spela Gursch online?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ja, Gursch går att spela gratis online på gursch.beer. Spelet körs i webbläsaren utan installation. Man skapar ett spel och delar en länk med sina vänner, eller spelar mot bottar. En övningsrunda med guide lär ut reglerna."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Spelar man Gursch om riktiga pengar?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nej, på gursch.beer är kronorna bara spelets poängräkning. Alla börjar på 0 kr, saldot kan bli negativt och inga riktiga pengar hanteras."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Heter det Gursch eller Gurch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Spelet heter Gursch. Stavningen Gurch förekommer också och syftar på samma kortspel."
+          }
+        }
+      ]
     },
     {
       "@type": "BreadcrumbList",
@@ -68,7 +193,9 @@
 <article>
 <h1>Regler för Gursch</h1>
 <p class="ingress">Gursch (ibland stavat Gurch) är ett kortspel för 2–5 spelare med en vanlig kortlek, med gurkan Gurkan som maskot. Här finns alla regler, i samma ordning som de används i spelet. Vill du hellre öva direkt kan du <a href="/">spela mot bottar</a> och låta guiden visa dig hur det går till.</p>
+<p class="uppdaterad">Senast uppdaterad <time datetime="2026-11-12">12 november 2026</time></p>
 <nav class="innehall" aria-label="Innehåll">
+<a href="#kort-om-gursch">Kort om Gursch</a>
 <a href="#grund">Grund</a>
 <a href="#given-och-flop">Given och flop</a>
 <a href="#kombinationer-och-7-an">Kombinationer och 7:an</a>
@@ -78,7 +205,21 @@
 <a href="#stickspel">Stickspel</a>
 <a href="#slutvärde-och-betalning">Slutvärde och betalning</a>
 <a href="#mini-gursch">Mini-gursch</a>
+<a href="#vanliga-fragor">Vanliga frågor</a>
 </nav>
+
+<section id="kort-om-gursch">
+<h2>Kort om Gursch</h2>
+<dl class="fakta">
+<dt>Typ</dt><dd>Kortspel med stick, där man först slänger och drar nya kort</dd>
+<dt>Spelare</dt><dd>2–5</dd>
+<dt>Kortlek</dt><dd>En vanlig kortlek med 52 kort, utan jokrar. Färgerna saknar betydelse</dd>
+<dt>Kort på handen</dt><dd>5 (fyra dolda och ett uppvänt)</dd>
+<dt>Mål</dt><dd>Att gå ut på så lågt slutvärde som möjligt. Den med högst slutvärde förlorar rundan</dd>
+<dt>Specialkort</dt><dd>7:an är joker i kombinationer</dd>
+<dt>Spela online</dt><dd>Gratis på gursch.beer, i webbläsaren, med vänner eller mot bottar</dd>
+</dl>
+</section>
 
 <section id="grund">
 <h2>Grund</h2>
@@ -151,6 +292,34 @@
 <p id="r29"><strong>R29.</strong> Har flera samma högsta slutvärde spelar de en <em>mini-gursch</em>. Var och en får 3 kort (2 dolda och 1 uppvänt) ur en ny lek. Den med det högsta uppvända kortet börjar (vid lika den som fick sitt kort sist). Multipliern gångras med antalet deltagare. Sedan spelas det som ett vanligt stickspel.</p>
 <p id="r30"><strong>R30.</strong> Förloraren betalar sitt slutvärde i mini-gurschen (det man gick ut på där) × den höjda multipliern. Rundans lika slutvärde spelar ingen roll längre.</p>
 <p id="r31"><strong>R31.</strong> Blir det lika igen spelas en ny mini-gursch (<em>mini-mini-gursch</em>) med ännu högre multiplier. Inställningen <em>Mini-gursch cap</em> begränsar antalet nivåer. När gränsen nås och det fortfarande är lika avgörs det med en <em>dragning</em>. Korten som finns kvar i mini-gurschens draghög läggs dolda på bordet. De lika väljer ett kort var i sittordning, med början hos den första av dem efter dealern, och varje kort vänds upp när det väljs. Högst kort vinner (2 lägst, A högst, 7:an räknas som 7). Den med lägst kort förlorar och betalar sitt slutvärde från den senaste mini-gurschen × den senaste nivåns multiplier. Drar flera lika lågt drar de igen bland korten som är kvar.</p>
+</section>
+
+<section id="vanliga-fragor">
+<h2>Vanliga frågor om Gursch</h2>
+<h3>Vad är Gursch?</h3>
+<p>Gursch är ett kortspel för 2–5 spelare som spelas med en vanlig kortlek med 52 kort. Varje spelare får fem kort, byter kort i en eller flera slängrundor och spelar sedan ut handen i stick. Den som går ut på det högsta slutvärdet förlorar rundan och betalar de andra.</p>
+<h3>Hur många kan spela Gursch?</h3>
+<p>Gursch spelas av 2–5 spelare med en enda kortlek.</p>
+<h3>Vad går Gursch ut på?</h3>
+<p>Målet i Gursch är att ha så lågt slutvärde som möjligt när rundan är slut. Slutvärdet räknas på korten man lägger i sista sticket. Den med högst slutvärde förlorar och betalar slutvärdet gånger rundans multiplier till varje annan spelare.</p>
+<h3>Hur går en runda i Gursch till?</h3>
+<p>En runda i Gursch har fyra delar. Först delas fem kort ut, och den med det högsta uppvända kortet vinner floppen och får börja. Sedan slänger spelarna kort och drar nya, först i tur och ordning och därefter i förhandlingar där alla måste vara överens om antalet. Efter det spelas alla kort ut i stick. Till sist räknas slutvärdet, och den med högst slutvärde betalar de andra.</p>
+<h3>Vad gör 7:an i Gursch?</h3>
+<p>7:an är joker i kombinationer i Gursch: kung och 7:a räknas som två kungar. En ensam 7:a är lika stark som ett ess i sticket, men den räknas som 7 i slutvärdet.</p>
+<h3>Måste man slå i Gursch?</h3>
+<p>Nej, man måste inte slå i Gursch. Enligt följregeln ska varje kort man lägger vara en 7:a, minst lika högt som utspelet eller ett av ens lägsta kort. Alla lägger lika många kort som utspelet.</p>
+<h3>Vad är en slask i Gursch?</h3>
+<p>En slask i Gursch är att lägga hela handen i slänghögen och få fem nya kort. De andra spelarna kan syna slasken inom 7 sekunder. Fanns det knekt, dam, kung eller ess i den gamla handen betalar slaskaren 10 kr per sådant kort till den som synade, annars betalar den som synade 25 kr till slaskaren. Man får slaska högst tre gånger per runda.</p>
+<h3>Vad händer om man spelar ut fem lika i Gursch?</h3>
+<p>Den som spelar ut fem lika i Gursch, även med 7:or som jokrar, går ut direkt och rundan tar slut. De andras slutvärde blir då hela deras hand. Fem lika räknas som ett vanligt slutvärde, till exempel 65 för fem kungar, så den som går ut på det kan ändå förlora.</p>
+<h3>Vad är en mini-gursch?</h3>
+<p>En mini-gursch är ett särspel i Gursch när flera spelare har samma högsta slutvärde. De som är lika får tre kort var ur en ny lek och spelar ett kort stickspel. Multipliern gångras med antalet deltagare, och förloraren betalar sitt slutvärde i mini-gurschen gånger den höjda multipliern.</p>
+<h3>Kan man spela Gursch online?</h3>
+<p>Ja, Gursch går att spela gratis online på gursch.beer. Spelet körs i webbläsaren utan installation. Man skapar ett spel och delar en länk med sina vänner, eller spelar mot bottar. En övningsrunda med guide lär ut reglerna.</p>
+<h3>Spelar man Gursch om riktiga pengar?</h3>
+<p>Nej, på gursch.beer är kronorna bara spelets poängräkning. Alla börjar på 0 kr, saldot kan bli negativt och inga riktiga pengar hanteras.</p>
+<h3>Heter det Gursch eller Gurch?</h3>
+<p>Spelet heter Gursch. Stavningen Gurch förekommer också och syftar på samma kortspel.</p>
 </section>
 
 <section class="cta">

@@ -1,4 +1,18 @@
+# Alla sökmotorer är välkomna, även AI-sökmotorerna nedan.
+# De räknas upp så att det syns att de är tillåtna med flit.
 User-agent: *
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: MistralAI-User
+User-agent: CCBot
 Allow: /
 Disallow: /join/
 Disallow: /komponenter.html

@@ -1,0 +1,210 @@
+# Gursch – regler
+
+> Gursch (ibland stavat Gurch) är ett kortspel för 2–5 spelare med en vanlig kortlek med 52 kort. Spela gratis på https://gursch.beer/. Den här filen är reglerna från https://gursch.beer/regler som ren text. Senast uppdaterad 2026-11-12.
+
+## Kort om Gursch
+
+- Typ: Kortspel med stick, där man först slänger och drar nya kort
+- Spelare: 2–5
+- Kortlek: En vanlig kortlek med 52 kort, utan jokrar. Färgerna saknar betydelse
+- Kort på handen: 5 (fyra dolda och ett uppvänt)
+- Mål: Att gå ut på så lågt slutvärde som möjligt. Den med högst slutvärde förlorar rundan
+- Specialkort: 7:an är joker i kombinationer
+- Spela online: Gratis på gursch.beer, i webbläsaren, med vänner eller mot bottar
+
+## Grund
+
+**R1.** 2–5 spelare och en kortlek med 52 kort. Färgerna saknar betydelse.
+
+**R2.** Alla börjar på 0 kr. Alla belopp är hela kronor, och saldon får bli negativa.
+
+**R3.** Valörer: 2–10, J = 11, Q = 12, K = 13, A = 14. *Face cards* är J, Q, K och A.
+
+## Given och flop
+
+**R4.** Dealern flyttas ett steg varje runda. Korten delas ut med början hos spelaren efter
+dealern: fyra dolda kort var, sedan ett femte uppvänt kort var.
+
+**R5.** Den som har det högsta uppvända kortet vinner *floppen*.
+Vid lika vinner den som fick sitt kort sist i utdelningsordningen.
+Floppkortet syns för alla under floppen och första slängrundan. När första slängrundan är
+slut göms det.
+
+**R6.** Multiplier: antingen fast (×1, ×2, ×3, ×4, ×5, ×10, ×25, ×50, ×100) eller *flopmult*, där
+flopkortets värde gånger 1–4 blir multiplier.
+
+## Kombinationer och 7:an
+
+**R7.** 7:an är joker i kombinationer: K,7 = K,K och 2,2,7 = tre tvåor. En ensam 7:a är lika
+stark som ett ess i sticket, men räknas som 7 i slutvärdet.
+
+**R8.** En kombination är *clean* (alla kort har samma valör), *semi-mixed* (samma valör plus
+7:or) eller *mixed* (allt annat).
+
+## Första slängrundan
+
+**R9.** Flopvinnaren börjar, sedan går turen vidare i sittordning. Den första som slänger
+bestämmer antalet (1–4). De andra slänger lika många eller säger STAY.
+Säger den första STAY bestämmer nästa som slänger antalet.
+
+**R10.** Den som säger STAY i första slängrundan står över den första förhandlingen och är
+med igen i nästa.
+
+**R11.** Drar man 1 kort visas det uppvänt för alla när det dras, i ungefär 3 sekunder, och
+sedan göms det. Det syns aldrig i nästa slängning, i sista slaskchansen eller i stickspelet.
+Drar man 2–4 kort är de dolda.
+
+**R12.** När draghögen tar slut blandas hela slänghögen, även kort som just har slängts,
+och blir en ny draghög.
+
+## Slängförhandling
+
+**R13.** Efter första slängrundan förhandlar alla samtidigt. Var och en föreslår hur många
+kort alla ska slänga (1–4) och kan ändra sig när som helst. Allas förslag syns i realtid,
+och man kan chatta under tiden. Förhandlingen har en timer (20 s, går att ändra i lobbyn).
+
+**R14.** Visar alla samma tal väljer alla samtidigt så många kort och drar nya, och sedan
+börjar en ny förhandling. Enigheten måste hålla i 2 s, så att man hinner ändra sig.
+
+**R15.** STAY avslutar förhandlingen direkt. Är man inte överens när tiden tar slut avslutas
+den också. I båda fallen slängs inga kort och spelet börjar.
+En enighet som redan pågår när tiden tar slut får gå klart.
+
+**R16.** Den som inte hinner välja sina kort får sina högsta kort slängda (turtimern
+gäller). Det finns inget tak för antalet förhandlingar i en runda.
+
+## Slask
+
+**R17.** SLASK: man lägger hela handen i slänghögen och får fem nya kort. Det går att slaska
+på sin tur i första slängrundan och i sista slaskchansen. Efter en slask väljer man igen
+direkt på sin nya hand: slaska igen, eller fortsätta (slänga eller STAY i första slängrundan,
+PASS i sista slaskchansen). Varje spelare får slaska högst 3 gånger per runda (går att ändra
+i lobbyn).
+
+**R18.** När någon slaskar kan de andra *syna* inom 7 sekunder (går att ändra i lobbyn), och den som synar först
+gäller. Man kan inte syna sin egen slask. Inget annat händer förrän fönstret har stängt.
+
+**R19.** Synad slask: fanns det face cards i den gamla handen betalar slaskaren 10 kr per
+face card till den som synade. Fanns det inga betalar den som synade 25 kr till slaskaren.
+En slask som ingen synar kostar ingenting.
+
+**R20.** Sista slaskchansen: när slängningen är klar får alla i tur, med början hos
+flopvinnaren, välja SLASK eller PASS innan stickspelet börjar. Den som redan har slaskat
+max antal gånger hoppas över, och den som når max under sin tur går vidare automatiskt.
+
+## Stickspel
+
+**R21.** Flopvinnaren leder första sticket. Den som vinner ett stick leder nästa.
+
+**R22.** Utspelet är 1–5 kort som är clean eller semi-mixed. Ett ensamt kort går alltid.
+Mixed får inte spelas ut. Den som *följer* får däremot lägga mixed, till exempel dam + kung på
+två 10:or, så länge varje kort följer R24. Det är ett sätt att bli av med dåliga kort.
+
+**R23.** Alla lägger lika många kort som utspelet.
+
+**R24.** Följregeln: man måste inte slå. Varje kort man lägger måste vara
+- en 7:a, eller
+- minst lika högt som utspelet, alltså det som påbörjade sticket, eller
+- ett av ens lägsta kort (7:an räknas då som 7).
+
+Utspelet räknas som kombinationens värde: 4,4,7 är tre fyror, så 6,7,10 går att lägga.
+En 7:a räknas som ess bara när den spelas ut ensam.
+
+"Lägsta" räknas bland korten man inte redan lägger som 7:a eller högt kort. Med handen
+7,9,K,A mot Q,Q går alltså 7+9, men inte K+9, eftersom den kvarvarande 7:an är lägre än 9:an.
+
+**R25.** Den som lagt den bästa kombinationen hittills leder sticket. Ett senare spel tar
+över ledningen bara om det har minst lika högt värde *och* är minst lika rent (clean är
+renare än semi-mixed), och är bättre i minst ett av dem. Exempel:
+- A,7 efter 8,8: tar inte över, ett semi-mixed slår aldrig ett clean.
+- 2,2 efter A,7: tar inte över, lägre värde vinner aldrig, även om det är clean.
+- K,K efter K,7, eller A,7 efter K,7: tar över.
+
+Mixed vinner aldrig. Är två semi-mixed lika höga vinner den med färst 7:or: A,A,7 slår A,7,7,
+oavsett vem som lade först. Annars vinner den som lade sist vid exakt lika (samma värde och typ).
+Ordningen spelar roll: med tre spelare kan 8,8 → A,7 → 2,2 sluta med att 8,8 vinner.
+
+## Slutvärde och betalning
+
+**R26.** Rundan tar slut när alla har spelat ut sina kort. Ens *slutvärde* räknas på korten
+man gick ut på, alltså de man lade i sista sticket:
+- clean eller semi-mixed: värdet × antal kort (7:an räknas som det den ersätter, men en
+  ensam 7:a är 7)
+- mixed: summan av korten (7:an räknas som 7)
+
+**R27.** Spelar någon ut fem lika (*five of a kind*, även med 7:or, till exempel *quint two*
+som bara är 2:or och 7:or) går den spelaren ut direkt och rundan tar slut. De andras
+slutvärde blir hela deras hand. Quinten räknas som vanligt slutvärde (fem kungar = 65), så den
+som går ut på en quint kan förlora precis som alla andra.
+
+**R28.** Den med högst slutvärde förlorar och betalar slutvärdet × multiplier till varje
+annan spelare.
+
+## Mini-gursch
+
+**R29.** Har flera samma högsta slutvärde spelar de en *mini-gursch*. Var och en får 3 kort
+(2 dolda och 1 uppvänt) ur en ny lek. Den med det högsta uppvända kortet börjar (vid lika
+den som fick sitt kort sist). Multipliern gångras med antalet deltagare. Sedan spelas det
+som ett vanligt stickspel.
+
+**R30.** Förloraren betalar sitt slutvärde i mini-gurschen (det man gick ut på där) × den
+höjda multipliern. Rundans lika slutvärde spelar ingen roll längre.
+
+**R31.** Blir det lika igen spelas en ny mini-gursch (*mini-mini-gursch*) med ännu högre
+multiplier. Inställningen *Mini-gursch cap* begränsar antalet nivåer.
+När gränsen nås och det fortfarande är lika avgörs det med en *dragning*. Korten som finns
+kvar i mini-gurschens draghög läggs dolda på bordet. De lika väljer ett kort var i
+sittordning, med början hos den första av dem efter dealern, och varje kort vänds upp när
+det väljs. Högst kort vinner (2 lägst, A högst, 7:an räknas som 7). Den med lägst kort
+förlorar och betalar sitt slutvärde från den senaste mini-gurschen × den senaste nivåns
+multiplier. Drar flera lika lågt drar de igen bland korten som är kvar.
+
+## Vanliga frågor
+
+### Vad är Gursch?
+
+Gursch är ett kortspel för 2–5 spelare som spelas med en vanlig kortlek med 52 kort. Varje spelare får fem kort, byter kort i en eller flera slängrundor och spelar sedan ut handen i stick. Den som går ut på det högsta slutvärdet förlorar rundan och betalar de andra.
+
+### Hur många kan spela Gursch?
+
+Gursch spelas av 2–5 spelare med en enda kortlek.
+
+### Vad går Gursch ut på?
+
+Målet i Gursch är att ha så lågt slutvärde som möjligt när rundan är slut. Slutvärdet räknas på korten man lägger i sista sticket. Den med högst slutvärde förlorar och betalar slutvärdet gånger rundans multiplier till varje annan spelare.
+
+### Hur går en runda i Gursch till?
+
+En runda i Gursch har fyra delar. Först delas fem kort ut, och den med det högsta uppvända kortet vinner floppen och får börja. Sedan slänger spelarna kort och drar nya, först i tur och ordning och därefter i förhandlingar där alla måste vara överens om antalet. Efter det spelas alla kort ut i stick. Till sist räknas slutvärdet, och den med högst slutvärde betalar de andra.
+
+### Vad gör 7:an i Gursch?
+
+7:an är joker i kombinationer i Gursch: kung och 7:a räknas som två kungar. En ensam 7:a är lika stark som ett ess i sticket, men den räknas som 7 i slutvärdet.
+
+### Måste man slå i Gursch?
+
+Nej, man måste inte slå i Gursch. Enligt följregeln ska varje kort man lägger vara en 7:a, minst lika högt som utspelet eller ett av ens lägsta kort. Alla lägger lika många kort som utspelet.
+
+### Vad är en slask i Gursch?
+
+En slask i Gursch är att lägga hela handen i slänghögen och få fem nya kort. De andra spelarna kan syna slasken inom 7 sekunder. Fanns det knekt, dam, kung eller ess i den gamla handen betalar slaskaren 10 kr per sådant kort till den som synade, annars betalar den som synade 25 kr till slaskaren. Man får slaska högst tre gånger per runda.
+
+### Vad händer om man spelar ut fem lika i Gursch?
+
+Den som spelar ut fem lika i Gursch, även med 7:or som jokrar, går ut direkt och rundan tar slut. De andras slutvärde blir då hela deras hand. Fem lika räknas som ett vanligt slutvärde, till exempel 65 för fem kungar, så den som går ut på det kan ändå förlora.
+
+### Vad är en mini-gursch?
+
+En mini-gursch är ett särspel i Gursch när flera spelare har samma högsta slutvärde. De som är lika får tre kort var ur en ny lek och spelar ett kort stickspel. Multipliern gångras med antalet deltagare, och förloraren betalar sitt slutvärde i mini-gurschen gånger den höjda multipliern.
+
+### Kan man spela Gursch online?
+
+Ja, Gursch går att spela gratis online på gursch.beer. Spelet körs i webbläsaren utan installation. Man skapar ett spel och delar en länk med sina vänner, eller spelar mot bottar. En övningsrunda med guide lär ut reglerna.
+
+### Spelar man Gursch om riktiga pengar?
+
+Nej, på gursch.beer är kronorna bara spelets poängräkning. Alla börjar på 0 kr, saldot kan bli negativt och inga riktiga pengar hanteras.
+
+### Heter det Gursch eller Gurch?
+
+Spelet heter Gursch. Stavningen Gurch förekommer också och syftar på samma kortspel.

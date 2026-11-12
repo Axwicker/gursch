@@ -11,11 +11,17 @@ a { color: var(--guld); }
 main { max-width: 760px; margin: 0 auto; padding: 32px 20px 56px; }
 h1 { font: 400 clamp(34px, 7vw, 52px)/1.1 "Alfa Slab One", Georgia, serif; margin: 0 0 16px; }
 .ingress { font-size: 20px; color: #e4dcc0; }
+.uppdaterad { margin: 8px 0 0; font-size: 15px; color: #9fb0a2; }
 .innehall { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 8px; }
 .innehall a { padding: 6px 12px; border: 1.5px solid rgba(240,232,204,.4); border-radius: 4px; color: var(--kram); text-decoration: none; font: 600 16px/1.2 "Barlow Condensed", system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase; }
 .innehall a:hover { border-color: var(--guld); color: var(--guld); }
 section { background: var(--kram); color: var(--text); border: 2px solid #0a1612; border-radius: 6px; box-shadow: 4px 4px 0 #0a1612; padding: 8px 24px 20px; margin-top: 28px; }
 h2 { font: 700 28px/1.2 "Barlow Condensed", system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; margin: 16px 0 8px; }
+h3 { font: 700 21px/1.25 "Barlow Condensed", system-ui, sans-serif; letter-spacing: .02em; margin: 20px 0 4px; }
+h3 + p { margin-top: 4px; }
+.fakta { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 12px 0 4px; }
+.fakta dt { font: 700 17px/1.6 "Barlow Condensed", system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase; color: var(--dampad); }
+.fakta dd { margin: 0; }
 section p { margin: 12px 0; }
 section p[id] { scroll-margin-top: 76px; }
 section ul { margin: 8px 0 12px; padding-left: 24px; }
@@ -27,4 +33,4 @@ code { background: var(--papper); padding: 1px 5px; border-radius: 3px; font-siz
 footer { padding: 24px 20px 40px; text-align: center; color: #9fb0a2; font-size: 15px; }
 footer a { color: #9fb0a2; }
 :focus-visible { outline: 3px solid var(--guld); outline-offset: 2px; }
-@media (max-width: 520px) { body { font-size: 17px; } section { padding: 6px 16px 16px; } }
+@media (max-width: 520px) { body { font-size: 17px; } section { padding: 6px 16px 16px; } .fakta { grid-template-columns: 1fr; gap: 0; } .fakta dd { margin-bottom: 8px; } }

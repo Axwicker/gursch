@@ -1,0 +1,26 @@
+# Gursch
+
+> Gursch (ibland stavat Gurch) är ett kortspel för 2–5 spelare med en vanlig kortlek med 52 kort. På gursch.beer går det att spela gratis i webbläsaren, med vänner via en länk eller mot bottar. Sajten är på svenska.
+
+- Typ: Kortspel med stick, där man först slänger och drar nya kort
+- Spelare: 2–5
+- Kortlek: En vanlig kortlek med 52 kort, utan jokrar. Färgerna saknar betydelse
+- Kort på handen: 5 (fyra dolda och ett uppvänt)
+- Mål: Att gå ut på så lågt slutvärde som möjligt. Den med högst slutvärde förlorar rundan
+- Specialkort: 7:an är joker i kombinationer
+- Spela online: Gratis på gursch.beer, i webbläsaren, med vänner eller mot bottar
+
+Reglerna senast uppdaterade 2026-11-12.
+
+## Sidor
+
+- [Spela Gursch](https://gursch.beer/): Startsidan. Skapa ett spel och dela länken, gå med i ett spel med en kod, eller spela en övningsrunda mot bottar med en guide.
+- [Regler för Gursch](https://gursch.beer/regler): Alla regler (R1–R31) i den ordning de används, med vanliga frågor.
+
+## Fulltext
+
+- [Reglerna som ren text](https://gursch.beer/llms-full.txt): Hela regelboken och vanliga frågor i Markdown.
+
+## Övrigt
+
+- [Källkoden på GitHub](https://github.com/Axwicker/gursch): Spelets server och klient. Servern avgör alla drag.
